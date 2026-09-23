@@ -563,7 +563,7 @@ class LimenAiServiceProvider extends ServiceProvider
             $driver = $app['config']->get('limen-ai.broadcasting.driver', 'null');
 
             return match ($driver) {
-                'pusher' => $app->make(PusherBroadcaster::class),
+                'pusher', 'reverb' => $app->make(PusherBroadcaster::class),
                 default => $app->make(NullBroadcaster::class),
             };
         });

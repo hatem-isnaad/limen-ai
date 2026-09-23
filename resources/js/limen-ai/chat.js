@@ -821,7 +821,7 @@
             }
 
             if (this.pendingRunId && !window.Echo) {
-                await this.pollRun(this.pendingRunId);
+                await this.waitForRun(this.pendingRunId);
             } else if (!window.Echo) {
                 await this.loadConversation();
                 this.setComposerDisabled(false);
@@ -829,6 +829,115 @@
             } else {
                 this.setThinking(true, 'Agent is thinking...');
             }
+        }
+
+        async waitForRun(runId) {
+            if (this.config.streaming?.enabled !== false && typeof EventSource !== 'undefined') {
+                await this.streamRun(runId);
+
+                return;
+            }
+
+            await this.pollRun(runId);
+        }
+
+        async streamRun(runId) {
+            const params = new URLSearchParams();
+
+            if (this.guestToken) {
+                params.set('guest_token', this.guestToken);
+            }
+
+            const suffix = params.toString() ? `?${params.toString()}` : '';
+            const url = `${this.apiBase}/runs/${runId}/stream${suffix}`;
+            let streamingMessageEl = null;
+            let streamedContent = '';
+
+            await new Promise((resolve) => {
+                const source = new EventSource(url);
+
+                const finish = () => {
+                    source.close();
+                    resolve();
+                };
+
+                source.addEventListener('status', (event) => {
+                    try {
+                        const payload = JSON.parse(event.data);
+
+                        if (!payload.terminal) {
+                            this.setThinking(true, 'Agent is thinking...');
+                        }
+                    } catch (error) {
+                        // Ignore malformed stream payloads.
+                    }
+                });
+
+                source.addEventListener('delta', (event) => {
+                    try {
+                        const payload = JSON.parse(event.data);
+                        this.setThinking(false);
+
+                        if (!streamingMessageEl) {
+                            streamingMessageEl = this.appendMessage('assistant', '');
+                        }
+
+                        streamedContent += payload.content || '';
+                        this.setMessageContent(streamingMessageEl, streamedContent);
+                    } catch (error) {
+                        // Ignore malformed stream payloads.
+                    }
+                });
+
+                source.addEventListener('completed', async () => {
+                    this.pendingRunId = null;
+                    this.setComposerDisabled(false);
+                    this.setThinking(false);
+                    await this.loadConversation();
+                    this.sounds.play('receive');
+                    this.incrementUnreadIfClosed();
+                    finish();
+                });
+
+                source.addEventListener('approval_required', () => {
+                    this.pendingRunId = null;
+                    this.setComposerDisabled(false);
+                    this.setThinking(false);
+                    this.setStatus('Approval required.');
+                    finish();
+                });
+
+                source.addEventListener('failed', (event) => {
+                    try {
+                        const payload = JSON.parse(event.data);
+                        this.pendingRunId = null;
+                        this.setComposerDisabled(false);
+                        this.setThinking(false, payload.error || 'Agent failed.');
+                        this.sounds.play('notification');
+                    } catch (error) {
+                        this.setThinking(false, 'Agent failed.');
+                    }
+
+                    finish();
+                });
+
+                source.addEventListener('timeout', () => {
+                    this.pendingRunId = null;
+                    this.setComposerDisabled(false);
+                    this.setThinking(false, 'Timed out waiting for agent response.');
+                    this.sounds.play('notification');
+                    finish();
+                });
+
+                source.addEventListener('error', () => {
+                    if (source.readyState === EventSource.CLOSED) {
+                        return;
+                    }
+
+                    source.close();
+                    this.pollRun(runId).then(finish);
+                });
+            });
         }
 
         async pollRun(runId) {
@@ -904,7 +1013,7 @@
 
         appendMessage(role, content, options = {}) {
             if (!this.messagesEl) {
-                return;
+                return null;
             }
 
             const animate = options.animate !== false && this.config.animations?.message_entrance !== false;
@@ -945,6 +1054,19 @@
             row.appendChild(bubble);
             this.messagesEl.appendChild(row);
             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+
+            return message;
+        }
+
+        setMessageContent(messageEl, content) {
+            if (!messageEl) {
+                return;
+            }
+
+            messageEl.textContent = content;
+            if (this.messagesEl) {
+                this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+            }
         }
 
         formatTimestamp(date) {

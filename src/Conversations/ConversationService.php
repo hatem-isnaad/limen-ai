@@ -51,9 +51,11 @@ class ConversationService
         $summary = $this->summarizer->summarize($conversationId, $stored);
 
         if ($summary !== null && $summary !== '') {
+            $messagesForAgent = $this->messagesWithSummaryApplied($stored);
+
             return array_merge(
                 [['role' => 'system', 'content' => "Conversation summary:\n".$summary]],
-                $this->formatter->toAgentMessages($stored),
+                $this->formatter->toAgentMessages($messagesForAgent),
             );
         }
 
@@ -130,5 +132,20 @@ class ConversationService
         }
 
         return max(1, (int) $this->config->get('limen-ai.conversations.history_limit', 50));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $stored
+     * @return list<array<string, mixed>>
+     */
+    protected function messagesWithSummaryApplied(array $stored): array
+    {
+        $keepRecent = max(1, (int) $this->config->get('limen-ai.conversations.summary_keep_recent', 12));
+
+        if (count($stored) <= $keepRecent) {
+            return $stored;
+        }
+
+        return array_slice($stored, -$keepRecent);
     }
 }

@@ -26,6 +26,7 @@ final class ChatUiConfig
             'guest' => $ui['guest'] ?? [],
             'history' => $ui['history'] ?? [],
             'i18n' => $ui['i18n'] ?? [],
+            'streaming' => $ui['streaming'] ?? [],
         ];
     }
 

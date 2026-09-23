@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-23
+
+### Added
+
+- `LlmConversationSummarizer` — optional LLM-backed long-thread compression with metadata cache
+- `GET /runs/{id}/stream` — SSE endpoint for run status, delta chunks, and completion events
+- Chat UI EventSource fallback when Laravel Echo is unavailable (`ui.streaming.enabled`)
+- `LIMEN_AI_BROADCAST_DRIVER=reverb` alias for Laravel Reverb broadcasting
+- Conversation history now keeps only `summary_keep_recent` messages when a summary is active
+- [docs/project/ROADMAP-v1.2.md](docs/project/ROADMAP-v1.2.md)
+
+### Changed
+
+- Guest stream access supports `?guest_token=` query param (for EventSource clients)
+
 ## [1.1.0] - 2026-09-23
 
 ### Added

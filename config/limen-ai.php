@@ -301,7 +301,18 @@ return [
         'repository' => env('LIMEN_AI_CONVERSATION_REPOSITORY'),
         'message_repository' => env('LIMEN_AI_MESSAGE_REPOSITORY'),
         'history_limit' => 50,
-        'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
+        'summarizer' => env('LIMEN_AI_CONVERSATION_SUMMARIZER', LimenAi\Conversations\NullConversationSummarizer::class),
+        'summary_threshold' => (int) env('LIMEN_AI_SUMMARY_THRESHOLD', 24),
+        'summary_keep_recent' => (int) env('LIMEN_AI_SUMMARY_KEEP_RECENT', 12),
+        'summary_refresh_messages' => (int) env('LIMEN_AI_SUMMARY_REFRESH_MESSAGES', 8),
+    ],
+
+    'streaming' => [
+        'enabled' => env('LIMEN_AI_STREAMING_ENABLED', true),
+        'poll_interval_ms' => (int) env('LIMEN_AI_STREAM_POLL_MS', 400),
+        'max_wait_seconds' => (int) env('LIMEN_AI_STREAM_MAX_WAIT', 120),
+        'chunk_final_message' => env('LIMEN_AI_STREAM_CHUNK_FINAL', true),
+        'chunk_chars' => (int) env('LIMEN_AI_STREAM_CHUNK_CHARS', 24),
     ],
 
     'tool_pipeline' => [
@@ -769,6 +780,10 @@ return [
             'enabled' => env('LIMEN_AI_UI_RATE_LIMIT_ENABLED', false),
             'max_attempts' => (int) env('LIMEN_AI_UI_RATE_LIMIT_MAX', 60),
             'decay_minutes' => (int) env('LIMEN_AI_UI_RATE_LIMIT_DECAY', 1),
+        ],
+
+        'streaming' => [
+            'enabled' => env('LIMEN_AI_UI_STREAMING_ENABLED', true),
         ],
 
         'guest' => [

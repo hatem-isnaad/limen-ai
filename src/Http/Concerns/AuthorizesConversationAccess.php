@@ -13,7 +13,7 @@ trait AuthorizesConversationAccess
             app(ConversationAccessGuard::class)->canAccess(
                 $request->user(),
                 $conversationId,
-                $request->header('X-Limen-Guest-Token'),
+                $request->header('X-Limen-Guest-Token') ?? $request->query('guest_token'),
             ),
             403,
             'Conversation access denied.',

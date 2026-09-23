@@ -31,6 +31,7 @@ Route::prefix($prefix)
         Route::post('conversations/{conversationId}/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
         Route::delete('attachments/{attachmentId}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         Route::get('runs/{runId}', [RunController::class, 'show'])->name('runs.show');
+        Route::get('runs/{runId}/stream', [RunController::class, 'stream'])->name('runs.stream');
         Route::get('runs/{runId}/observability', [ObservabilityController::class, 'show'])->name('runs.observability');
         Route::post('approvals/{approvalId}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
         Route::post('approvals/{approvalId}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');

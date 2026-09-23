@@ -18,13 +18,13 @@
 | Tool pipeline | Complete |
 | UI | Complete |
 | Limen integration | Reference demo complete |
-| Release | **v1.0.5** |
+| Release | **v1.2.0** |
 
 ## Current Phase
 
 **Phase 22 — Final Hardening** (Complete)
 
-All 22 implementation phases are complete. The package is ready for host app integration at v1.0.5.
+All 22 implementation phases are complete. v1.2.0 adds conversation summarization, SSE run streaming, and Reverb broadcasting.
 
 ## Completed
 
@@ -110,7 +110,8 @@ All 22 implementation phases are complete. The package is ready for host app int
 
 1. Wire published Limen demo into production host app
 2. Configure production LLM provider and queue workers
-3. Plan v1.1 features based on host app feedback
+3. v1.2: summarization + SSE streaming (see [ROADMAP-v1.2.md](ROADMAP-v1.2.md))
+4. v1.3 candidates: provider-native token streaming, OpenTelemetry export
 
 ## Risks
 
