@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-23
+
+### Changed
+
+- fix: bash-safe regex in create-release.sh (#26) (a1034c3)
+- fix: stop cancelling release runs and analyze non-merge commits (32093f5)
+- fix: do not abort release when tag fetch fails (7e65a6a)
+- fix: use release readiness gate instead of full test suite on main (05781c8)
+- fix: fetch release tags and align release gate with CI (e2ecb2c)
+- fix: replace semantic-release with gh-native release script (c45f622)
+- fix: simplify semantic-release and sync version metadata post-release (dc82976)
+- fix: unblock release workflow queue (#18) (6a31896)
+- fix: semantic-release without protected-branch push (#17) (cf6ee65)
+- fix: semantic-release git auth and README version pattern (#15) (72362e2)
+- fix: resolve Composer dependency failures in release workflow (#13) (98d2b80)
+- feat: add semantic-release automation on push to main (892960a)
+- feat: add comprehensive unit test coverage (41bbdac)
 ## [Unreleased]
 
 ### Added
@@ -56,3 +73,5 @@ First stable release of the Limen AI Laravel agent framework (phases 01–22).
 - See [SECURITY.md](SECURITY.md) for the full threat model
 
 [1.0.0]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.0
+
+[1.1.0]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.1.0
