@@ -4,6 +4,7 @@ namespace LimenAi\Runtime;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use LimenAi\Agents\ResolvedAgent;
+use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Agents\AgentResolver;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Runtime\AgentRuntime;
@@ -28,6 +29,7 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly RunRepository $runs,
         private readonly CheckpointStore $checkpoints,
         private readonly ToolCallParser $toolCallParser,
+        private readonly ConversationService $conversations,
         private readonly Dispatcher $events,
     ) {}
 
@@ -36,21 +38,26 @@ class DefaultAgentRuntime implements AgentRuntime
         $agent = $this->agentResolver->resolve($agentKey);
         $this->authorization->authorizeAgent($agent->definition());
 
+        $this->conversations->ensure($conversationId, $agentKey, $context);
+
+        $history = $this->conversations->historyForAgent($conversationId);
+        $this->conversations->appendUserMessage($conversationId, $userMessage);
+
+        $messages = array_merge($history, [
+            ['role' => 'user', 'content' => $userMessage],
+        ]);
+
+        $historyCount = count($messages);
+
         $runId = $this->runs->create([
             'agent_key' => $agentKey,
             'conversation_id' => $conversationId,
             'user_id' => $context->userId(),
             'status' => RunStatus::RUNNING,
-            'messages' => [
-                ['role' => 'user', 'content' => $userMessage],
-            ],
+            'messages' => $messages,
         ]);
 
         $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context));
-
-        $messages = [
-            ['role' => 'user', 'content' => $userMessage],
-        ];
 
         $limits = new RuntimeLimits($agent->limits(), microtime(true));
 
@@ -72,12 +79,16 @@ class DefaultAgentRuntime implements AgentRuntime
                 'error' => null,
             ]);
 
+            $this->syncConversationMessages($conversationId, $messages, $historyCount);
+
             $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $finalMessage, $context));
             $this->checkpoints->delete($runId);
 
             return $runId;
         } catch (ApprovalRequiredException $exception) {
             $this->saveApprovalCheckpoint($runId, $limits, $messages, $exception);
+            $this->syncConversationMessages($conversationId, $messages, $historyCount);
+            $this->conversations->markWaitingApproval($conversationId);
 
             $this->persistRun($runId, RunStatus::WAITING_APPROVAL, [
                 'current_step' => $limits->currentStep(),
@@ -128,6 +139,8 @@ class DefaultAgentRuntime implements AgentRuntime
             (int) ($state['tool_call_count'] ?? 0),
         );
 
+        $historyCount = count($messages);
+
         if ($pending = $state['pending_approval'] ?? null) {
             $toolContext = $this->toolContext($context, $runId, (string) $run['conversation_id'], $agent->key());
             $result = $this->toolPipeline->execute(
@@ -162,10 +175,13 @@ class DefaultAgentRuntime implements AgentRuntime
             'error' => null,
         ]);
 
+        $conversationId = (string) $run['conversation_id'];
+        $this->syncConversationMessages($conversationId, $messages, $historyCount);
+
         $this->events->dispatch(new AgentCompleted(
             $runId,
             (string) $run['agent_key'],
-            (string) $run['conversation_id'],
+            $conversationId,
             $finalMessage,
             $context,
         ));
@@ -203,7 +219,10 @@ class DefaultAgentRuntime implements AgentRuntime
             $toolCalls = $this->toolCallParser->parse($response);
 
             if ($toolCalls === []) {
-                return (string) ($response->content() ?? '');
+                $content = (string) ($response->content() ?? '');
+                $messages[] = ['role' => 'assistant', 'content' => $content];
+
+                return $content;
             }
 
             $limits->recordToolCalls(count($toolCalls));
@@ -280,5 +299,19 @@ class DefaultAgentRuntime implements AgentRuntime
     protected function persistRun(string $runId, string $status, array $attributes): void
     {
         $this->runs->updateStatus($runId, $status, $attributes);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     */
+    protected function syncConversationMessages(string $conversationId, array $messages, int $historyCount): void
+    {
+        $newMessages = array_slice($messages, $historyCount);
+
+        if ($newMessages === []) {
+            return;
+        }
+
+        $this->conversations->appendAgentMessages($conversationId, $newMessages);
     }
 }

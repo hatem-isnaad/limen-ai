@@ -12,6 +12,9 @@ use LimenAi\Console\ValidateCommand;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Agents\AgentResolver;
 use LimenAi\Contracts\Authorization\AuthorizationService;
+use LimenAi\Contracts\Conversations\ConversationRepository;
+use LimenAi\Contracts\Conversations\ConversationSummarizer;
+use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\EmbeddingProvider;
@@ -24,6 +27,11 @@ use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
+use LimenAi\Conversations\ConversationService;
+use LimenAi\Conversations\InMemoryConversationRepository;
+use LimenAi\Conversations\InMemoryMessageRepository;
+use LimenAi\Conversations\MessageFormatter;
+use LimenAi\Conversations\NullConversationSummarizer;
 use LimenAi\Runtime\ArrayCheckpointStore;
 use LimenAi\Runtime\DefaultAgentRuntime;
 use LimenAi\Runtime\InMemoryRunRepository;
@@ -56,10 +64,13 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerAgents();
         $this->registerTools();
         $this->registerRuntime();
+        $this->registerConversations();
     }
 
     public function boot(): void
     {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/limen-ai.php' => config_path('limen-ai.php'),
@@ -134,5 +145,16 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(CheckpointStore::class, $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class);
         $this->app->singleton(ToolCallParser::class);
         $this->app->singleton(AgentRuntime::class, DefaultAgentRuntime::class);
+    }
+
+    protected function registerConversations(): void
+    {
+        $conversations = $this->app['config']->get('limen-ai.conversations', []);
+
+        $this->app->singleton(ConversationRepository::class, $conversations['repository'] ?? InMemoryConversationRepository::class);
+        $this->app->singleton(MessageRepository::class, $conversations['message_repository'] ?? InMemoryMessageRepository::class);
+        $this->app->singleton(MessageFormatter::class);
+        $this->app->singleton(ConversationSummarizer::class, $conversations['summarizer'] ?? NullConversationSummarizer::class);
+        $this->app->singleton(ConversationService::class);
     }
 }

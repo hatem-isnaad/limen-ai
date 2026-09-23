@@ -3,10 +3,12 @@
 namespace LimenAi\Tests\Feature;
 
 use Illuminate\Support\Facades\Event;
+use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentStarted;
+use LimenAi\Events\MessageCreated;
 use LimenAi\Exceptions\RuntimeLimitExceededException;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
@@ -133,5 +135,68 @@ class AgentRuntimeTest extends TestCase
         $run = app(RunRepository::class)->find($runId);
 
         $this->assertSame(RunStatus::WAITING_APPROVAL, $run['status']);
+    }
+
+    public function test_it_loads_prior_conversation_history_on_subsequent_runs(): void
+    {
+        Event::fake([MessageCreated::class]);
+
+        $fake = app(FakeLlmProvider::class);
+        $fake->setDefaultResponse(LlmResponseData::fromArray([
+            'content' => 'First reply.',
+            'finish_reason' => 'stop',
+        ]));
+
+        app(AgentRuntime::class)->run(
+            'example',
+            'conv-multi',
+            'Hello',
+            RunContextData::make(['user_id' => 1]),
+        );
+
+        $fake->setDefaultResponse(LlmResponseData::fromArray([
+            'content' => 'Second reply.',
+            'finish_reason' => 'stop',
+        ]));
+
+        app(AgentRuntime::class)->run(
+            'example',
+            'conv-multi',
+            'Follow up',
+            RunContextData::make(['user_id' => 1]),
+        );
+
+        $calls = $fake->recordedCalls();
+        $secondCallMessages = $calls[1]['messages'];
+
+        $this->assertSame('Hello', $secondCallMessages[0]['content']);
+        $this->assertSame('First reply.', $secondCallMessages[1]['content']);
+        $this->assertSame('Follow up', $secondCallMessages[2]['content']);
+
+        $stored = app(ConversationService::class)->storedMessages('conv-multi');
+        $this->assertCount(4, $stored);
+    }
+
+    public function test_it_persists_messages_to_conversation_on_completion(): void
+    {
+        app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
+            'content' => 'Persisted response.',
+            'finish_reason' => 'stop',
+        ]));
+
+        app(AgentRuntime::class)->run(
+            'example',
+            'conv-persist',
+            'Save this',
+            RunContextData::make(['user_id' => 1]),
+        );
+
+        $stored = app(ConversationService::class)->storedMessages('conv-persist');
+
+        $this->assertCount(2, $stored);
+        $this->assertSame('user', $stored[0]['role']);
+        $this->assertSame('Save this', $stored[0]['content']);
+        $this->assertSame('assistant', $stored[1]['role']);
+        $this->assertSame('Persisted response.', $stored[1]['content']);
     }
 }
