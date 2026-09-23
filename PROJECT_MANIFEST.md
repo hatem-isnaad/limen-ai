@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 14 — Security Hardening**
+Current: **Phase 15 — Queue & Broadcasting**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -213,3 +213,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Secret resolver | `EnvSecretResolver` |
 | Validation | `HttpIntegrationValidator` |
 | Example tool | `example_http_status` |
+
+## Phase 14 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| SSRF guard | `SsrfUrlValidator` with DNS resolution and `assertAllowed()` |
+| Security exception | `SecurityException` |
+| Content sanitizer | `PromptInjectionSanitizer`, `NullContentSanitizer` |
+| Untrusted wrapping | Knowledge, memory, and user message delimiters |
+| HTTP hardening | Redirect blocking via `allow_redirects: false` |
+| Config | `security.ssrf` and `security.injection` sections |

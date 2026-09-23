@@ -17,7 +17,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 11 | Knowledge / RAG | Ingestion, embeddings, vector abstraction | Complete |
 | 12 | Workflow Engine | Branching, approval, resume | Complete |
 | 13 | HTTP Integrations | Declarative external API tools | Complete |
-| 14 | Security Hardening | SSRF, redaction, injection defenses | Pending |
+| 14 | Security Hardening | SSRF, redaction, injection defenses | Complete |
 | 15 | Queue & Broadcasting | Jobs, Pusher adapter, channels | Pending |
 | 16 | Chat UI | Blade components + JS | Pending |
 | 17 | Themes | RTL/LTR, dark/light, customization | Pending |
