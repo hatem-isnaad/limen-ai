@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 09 — State & Checkpoints**
+Current: **Phase 10 — Memory**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -156,3 +156,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Guest sessions | `GuestSessionValidator`, null + cache drivers |
 | Exceptions | `UnauthenticatedException`, `RunContextAuthorizationException` |
 | Context validation | `validateRunContext()` in runtime |
+
+## Phase 09 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Run repository (DB) | `DatabaseRunRepository` |
+| Checkpoint store (DB) | `DatabaseCheckpointStore` |
+| Approval repository | `InMemoryApprovalRepository`, `DatabaseApprovalRepository` |
+| Runtime methods | `resume()`, `cancel()`, `reject()` |
+| Events | `ApprovalRequested`, `ApprovalGranted`, `ApprovalRejected` |
+| Migrations | `limen_ai_runs`, `limen_ai_run_checkpoints`, `limen_ai_approvals` |

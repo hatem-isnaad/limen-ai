@@ -12,7 +12,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 06 | Runtime | Core execution loop + limits | Complete |
 | 07 | Conversations | Conversations, messages, runs persistence | Complete |
 | 08 | Auth & Authorization | Guards, abilities, policies integration | Complete |
-| 09 | State & Checkpoints | Resume, cancel, approval wait states | Pending |
+| 09 | State & Checkpoints | Resume, cancel, approval wait states | Complete |
 | 10 | Memory | Scoped memory stores + retrieval | Pending |
 | 11 | Knowledge / RAG | Ingestion, embeddings, vector abstraction | Pending |
 | 12 | Workflow Engine | Branching, approval, resume | Pending |

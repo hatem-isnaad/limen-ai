@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 08 — Auth & Authorization** (Complete)
+**Phase 09 — State & Checkpoints** (Complete)
 
 ## Completed
 
@@ -51,6 +51,9 @@
 - Hardened authorization with Gate/policy checks and run context validation
 - Guest session validator and `UnauthenticatedException` separation
 - Authorization unit, integration, and feature tests
+- Database-backed run, checkpoint, and approval repositories
+- Approval lifecycle events and runtime `reject()` support
+- Resume/cancel hardening with persisted approval state
 
 ## In Progress
 
@@ -62,9 +65,9 @@
 
 ## Next Steps
 
-1. Begin Phase 09 — State & checkpoints (Eloquent repositories)
+1. Begin Phase 10 — Memory
 2. Add queue-dispatched runtime job skeleton
-3. Begin Phase 10 — Memory
+3. Begin Phase 11 — Knowledge / RAG
 
 ## Risks
 

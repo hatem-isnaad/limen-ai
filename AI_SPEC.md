@@ -153,3 +153,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 07 — Conversation/message persistence, history loading, migrations
 - [x] Begin Phase 08 — Auth & Authorization
 - [x] Phase 08 — Gate/policy integration, guest sessions, context validation
+- [x] Begin Phase 09 — State & Checkpoints
+- [x] Phase 09 — Run/checkpoint/approval persistence, resume/reject/cancel hardening

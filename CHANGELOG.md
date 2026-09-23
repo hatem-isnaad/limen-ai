@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 09 persisted run/checkpoint/approval state with database repositories and resume/reject/cancel hardening
+- `ApprovalRepository` implementations, approval lifecycle events, and `InvalidRunStateException`
+- Database migrations for `limen_ai_runs`, `limen_ai_run_checkpoints`, and `limen_ai_approvals`
+- Run-state feature tests including full approval resume flow
+
+### Added (Phase 08)
+
 - Phase 08 authorization hardening with Gate/policy checks, guest session validation, and run context user matching
 - `GuestSessionValidator` contract with null and cache drivers
 - `UnauthenticatedException` and `RunContextAuthorizationException`

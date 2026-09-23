@@ -80,6 +80,7 @@ return [
     'runtime' => [
         'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
         'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
+        'approval_repository' => LimenAi\Authorization\InMemoryApprovalRepository::class,
     ],
 
     'conversations' => [

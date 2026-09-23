@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 09 — State & Checkpoints**
+**Phase 10 — Memory**
 
 ## Phase 01 Scope
 
@@ -140,8 +140,18 @@ At the end of each phase:
 5. Authorization config section and service provider bindings
 6. Unit, integration, and feature authorization tests
 
-## Next Implementation Tasks (Phase 09)
+## Phase 09 Completed
 
-1. Eloquent run repository and checkpoint persistence
-2. Approval repository skeleton
-3. Resume/cancel hardening with persisted state
+1. `DatabaseRunRepository` and `DatabaseCheckpointStore` with query builder persistence
+2. `InMemoryApprovalRepository` and `DatabaseApprovalRepository`
+3. Migrations for `limen_ai_runs`, `limen_ai_run_checkpoints`, `limen_ai_approvals`
+4. Runtime `resume()`, `cancel()`, and `reject()` hardening with auth + approval lifecycle
+5. Approval events: `ApprovalRequested`, `ApprovalGranted`, `ApprovalRejected`
+6. Tool pipeline bypass for `approval_granted` metadata on resume
+7. Database and run-state feature tests
+
+## Next Implementation Tasks (Phase 10)
+
+1. Scoped memory store contract and in-memory driver
+2. User/conversation memory retrieval hooks
+3. Memory feature tests
