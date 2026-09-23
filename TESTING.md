@@ -30,13 +30,26 @@
 | FakeRealtimeBroadcaster | RealtimeBroadcaster |
 | FakeApprovalStore | ApprovalRepository |
 
-## Architecture Tests (Phase 20, scaffold in Phase 01)
+## Architecture Tests
+
+Enforced in `tests/Architecture/`:
+
+| Test | Rule |
+|------|------|
+| `PackageBoundaryTest` | No host `App\` imports; runtime/provider/tool isolation |
+| `ModuleBoundaryTest` | Per-module dependency rules (HTTP, UI, Jobs, Observability) |
+| `CriticalCoverageGateTest` | Security-critical classes have matching unit/feature tests |
 
 Examples:
 
-- `LimenAi\Runtime` must not import `Illuminate\View`
+- `LimenAi\Runtime` must not import `Illuminate\View` or `LimenAi\Http\`
 - `LimenAi\` must not import `App\`
-- No direct `Pusher\` usage outside `Broadcasting\Adapters`
+- No direct `Pusher\` usage outside `Broadcasting\`
+- Jobs resolve `AgentRuntime` through the contract only
+
+## Security Suite
+
+`tests/Security/SecurityCriticalMatrixTest.php` provides fast smoke checks for SSRF, sanitization, redaction, and run-context integrity. Feature-level scenarios remain in `tests/Feature/`.
 
 ## Critical Test Scenarios
 
@@ -72,11 +85,14 @@ Examples:
 
 Use `orchestra/testbench` with package service provider registered in test case base class.
 
-## CI (Future)
+## CI
+
+See [docs/ci.md](docs/ci.md) for the full matrix and merge gates.
 
 - PHP 8.2, 8.3
 - Laravel 11 + 12 matrix
-- PHPUnit + architecture suite
+- Required gates: Unit/Integration/Feature + Architecture + Security
+- Local merge gate: `composer test:gates`
 
 ## Definition of Done (Testing)
 

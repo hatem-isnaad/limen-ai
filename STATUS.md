@@ -16,12 +16,12 @@
 | Runtime | Core loop complete |
 | Conversations | In-memory persistence complete |
 | Tool pipeline | Complete |
-| UI | Not started |
+| UI | Complete |
 | Limen integration | Not started |
 
 ## Current Phase
 
-**Phase 19 — Artisan Developer Tools** (Complete)
+**Phase 20 — Testing & Architecture Validation** (Complete)
 
 ## Completed
 
@@ -82,6 +82,9 @@
 - `limen-ai:doctor` environment validation command
 - Generator commands: `make:agent`, `make:tool`, `make:skill`, plus `limen-ai:list`
 - Publishable stubs under `stubs/` with `StubGenerator`
+- Expanded architecture boundary tests (`ModuleBoundaryTest`, `CriticalCoverageGateTest`)
+- Security critical matrix suite and CI workflow with merge gates
+- Test matrix documentation in `docs/ci.md`
 
 ## In Progress
 
@@ -93,9 +96,9 @@
 
 ## Next Steps
 
-1. Begin Phase 20 — Testing & Architecture Validation
-2. Expand architecture test matrix and CI coverage gates
-3. Begin Phase 21 — Limen Integration
+1. Begin Phase 21 — Limen Integration (host app tools for 3PL demo)
+2. Add `GetShipmentStatus` and approval-gated messaging tools in host app
+3. Wire chat UI with broadcasting in Limen demo
 
 ## Risks
 

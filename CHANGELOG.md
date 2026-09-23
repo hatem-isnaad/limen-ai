@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 20 testing architecture with expanded boundary tests, security gates, and CI workflow
+- `ModuleBoundaryTest`, `CriticalCoverageGateTest`, and `SecurityCriticalMatrixTest`
+- GitHub Actions test matrix (PHP 8.2/8.3, Laravel 11/12) and `docs/ci.md`
+- Composer scripts: `test:security`, `test:gates`
+
+### Added (Phase 19)
+
 - Phase 19 Artisan developer tools with doctor, list, and make:agent/tool/skill generators
 - Publishable code stubs and StubGenerator for host app scaffolding
 - Developer tooling unit and feature tests
