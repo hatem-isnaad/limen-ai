@@ -39,7 +39,10 @@ use LimenAi\Contracts\Knowledge\KnowledgeRetriever;
 use LimenAi\Contracts\Knowledge\VectorStore;
 use LimenAi\Contracts\Memory\MemoryRetriever;
 use LimenAi\Contracts\Memory\MemoryStore;
+use LimenAi\Contracts\Observability\AuditExporter;
 use LimenAi\Contracts\Observability\AuditLogger;
+use LimenAi\Contracts\Observability\UsageReader;
+use LimenAi\Contracts\Observability\UsageTracker;
 use LimenAi\Contracts\Providers\EmbeddingProvider;
 use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Skills\SkillRepository;
@@ -85,7 +88,14 @@ use LimenAi\Memory\DefaultMemoryRetriever;
 use LimenAi\Memory\InMemoryMemoryStore;
 use LimenAi\Memory\MemoryFormatter;
 use LimenAi\Memory\MemoryService;
+use LimenAi\Observability\AgentObservabilityListener;
+use LimenAi\Observability\AuditBuffer;
+use LimenAi\Observability\DefaultAuditExporter;
 use LimenAi\Observability\LogAuditLogger;
+use LimenAi\Observability\LogUsageTracker;
+use LimenAi\Observability\NullUsageTracker;
+use LimenAi\Observability\RunObservabilityReporter;
+use LimenAi\Observability\UsageBuffer;
 use LimenAi\Providers\EmbeddingProviderManager;
 use LimenAi\Providers\Fake\FakeEmbeddingProvider;
 use LimenAi\Providers\Fake\FakeLlmProvider;
@@ -120,6 +130,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerRepositories();
         $this->registerProviders();
         $this->registerAgents();
+        $this->registerObservability();
         $this->registerTools();
         $this->registerRuntime();
         $this->registerConversations();
@@ -152,6 +163,10 @@ class LimenAiServiceProvider extends ServiceProvider
 
         if ((bool) $this->app['config']->get('limen-ai.broadcasting.enabled', true)) {
             $this->app->make(AgentEventBroadcaster::class)->subscribe($this->app['events']);
+        }
+
+        if ((bool) $this->app['config']->get('limen-ai.observability.audit_enabled', true)) {
+            $this->app->make(AgentObservabilityListener::class)->subscribe($this->app['events']);
         }
 
         if ((bool) $this->app['config']->get('limen-ai.ui.enabled', true)) {
@@ -207,7 +222,6 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SensitiveDataRedactor::class);
         $this->app->singleton(ToolInputValidator::class);
-        $this->app->singleton(AuditLogger::class, LogAuditLogger::class);
         $this->app->singleton(ToolExecutor::class, ClassBasedToolExecutor::class);
         $this->app->singleton(ToolPipeline::class);
 
@@ -406,5 +420,25 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ConversationAccessGuard::class);
         $this->app->singleton(ThemeResolver::class);
+    }
+
+    protected function registerObservability(): void
+    {
+        $this->app->singleton(AuditBuffer::class);
+        $this->app->singleton(UsageBuffer::class);
+        $this->app->singleton(AuditLogger::class, LogAuditLogger::class);
+        $this->app->singleton(AuditExporter::class, DefaultAuditExporter::class);
+        $this->app->singleton(RunObservabilityReporter::class);
+        $this->app->singleton(AgentObservabilityListener::class);
+
+        $this->app->singleton(UsageTracker::class, function ($app): UsageTracker {
+            if (! (bool) $app['config']->get('limen-ai.observability.usage_tracking_enabled', true)) {
+                return new NullUsageTracker();
+            }
+
+            return $app->make(LogUsageTracker::class);
+        });
+
+        $this->app->bind(UsageReader::class, fn ($app): UsageReader => $app->make(UsageTracker::class));
     }
 }
