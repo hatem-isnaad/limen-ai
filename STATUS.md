@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 12 — Workflow Engine** (Complete)
+**Phase 13 — HTTP Integrations** (Complete)
 
 ## Completed
 
@@ -62,6 +62,8 @@
 - Workflow engine with agent, tool, approval, and branch step types
 - Workflow checkpoint resume/cancel/reject integrated with approval lifecycle
 - Example `example_flow` and `shipment_notify` workflows in config
+- Declarative HTTP connectors and `example_http_status` integration tool
+- SSRF URL validation and env/config secret resolution for outbound requests
 
 ## In Progress
 
@@ -73,9 +75,9 @@
 
 ## Next Steps
 
-1. Begin Phase 13 — HTTP Integrations
+1. Begin Phase 14 — Security Hardening
 2. Add queue-dispatched runtime job skeleton
-3. Begin Phase 14 — Security Hardening
+3. Begin Phase 15 — Queue & Broadcasting
 
 ## Risks
 
