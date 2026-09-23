@@ -34,6 +34,7 @@ The LLM proposes actions. Laravel decides whether they are allowed and executes 
 ```bash
 composer require limen-ai/limen-ai
 php artisan vendor:publish --tag=limen-ai-config
+php artisan vendor:publish --tag=limen-ai-env   # .env.limen-ai.example — all config keys
 php artisan migrate
 php artisan limen-ai:doctor
 ```
