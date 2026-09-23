@@ -11,5 +11,10 @@ interface WorkflowDefinition
     /** @return array<string, mixed> */
     public function definition(): array;
 
+    public function startStep(): string;
+
+    /** @return array<string, array<string, mixed>> */
+    public function steps(): array;
+
     public function version(): string;
 }
