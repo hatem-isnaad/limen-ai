@@ -1,7 +1,5 @@
 # Limen AI — Implementation Guide
 
-This document tracks how the package will be built, phase by phase.
-
 ## Current Phase
 
 **Phase 12 — Workflow Engine**
@@ -15,3 +13,9 @@ This document tracks how the package will be built, phase by phase.
 5. Runtime knowledge injection after memory, before conversation history
 6. Config-driven driver bindings (`null`, `config`, `vector`) in service provider
 7. Unit, integration, and feature knowledge tests
+
+## Next Implementation Tasks (Phase 12)
+
+1. Workflow definition repository and step runner skeleton
+2. Branching and approval step types
+3. Workflow resume integration with runtime checkpoints
