@@ -21,21 +21,27 @@ if [[ ${#SUBJECTS[@]} -eq 0 ]]; then
   exit 0
 fi
 
+RE_FEAT='^feat(\([^)]+\))?:'
+RE_PATCH='^(fix|perf|revert|refactor|build)(\([^)]+\))?:'
+RE_NOTES='^- (feat|fix|perf|revert|refactor|build)(\([^)]+\))?:'
+
 BUMP="none"
 for subject in "${SUBJECTS[@]}"; do
-  if [[ "$subject" =~ ^[a-zA-Z]+(\([^)]+\))?!: ]] || [[ "$subject" == *"BREAKING CHANGE"* ]]; then
+  commit_prefix="${subject%%:*}"
+
+  if [[ "$subject" == *"BREAKING CHANGE"* ]] || [[ "$commit_prefix" == *"!" ]]; then
     BUMP="major"
     break
   fi
 
-  if [[ "$subject" =~ ^feat(\([^)]+\))?: ]]; then
+  if [[ "$subject" =~ $RE_FEAT ]]; then
     if [[ "$BUMP" != "major" ]]; then
       BUMP="minor"
     fi
     continue
   fi
 
-  if [[ "$subject" =~ ^(fix|perf|revert|refactor|build)(\([^)]+\))?: ]]; then
+  if [[ "$subject" =~ $RE_PATCH ]]; then
     if [[ "$BUMP" == "none" ]]; then
       BUMP="patch"
     fi
@@ -82,9 +88,9 @@ NOTES_FILE="$(mktemp)"
   echo "## Limen AI ${TAG}"
   echo
   if [[ -n "$RANGE" ]]; then
-    git log "${RANGE}" --pretty=format:'- %s (%h)' | grep -E '^- (feat|fix|perf|revert|refactor|build)(\([^)]+\))?!?:' || true
+    git log "${RANGE}" --pretty=format:'- %s (%h)' | grep -E "$RE_NOTES" || true
   else
-    git log --pretty=format:'- %s (%h)' | grep -E '^- (feat|fix|perf|revert|refactor|build)(\([^)]+\))?!?:' || true
+    git log --pretty=format:'- %s (%h)' | grep -E "$RE_NOTES" || true
   fi
 } > "$NOTES_FILE"
 
@@ -126,6 +132,12 @@ section_lines.extend(f"- {line}" for line in bullet_lines)
 section_lines.append("")
 
 content = changelog_path.read_text(encoding="utf-8")
+content = re.sub(
+    r"## \[Unreleased\]\n\n### Added\n\n",
+    "## [Unreleased]\n\n### Added\n\n",
+    content,
+    count=1,
+)
 marker = "## [Unreleased]"
 if marker not in content:
     raise SystemExit("CHANGELOG.md is missing an [Unreleased] section")
@@ -135,8 +147,7 @@ updated = content.replace(
     "\n".join(section_lines) + marker,
     1,
 )
-if f"[{version}]:" not in updated:
-    updated += f"\n[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
+updated += f"\n[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
 changelog_path.write_text(updated, encoding="utf-8")
 print(f"Updated CHANGELOG.md for {version}")
 PY
