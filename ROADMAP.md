@@ -20,7 +20,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 14 | Security Hardening | SSRF, redaction, injection defenses | Complete |
 | 15 | Queue & Broadcasting | Jobs, Pusher adapter, channels | Complete |
 | 16 | Chat UI | Blade components + JS | Complete |
-| 17 | Themes | RTL/LTR, dark/light, customization | Pending |
+| 17 | Themes | RTL/LTR, dark/light, customization | Complete |
 | 18 | Observability & Audit | Usage, traces, audit logs | Pending |
 | 19 | Artisan Developer Tools | make:* commands, stubs, doctor | Pending |
 | 20 | Testing & Architecture Validation | Full test matrix + arch tests | Pending |

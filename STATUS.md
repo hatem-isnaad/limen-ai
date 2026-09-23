@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 16 — Chat UI** (Complete)
+**Phase 17 — Themes** (Complete)
 
 ## Completed
 
@@ -74,6 +74,8 @@
 - Chat UI Blade components (`chatbot`, `widget`) with themed CSS/JS client
 - HTTP API for conversations, messages, runs, and approvals
 - Echo-ready private channel authorization for conversation updates
+- Theme presets (default, arabic), light/dark palettes, and `ThemeResolver`
+- RTL layout refinements, dark mode CSS variables, and optional client mode toggle
 
 ## In Progress
 
@@ -85,9 +87,9 @@
 
 ## Next Steps
 
-1. Begin Phase 17 — Themes
-2. Expand RTL/dark mode theming and publishable asset overrides
-3. Begin Phase 18 — Observability & Audit
+1. Begin Phase 18 — Observability & Audit
+2. Expand usage tracking and audit log exporters
+3. Add trace correlation hooks for agent runs
 
 ## Risks
 
