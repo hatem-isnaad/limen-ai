@@ -30,11 +30,11 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 | SECURITY.md | Security model |
 | TESTING.md | Testing strategy |
 | docs/ci.md | CI matrix and merge gates |
-| docs/branching.md | stg → main promotion flow |
 | docs/limen-integration.md | Limen 3PL host app integration |
 | docs/release.md | Install, publish, and release guide |
 | docs/performance.md | Caching and profiling notes |
 | docs/providers.md | LLM/embedding providers and per-agent models |
+| docs/agent-configuration.md | Persona, tone, language, memory, quality controls |
 | CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 

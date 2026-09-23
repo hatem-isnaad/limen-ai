@@ -11,6 +11,9 @@ The LLM proposes actions. Laravel decides whether they are allowed and executes 
 ## Features
 
 - **Multi-provider LLM support** — OpenAI, Anthropic, Gemini, OpenRouter, and custom drivers from config
+- **Per-agent persona controls** — display name, tone, language, response style, rules, and forbidden topics from config
+- **Strict memory policy** — key allowlists, length limits, and sanitization on store and recall
+- **Token and quality guards** — temperature, history limits, max tokens, and hard response length caps
 - Per-agent `provider` + `model` selection (no code changes to switch models)
 - Config-driven agents, tools, skills, and workflows
 - Multi-step runtime with tool pipeline, approvals, and checkpoints
@@ -58,6 +61,7 @@ See [docs/release.md](docs/release.md) for full publish tags, validation, and up
 | [SECURITY.md](SECURITY.md) | Threat model and controls |
 | [TESTING.md](TESTING.md) | Test strategy |
 | [docs/providers.md](docs/providers.md) | LLM/embedding providers and models |
+| [docs/agent-configuration.md](docs/agent-configuration.md) | Persona, tone, language, memory, and quality |
 | [docs/release.md](docs/release.md) | Install, publish, and release |
 | [docs/limen-integration.md](docs/limen-integration.md) | Limen 3PL host demo |
 | [docs/ci.md](docs/ci.md) | CI matrix and merge gates |
@@ -74,8 +78,6 @@ composer install
 composer test
 composer test:gates   # architecture + security merge gates
 ```
-
-**Branch flow:** feature → **`stg`** (CI runs) → **`main`** (go-live). See [docs/branching.md](docs/branching.md).
 
 ## License
 
