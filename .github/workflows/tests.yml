@@ -29,6 +29,14 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
+      - name: Verify checkout
+        run: |
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "EVENT=${{ github.event_name }}"
+          echo "PR_HEAD=${{ github.event.pull_request.head.sha }}"
+          test -f src/Security/SensitiveDataRedactor.php
+          test -f tests/Stubs/EchoTool.php
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
