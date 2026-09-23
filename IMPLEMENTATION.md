@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 20 — Testing & Architecture Validation**
+**Phase 21 — Limen Integration**
 
 ## Phase 01 Scope
 
@@ -237,8 +237,16 @@ At the end of each phase:
 3. `limen-ai:list` inspection command and publishable `stubs/` directory
 4. `StubGenerator` helper and developer tooling unit/feature tests
 
-## Next Implementation Tasks (Phase 20)
+## Phase 20 Completed
 
-1. Expand architecture boundary tests across all modules
-2. Full test matrix documentation and CI recommendations
-3. Coverage gates for security-critical paths
+1. `ModuleBoundaryTest` and shared `ScansPhpSources` concern for per-module rules
+2. `CriticalCoverageGateTest` mapping security-critical classes to required tests
+3. `SecurityCriticalMatrixTest` smoke suite for SSRF, sanitization, and redaction
+4. GitHub Actions workflow (`.github/workflows/tests.yml`) with PHP/Laravel matrix
+5. `docs/ci.md`, updated `TESTING.md`, and `composer test:gates` scripts
+
+## Next Implementation Tasks (Phase 21)
+
+1. Host app tools: `GetShipmentStatus`, approval-gated customer messaging
+2. Register Limen-specific agents/tools in host `config/limen-ai.php`
+3. End-to-end demo with chat UI and broadcasting in the Limen application
