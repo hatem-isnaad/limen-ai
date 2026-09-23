@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-09-23
+
 ### Fixed
 
 - CI matrix excludes PHP 8.2 × Laravel 13 (Laravel 13 requires PHP ^8.3)
@@ -20,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Release script resolves previous tag from semver (ignores stray `v1.3+` experimental tags)
 - Pint formatting applied across `src/`, `tests/`, and `config/`
+- Removed stray experimental tags `v1.3.0`–`v1.7.1` from origin
 
 ## [1.2.0] - 2026-09-23
 

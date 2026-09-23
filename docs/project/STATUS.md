@@ -18,13 +18,13 @@
 | Tool pipeline | Complete |
 | UI | Complete |
 | Limen integration | Reference demo complete |
-| Release | **v1.2.0** |
+| Release | **v1.2.1** |
 
 ## Current Phase
 
 **Phase 22 — Final Hardening** (Complete)
 
-All 22 implementation phases are complete. v1.2.0 adds conversation summarization, SSE run streaming, and Reverb broadcasting.
+All 22 implementation phases are complete. v1.2.1 adds CI/Pint hardening on top of v1.2.0 (summarization, SSE streaming, Reverb).
 
 ## Completed
 
