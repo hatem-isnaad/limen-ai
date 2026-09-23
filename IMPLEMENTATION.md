@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 13 — HTTP Integrations**
+**Phase 14 — Security Hardening**
 
 ## Phase 01 Scope
 
@@ -178,8 +178,17 @@ At the end of each phase:
 5. `WorkflowValidator` wired into `limen-ai:validate`
 6. Example workflows in config and unit/integration/feature tests
 
-## Next Implementation Tasks (Phase 13)
+## Phase 13 Completed
 
-1. Declarative HTTP connector config schema
-2. HTTP tool executor with SSRF guard hooks
-3. Integration tests with `Http::fake()`
+1. `integrations.connectors` config schema with `ConfigHttpConnectorRepository`
+2. `DeclarativeHttpToolExecutor` with templated paths, query, headers, and auth
+3. `SsrfUrlValidator` and `EnvSecretResolver` security hooks
+4. HTTP tools via `integration` key on tool definitions, delegated from `ClassBasedToolExecutor`
+5. `HttpIntegrationValidator` wired into `limen-ai:validate`
+6. Unit, integration, and feature tests with `Http::fake()`
+
+## Next Implementation Tasks (Phase 14)
+
+1. Expand SSRF validation (redirects, DNS rebinding hooks)
+2. Prompt-injection sanitization helpers
+3. Security-focused unit and feature tests

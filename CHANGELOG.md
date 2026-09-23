@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 13 declarative HTTP integrations with connector config, SSRF validation, and Http::fake tests
+- `DeclarativeHttpToolExecutor`, `HttpRequestBuilder`, `SsrfUrlValidator`, and `EnvSecretResolver`
+- HTTP integration unit, integration, and feature tests
+
+### Added (Phase 12)
+
 - Phase 12 workflow engine with agent, tool, approval, and branch steps plus checkpoint resume
 - `DefaultWorkflowEngine`, `WorkflowStepRunner`, `WorkflowValidator`, and workflow lifecycle events
 - Workflow unit, integration, and feature tests
