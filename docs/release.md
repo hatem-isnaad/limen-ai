@@ -103,7 +103,7 @@ Pushes to `main` trigger [semantic-release](https://semantic-release.gitbook.io/
    - Creates GitHub release `vX.Y.Z` with generated notes
    - Pushes the version commit back to `main` (`[skip ci]` avoids loops)
 
-Manual tags are not required. To re-validate a version without releasing, use the **Release** workflow dispatch on GitHub Actions.
+Manual tags are not required. If no commits since the last tag qualify for a release, the workflow exits successfully without creating a new version.
 
 ## Upgrade notes (v1.0.0)
 
