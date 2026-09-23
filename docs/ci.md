@@ -1,6 +1,18 @@
 # Limen AI — CI & Test Matrix
 
-This document describes the recommended continuous integration setup for the package and the test suites that must pass before merge.
+This document describes the continuous integration setup for the package and the test suites that must pass before promoting code to **`main`**.
+
+## Branch gate
+
+CI runs **only on the `stg` branch** (push and pull requests targeting `stg`). See [branching.md](branching.md).
+
+| Event | Branch | CI |
+|-------|--------|-----|
+| Push | `stg` | Yes |
+| Pull request | → `stg` | Yes |
+| Push | `main`, `cursor/**`, features | No |
+
+Validate on `stg` before merging to `main` for go-live.
 
 ## Workflow
 
@@ -20,7 +32,11 @@ Each matrix cell runs:
 2. **Architecture** — module and package boundary enforcement
 3. **Security** — consolidated security-critical smoke checks
 
+After the matrix completes, a **release-gate** job runs `composer test:release` on PHP 8.3.
+
 The PHP 8.3 / Laravel 12 cell optionally emits Clover coverage for downstream reporting.
+
+Manual release validation (optional, before tagging on `main`): [`.github/workflows/release.yml`](../.github/workflows/release.yml) via `workflow_dispatch`.
 
 ## Local Commands
 
@@ -29,20 +45,19 @@ composer test                  # full suite
 composer test:architecture     # boundary gates only
 composer test:security         # security gates only
 composer test:gates            # architecture + security (merge gate)
-composer test:release          # full suite + merge gates (pre-tag)
+composer test:release          # full suite + merge gates (pre-go-live)
 ```
 
-Release tags additionally run [`.github/workflows/release.yml`](../.github/workflows/release.yml), which verifies the tag matches `composer.json` version and executes `composer test:release`.
+## Merge Gates (Required on `stg`)
 
-## Merge Gates (Required)
-
-These suites **must pass** on every PR:
+These suites **must pass** before merging `stg` → `main`:
 
 | Gate | Suite | Purpose |
 |------|-------|---------|
 | Boundaries | Architecture | Prevent host-app coupling, UI/runtime leaks, SSRF bypass |
 | Security smoke | Security | SSRF, sanitization, redaction, context integrity |
 | Coverage map | Architecture (`CriticalCoverageGateTest`) | Security-critical classes have dedicated tests |
+| Release gate | `composer test:release` | Full regression + architecture + security |
 
 ## Test File Matrix (Summary)
 

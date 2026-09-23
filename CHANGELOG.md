@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CI/CD runs on **`stg`** branch only; `main` is go-live without automated workflow triggers
+- Release workflow is manual (`workflow_dispatch`); release gate runs on `stg` push
+
 ### Added
 
+- `docs/branching.md` — stg pre-production gate before main
 - First-class `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) LLM drivers
 - `OpenAiEmbeddingProvider` for production vector knowledge
 - Config-driven provider registry (`providers.drivers`) for adding custom LLM adapters without core changes

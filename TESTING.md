@@ -88,12 +88,12 @@ Use `orchestra/testbench` with package service provider registered in test case 
 
 ## CI
 
-See [docs/ci.md](docs/ci.md) for the full matrix and merge gates.
+See [docs/ci.md](docs/ci.md) and [docs/branching.md](docs/branching.md).
 
-- PHP 8.2, 8.3
-- Laravel 11 + 12 matrix
-- Required gates: Unit/Integration/Feature + Architecture + Security
-- Local merge gate: `composer test:gates`
+- CI runs on **`stg`** only (not on `main` or feature pushes)
+- PHP 8.2, 8.3 × Laravel 11 + 12 matrix
+- Required gates: Unit/Integration/Feature + Architecture + Security + release gate
+- Local pre-merge gate: `composer test:release`
 
 ## Definition of Done (Testing)
 

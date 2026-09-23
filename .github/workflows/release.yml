@@ -1,13 +1,20 @@
+# Release validation runs on push to `stg` via the Tests workflow (release-gate job).
+# Tag and publish only after merging stg → main. Use workflow_dispatch below for
+# optional manual re-validation before tagging on main.
+
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to validate against composer.json (without v prefix)
+        required: true
+        type: string
 
 jobs:
   validate:
-    name: Validate release tag
+    name: Validate release version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +28,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction
 
-      - name: Verify composer version matches tag
+      - name: Verify composer version matches input
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           COMPOSER_VERSION=$(composer config version)
-          if [ "$TAG" != "$COMPOSER_VERSION" ]; then
-            echo "Tag v${TAG} does not match composer.json version ${COMPOSER_VERSION}"
+          if [ "${{ inputs.version }}" != "$COMPOSER_VERSION" ]; then
+            echo "Input version ${{ inputs.version }} does not match composer.json version ${COMPOSER_VERSION}"
             exit 1
           fi
 

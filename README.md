@@ -75,6 +75,8 @@ composer test
 composer test:gates   # architecture + security merge gates
 ```
 
+**Branch flow:** feature → **`stg`** (CI runs) → **`main`** (go-live). See [docs/branching.md](docs/branching.md).
+
 ## License
 
 MIT
