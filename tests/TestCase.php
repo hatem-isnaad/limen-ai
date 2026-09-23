@@ -25,5 +25,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('limen-ai.default_agent', 'example');
         $app['config']->set('limen-ai.tools.example_echo.class', \LimenAi\Tests\Stubs\EchoTool::class);
         $app['config']->set('limen-ai.tool_pipeline.idempotency.driver', 'cache');
+        $app['config']->set('limen-ai.ui.enabled', true);
+        $app['config']->set('limen-ai.ui.middleware', []);
     }
 }
