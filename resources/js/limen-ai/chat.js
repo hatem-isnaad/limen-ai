@@ -16,6 +16,7 @@
             this.echoChannel = null;
 
             this.bindEvents();
+            this.initializeTheme();
             this.initialize();
         }
 
@@ -37,6 +38,36 @@
                 this.approvalEl.querySelector('[data-limen-ai-approve]')?.addEventListener('click', () => this.resolveApproval(true));
                 this.approvalEl.querySelector('[data-limen-ai-reject]')?.addEventListener('click', () => this.resolveApproval(false));
             }
+
+            this.root.querySelector('[data-limen-ai-mode-toggle]')?.addEventListener('click', () => {
+                const next = this.root.dataset.mode === 'dark' ? 'light' : 'dark';
+                window.localStorage.setItem('limen-ai-theme-mode', next);
+                this.applyThemeMode(next);
+            });
+        }
+
+        initializeTheme() {
+            const configuredMode = this.root.dataset.configuredMode || this.root.dataset.mode || 'light';
+            const storageKey = 'limen-ai-theme-mode';
+            let mode = configuredMode;
+
+            if (configuredMode === 'auto') {
+                mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            } else if (this.root.dataset.allowModeToggle === 'true') {
+                mode = window.localStorage.getItem(storageKey) || configuredMode;
+            }
+
+            this.applyThemeMode(mode === 'auto' ? 'light' : mode);
+
+            if (configuredMode === 'auto') {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+                    this.applyThemeMode(event.matches ? 'dark' : 'light');
+                });
+            }
+        }
+
+        applyThemeMode(mode) {
+            this.root.dataset.mode = mode;
         }
 
         async initialize() {
