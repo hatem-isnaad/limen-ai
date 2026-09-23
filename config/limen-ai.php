@@ -116,7 +116,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null,
+            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -285,13 +285,16 @@ return [
     ],
 
     'broadcasting' => [
-        'driver' => env('LIMEN_AI_BROADCAST_DRIVER', 'pusher'),
-        'channel_prefix' => 'limen-ai.conversation',
+        'enabled' => env('LIMEN_AI_BROADCASTING_ENABLED', true),
+        'driver' => env('LIMEN_AI_BROADCAST_DRIVER', 'null'),
+        'connection' => env('LIMEN_AI_BROADCAST_CONNECTION'),
+        'channel_prefix' => env('LIMEN_AI_BROADCAST_CHANNEL_PREFIX', 'limen-ai.conversation'),
     ],
 
     'queue' => [
         'connection' => env('LIMEN_AI_QUEUE_CONNECTION'),
         'name' => env('LIMEN_AI_QUEUE', 'default'),
+        'agent_runs' => env('LIMEN_AI_QUEUE_AGENT_RUNS', false),
     ],
 
     'observability' => [
