@@ -50,7 +50,7 @@ jobs:
           else
             composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction -W
+          composer update --prefer-dist --no-interaction -W --no-audit
 
       - name: Run unit, integration, and feature tests
         run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
