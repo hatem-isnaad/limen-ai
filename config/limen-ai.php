@@ -74,7 +74,7 @@ return [
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
-            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+            'provider' => 'fake',
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
             'persona' => [
                 'display_name' => 'Example Agent',
@@ -119,6 +119,7 @@ return [
             ],
             'version' => '1.0.0',
         ],
+        ...require __DIR__.'/limen-ai-provider-agents.php',
         'limen_3pl' => [
             'name' => 'Limen 3PL Assistant',
             'description' => 'Helps operators look up shipments and send approved customer updates.',

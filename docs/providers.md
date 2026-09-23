@@ -14,39 +14,52 @@ Limen AI resolves providers and models entirely from `config/limen-ai.php`. Each
 
 Register additional drivers under `providers.drivers` and reference them from a provider block.
 
-## Per-agent provider and model
+## Example agents (one per provider)
 
-```php
-'agents' => [
-    'support_openai' => [
-        'model' => env('SUPPORT_OPENAI_MODEL', 'gpt-4.1-mini'),
-        'provider' => 'openai',
-        // ...
-    ],
-    'support_claude' => [
-        'model' => env('SUPPORT_CLAUDE_MODEL', 'claude-sonnet-4-20250514'),
-        'provider' => 'anthropic',
-        // ...
-    ],
-    'support_openrouter' => [
-        'model' => env('SUPPORT_OR_MODEL', 'anthropic/claude-3.5-sonnet'),
-        'provider' => 'openrouter',
-        // ...
-    ],
-],
+The package ships ready-to-use example agents in `config/limen-ai.php`:
+
+| Agent key | Provider | Default model | Env model key |
+|-----------|----------|---------------|---------------|
+| `example` | `fake` | `gpt-4.1-mini` | `LIMEN_AI_EXAMPLE_MODEL` |
+| `example_openai` | `openai` | `gpt-4.1-mini` | `LIMEN_AI_OPENAI_MODEL` |
+| `example_anthropic` | `anthropic` | `claude-sonnet-4-20250514` | `LIMEN_AI_ANTHROPIC_MODEL` |
+| `example_gemini` | `gemini` | `gemini-2.0-flash` | `LIMEN_AI_GEMINI_MODEL` |
+| `example_openrouter` | `openrouter` | `anthropic/claude-3.5-sonnet` | `LIMEN_AI_OPENROUTER_MODEL` |
+
+Use in Blade or API:
+
+```blade
+<x-limen-ai::chatbot agent="example_openai" />
 ```
 
-The agent `model` is passed to the provider on every chat turn. Switch models without code changes — update config or `.env` only.
+Set the matching API key in `.env`, then run `php artisan limen-ai:validate`.
+
+## Per-agent provider and model
+
+Each agent picks its own `provider` and `model`. The model is passed to the provider on every chat turn — switch models without code changes by updating config or `.env` only.
 
 ## Environment variables
 
-| Variable | Provider |
-|----------|----------|
+Copy from the published template:
+
+```bash
+php artisan vendor:publish --tag=limen-ai-env
+# merges into .env.limen-ai.example at project root
+```
+
+Or see `.env.example` in the package repository for the full key list.
+
+| Variable | Purpose |
+|----------|---------|
 | `OPENAI_API_KEY` | `openai` LLM + embeddings |
 | `OPENROUTER_API_KEY` | `openrouter` |
 | `ANTHROPIC_API_KEY` | `anthropic` |
 | `GEMINI_API_KEY` | `gemini` |
-| `OPENAI_EMBEDDING_MODEL` | embedding model (default `text-embedding-3-small`) |
+| `LIMEN_AI_OPENAI_MODEL` | Model for `example_openai` |
+| `LIMEN_AI_ANTHROPIC_MODEL` | Model for `example_anthropic` |
+| `LIMEN_AI_GEMINI_MODEL` | Model for `example_gemini` |
+| `LIMEN_AI_OPENROUTER_MODEL` | Model for `example_openrouter` |
+| `OPENAI_EMBEDDING_MODEL` | Embedding model (default `text-embedding-3-small`) |
 
 ## OpenRouter example
 
