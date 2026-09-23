@@ -47,7 +47,6 @@ jobs:
         env:
           COMPOSER_NO_AUDIT: 1
         run: |
-          composer config --no-ansi audit.block-insecure false
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
             composer require "orchestra/testbench:^9.0" --dev --no-update
