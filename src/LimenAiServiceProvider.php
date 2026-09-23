@@ -165,6 +165,10 @@ class LimenAiServiceProvider extends ServiceProvider
             ], 'limen-ai-config');
 
             $this->publishes([
+                __DIR__.'/../stubs/limen-ai.env.example' => base_path('.env.limen-ai.example'),
+            ], 'limen-ai-env');
+
+            $this->publishes([
                 __DIR__.'/../stubs' => base_path('stubs/limen-ai'),
             ], 'limen-ai-stubs');
 
