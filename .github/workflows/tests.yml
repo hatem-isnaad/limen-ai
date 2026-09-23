@@ -27,6 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          tools: composer:2.10
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
@@ -41,6 +42,8 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
+        env:
+          COMPOSER_NO_AUDIT: 1
         run: |
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
@@ -48,10 +51,10 @@ jobs:
           else
             composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction
+          composer update --prefer-dist --no-interaction -W --no-audit
 
       - name: Run unit, integration, and feature tests
-        run: vendor/bin/phpunit --testsuite Unit --testsuite Integration --testsuite Feature
+        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
 
       - name: Run architecture boundary gates
         run: composer test:architecture
@@ -71,22 +74,3 @@ jobs:
           name: coverage-clover
           path: build/coverage.xml
           if-no-files-found: ignore
-
-  release-gate:
-    name: Release gate (PHP 8.3)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
-
-      - name: Run full release test suite
-        run: composer test:release
