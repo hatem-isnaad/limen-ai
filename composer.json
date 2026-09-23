@@ -60,6 +60,11 @@
     },
     "scripts": {
         "test": "phpunit",
-        "test:architecture": "phpunit --testsuite Architecture"
+        "test:architecture": "phpunit --testsuite Architecture",
+        "test:security": "phpunit --testsuite Security",
+        "test:gates": [
+            "@test:architecture",
+            "@test:security"
+        ]
     }
 }
