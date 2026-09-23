@@ -36,6 +36,8 @@ class RunController
                 'conversation_id' => (string) ($run['conversation_id'] ?? ''),
                 'final_message' => $run['final_message'] ?? null,
                 'error' => $run['error'] ?? null,
+                'trace_id' => $run['trace_id'] ?? null,
+                'span_id' => $run['span_id'] ?? null,
                 'terminal' => $this->statusReader->isTerminal($runId),
             ],
         ]);
