@@ -3,7 +3,10 @@ set -euo pipefail
 
 OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 
+git fetch --tags --force
+
 LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
+echo "Latest release tag: ${LAST_TAG:-<none>}"
 if [[ -n "$LAST_TAG" ]]; then
   RANGE="${LAST_TAG}..HEAD"
   mapfile -t SUBJECTS < <(git log "${RANGE}" --pretty=format:%s)
@@ -41,9 +44,12 @@ done
 
 if [[ "$BUMP" == "none" ]]; then
   echo "No releasable conventional commits since ${LAST_TAG:-<first release>}"
+  echo "Analyzed ${#SUBJECTS[@]} commit subject(s)"
   echo "published=false" >> "$OUTPUT"
   exit 0
 fi
+
+echo "Release bump: ${BUMP}"
 
 if [[ -n "$LAST_TAG" ]]; then
   CURRENT="${LAST_TAG#v}"

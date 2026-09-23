@@ -36,7 +36,10 @@ jobs:
           composer update --prefer-dist --no-interaction -W
 
       - name: Run full release test suite
-        run: composer test:release
+        run: |
+          vendor/bin/phpunit --testsuite Unit,Integration,Feature
+          vendor/bin/phpunit --testsuite Architecture
+          vendor/bin/phpunit --testsuite Security
 
   release:
     name: Create release
@@ -50,6 +53,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Create GitHub release
         id: release
