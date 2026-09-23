@@ -5,6 +5,9 @@
  *
  * Register ALL tools in tools.*; each agent exposes only what it needs.
  * See docs/scaling-agents-and-tools.md
+ *
+ * Default auth: LIMEN_AI_AUTHORIZATION_MODE=simple — tool access via authorize() on BaseTool.
+ * authorization.abilities below apply only when LIMEN_AI_AUTHORIZATION_MODE=gates.
  */
 return [
     'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'app_assistant'),

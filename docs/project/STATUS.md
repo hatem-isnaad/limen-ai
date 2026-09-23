@@ -24,7 +24,7 @@
 
 **Phase 22 — Final Hardening** (Complete)
 
-All 22 implementation phases are complete. The package is ready for host app integration at v1.0.0.
+All 22 implementation phases are complete. The package is ready for host app integration at v1.0.5.
 
 ## Completed
 

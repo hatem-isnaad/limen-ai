@@ -4,20 +4,20 @@
 **Re-checked:** 2026-09-23 (second pass)  
 **Third pass:** 2026-09-23 (release gate verified green)  
 **Audited by:** Host app integration session (`limen-ai` Laravel 13 skeleton)  
-**Package path:** `limen-ai-main` · **Released:** v1.0.4+ (black-box auth, auto-detect persistence)  
+**Package path:** `limen-ai-main` · **Released:** v1.0.5 (black-box auth, auto-detect persistence, stub/docs alignment)  
 **Purpose:** Actionable findings for the package maintainer — bugs, gaps, suggestions, and enhancements.
 
 ---
 
 ## Re-check summary (current state)
 
-Most **P0/P1 items from the initial audit are now implemented** in the unreleased branch (see `CHANGELOG.md [Unreleased]`). All **7 release-blocker test failures are resolved**; `composer test:release` is green on the unreleased branch.
+Most **P0/P1 items from the initial audit are implemented** (see `CHANGELOG.md` v1.0.1–v1.0.5). All **7 release-blocker test failures are resolved**; `composer test:release` is green on `main`.
 
 ### Verification run (2026-09-23, third pass)
 
 | Check | Result |
 |-------|--------|
-| Package tests (`composer test:release`) | **457/457 pass** (1609 assertions) — full suite + architecture + security |
+| Package tests (`composer test:release`) | **470/470 pass** (1639 assertions) — full suite + architecture + security |
 | Previously failing groups (checkpoint, guest, runtime) | **30/30 pass** |
 | Theme tests (`ThemeResolverTest`, `ThemeRenderingTest`) | **14/14 pass** |
 | Architecture tests | **37/37 pass** |
@@ -246,7 +246,7 @@ Host `.env` has repeated `LIMEN_AI_UI_TITLE`, `LIMEN_AI_THEME_PRESET`, etc. Last
 
 3. ~~Default persistence to `database` when migrations exist~~ **Done** (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`)
 4. Document that host published config can use persistence driver instead of explicit class names
-5. Tag v1.0.1+ release from unreleased branch
+5. ~~Tag v1.0.1+ release~~ **Done** (v1.0.5 tagged)
 
 ### P2 — Future
 
@@ -259,7 +259,7 @@ Host `.env` has repeated `LIMEN_AI_UI_TITLE`, `LIMEN_AI_THEME_PRESET`, etc. Last
 ## Test commands for maintainers
 
 ```bash
-# Full release gate (457/457 pass on unreleased branch)
+# Full release gate (470/470 pass on main)
 composer test:release
 
 # Theme only (passes)
@@ -274,11 +274,9 @@ vendor/bin/phpunit --testsuite Security
 
 ## Conclusion
 
-The unreleased branch addresses **all critical findings from the initial audit**, including the 7 test regressions from the second pass. Persistence driver, CLI auth, output validation hooks, theme fixes, conversation sync, and doctor warnings are solid improvements.
+Releases **v1.0.1 through v1.0.5** address **all critical findings from the initial audit**, including the 7 test regressions from the second pass. Persistence auto-detect, black-box `authorize()` tools, output validation hooks, theme fixes, conversation sync, and doctor warnings are shipped.
 
-**Before release:** commit unreleased changes and tag v1.0.1+ (release gate is green).
-
-**For host integrators:** run `php artisan migrate` (auto-detect persistence), set env + tools via [black-box-host-guide.md](black-box-host-guide.md), use `limen-ai:doctor`, and prefer env-driven theme over hardcoded Blade props.
+**For host integrators:** `composer require limen-ai/limen-ai:^1.0.5`, run `php artisan migrate` (auto-detect persistence), set env + tools via [black-box-host-guide.md](black-box-host-guide.md), use `limen-ai:doctor`, and prefer env-driven theme over hardcoded Blade props.
 
 ---
 

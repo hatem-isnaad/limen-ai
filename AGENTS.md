@@ -15,7 +15,7 @@
 | Type | Laravel package (library) — **not** a standalone app |
 | PHP | ^8.2 |
 | Laravel | ^11.0 \| ^12.0 \| ^13.0 |
-| Status | v1.0.4+ — all 22 roadmap phases complete |
+| Status | v1.0.5+ — all 22 roadmap phases complete |
 
 **What it is:** A reusable Laravel AI agent framework with agents, runtime, tools, skills, workflows, memory, knowledge (RAG), attachments, approvals, chat UI, HTTP API, and observability.
 
@@ -535,4 +535,4 @@ php artisan limen-ai:agent:test example
 
 ---
 
-*Last updated: 2026-09-23 · Package v1.0.4+ · Black-box guide: `docs/black-box-host-guide.md`*
+*Last updated: 2026-09-23 · Package v1.0.5+ · Black-box guide: `docs/black-box-host-guide.md`*

@@ -47,6 +47,7 @@ admin_agent       → privileged mutations + confirmation tools
     ],
     'support_agent' => [
         'tools' => ['get_shipment_status', 'list_open_tickets', 'add_ticket_note'],
+        // gates mode only — in simple mode, use authorize() on each tool class
         'authorization' => ['abilities' => ['agents.support']],
     ],
     'admin_agent' => [
