@@ -42,14 +42,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer config audit.block-insecure false
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
             composer require "orchestra/testbench:^9.0" --dev --no-update
           else
             composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction -W
+          composer update --prefer-dist --no-interaction -W --no-audit
 
       - name: Run unit, integration, and feature tests
         run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
