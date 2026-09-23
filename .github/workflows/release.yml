@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -11,7 +12,7 @@ permissions:
 
 concurrency:
   group: release-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -55,23 +56,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Install semantic-release
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund
-          else
-            npm install --no-audit --no-fund
-          fi
+        run: npm install --no-audit --no-fund
 
       - name: Run semantic-release
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          set -o pipefail
+          npx semantic-release 2>&1 | tee semantic-release.log
+
+      - name: Print semantic-release log on failure
+        if: failure()
+        run: cat semantic-release.log || true
 
       - name: Detect release file changes
+        if: success()
         id: release_files
         run: |
           if git diff --quiet -- CHANGELOG.md composer.json README.md; then
@@ -81,7 +83,7 @@ jobs:
           fi
 
       - name: Open PR to sync release files
-        if: steps.release_files.outputs.changed == 'true'
+        if: success() && steps.release_files.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
