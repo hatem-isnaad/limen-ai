@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 15 queue and broadcasting with agent run jobs, sync/queued dispatcher, and Pusher adapter
+- `RunAgentJob`, `AgentRunDispatcher`, `PusherBroadcaster`, `AgentEventBroadcaster`, and `RunStatusReader`
+- Queue and broadcast unit, integration, and feature tests
+
+### Added (Phase 14)
+
 - Phase 14 security hardening with DNS-aware SSRF validation, redirect blocking, and prompt-injection sanitization
 - `ContentSanitizer`, `PromptInjectionSanitizer`, `SecurityException`, and `UrlValidator::assertAllowed()`
 - Sanitization integrated into knowledge, memory formatters, and runtime user messages
