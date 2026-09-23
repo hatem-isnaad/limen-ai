@@ -19,9 +19,12 @@ Publish configuration and assets:
 
 ```bash
 php artisan vendor:publish --tag=limen-ai-config
+php artisan vendor:publish --tag=limen-ai-env
 php artisan vendor:publish --tag=limen-ai-views
 php artisan vendor:publish --tag=limen-ai-assets
 ```
+
+Copy the variables you need from `.env.limen-ai.example` into your host app `.env`. Example agents for each LLM provider (`example_openai`, `example_anthropic`, etc.) are defined in the published config.
 
 Run migrations:
 
@@ -83,17 +86,11 @@ Confirm:
 
 See [SECURITY.md](../SECURITY.md) for the full security model.
 
-## Branch promotion (stg → main)
-
-1. Merge feature work into **`stg`** and ensure CI is green (see [branching.md](branching.md)).
-2. Open a PR from **`stg`** → **`main`** after the staging gate passes.
-3. Merge to **`main`** for go-live. Pushes to `main` do not re-run CI.
-
 ## Tagging a release
 
-1. Confirm **`stg`** CI passed for the code being released.
-2. Merge **`stg`** → **`main`**.
-3. Create and push an annotated tag from **`main`**:
+1. Merge the release branch to `main`.
+2. Ensure CI is green on the merge commit.
+3. Create and push an annotated tag:
 
 ```bash
 git tag -a v1.0.0 -m "Limen AI v1.0.0 — initial stable release"
@@ -102,7 +99,7 @@ git push origin v1.0.0
 
 4. Create a GitHub release from the tag with notes from `CHANGELOG.md`.
 
-CI runs on **`stg`** only. Optional manual re-check before tagging: run the **Release** workflow (`workflow_dispatch`) in GitHub Actions.
+The optional `.github/workflows/release.yml` workflow validates tags and runs the full test matrix.
 
 ## Upgrade notes (v1.0.0)
 

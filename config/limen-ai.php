@@ -74,7 +74,7 @@ return [
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
-            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+            'provider' => 'fake',
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
             'persona' => [
                 'display_name' => 'Example Agent',
@@ -119,6 +119,7 @@ return [
             ],
             'version' => '1.0.0',
         ],
+        ...require __DIR__.'/limen-ai-provider-agents.php',
         'limen_3pl' => [
             'name' => 'Limen 3PL Assistant',
             'description' => 'Helps operators look up shipments and send approved customer updates.',
@@ -209,7 +210,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null,
+            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -245,7 +246,7 @@ return [
         'get_shipment_status' => [
             'name' => 'Get Shipment Status',
             'description' => 'Look up the current status of a shipment by ID.',
-            'class' => null,
+            'class' => null, // Host: App\LimenAi\Tools\GetShipmentStatus::class
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
@@ -259,7 +260,7 @@ return [
         'send_customer_message' => [
             'name' => 'Send Customer Message',
             'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
-            'class' => null,
+            'class' => null, // Host: App\LimenAi\Tools\SendCustomerMessage::class
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],
