@@ -1,224 +1,468 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Limen AI — Laravel AI Agent Framework documentation. Agents, tools, workflows, memory, RAG, chat UI, and enterprise security for Laravel 11/12.">
+  <meta name="color-scheme" content="dark light">
   <title>Limen AI — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
   <style>
     :root {
-      --bg: #0b0f19;
-      --bg-elevated: #111827;
-      --bg-card: #151d2e;
-      --border: rgba(148, 163, 184, 0.14);
-      --text: #e5e7eb;
-      --text-muted: #94a3b8;
-      --primary: #6366f1;
-      --primary-soft: rgba(99, 102, 241, 0.12);
-      --accent: #22d3ee;
-      --success: #34d399;
-      --warning: #fbbf24;
-      --code-bg: #0d1321;
-      --sidebar-w: 280px;
-      --radius: 12px;
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      --mono: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+      --sidebar-w: 288px;
+      --header-h: 56px;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --font: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --transition: 0.2s ease;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --bg-subtle: #010409;
+      --surface: #161b22;
+      --surface-hover: #1c2128;
+      --border: #30363d;
+      --border-muted: #21262d;
+      --text: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --primary: #2f81f7;
+      --primary-hover: #58a6ff;
+      --primary-soft: rgba(47, 129, 247, 0.12);
+      --accent: #3fb950;
+      --accent-soft: rgba(63, 185, 80, 0.12);
+      --warning: #d29922;
+      --warning-soft: rgba(210, 153, 34, 0.12);
+      --hero-gradient: linear-gradient(135deg, rgba(47, 129, 247, 0.08) 0%, rgba(63, 185, 80, 0.04) 100%);
+      --code-bg: #0d1117;
+      --overlay: rgba(1, 4, 9, 0.65);
+      --scrollbar: #30363d;
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --surface: #ffffff;
+      --surface-hover: #f6f8fa;
+      --border: #d0d7de;
+      --border-muted: #eaeef2;
+      --text: #1f2328;
+      --text-secondary: #57606a;
+      --text-muted: #656d76;
+      --primary: #0969da;
+      --primary-hover: #0550ae;
+      --primary-soft: rgba(9, 105, 218, 0.1);
+      --accent: #1a7f37;
+      --accent-soft: rgba(26, 127, 55, 0.1);
+      --warning: #9a6700;
+      --warning-soft: rgba(154, 103, 0, 0.1);
+      --hero-gradient: linear-gradient(135deg, rgba(9, 105, 218, 0.06) 0%, rgba(26, 127, 55, 0.04) 100%);
+      --code-bg: #f6f8fa;
+      --overlay: rgba(31, 35, 40, 0.4);
+      --scrollbar: #d0d7de;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
       font-family: var(--font);
-      background: radial-gradient(circle at top, #141b2d 0%, var(--bg) 45%);
+      background: var(--bg);
       color: var(--text);
-      line-height: 1.65;
-      font-size: 16px;
+      line-height: 1.6;
+      font-size: 15px;
+      min-height: 100vh;
     }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    ::selection { background: var(--primary-soft); color: var(--text); }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 999px; }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--primary-hover); text-decoration: underline; }
+
+    .site-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      z-index: 40;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      backdrop-filter: blur(12px);
+    }
+    .site-header-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-weight: 700; font-size: 0.95rem; color: var(--text);
+    }
+    .site-header-brand:hover { text-decoration: none; color: var(--text); }
+    .brand-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: grid; place-items: center;
+      font-size: 0.7rem; font-weight: 800; color: #fff;
+    }
+    .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+    .icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
     .layout { display: flex; min-height: 100vh; }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: var(--overlay);
+      z-index: 45;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
+
     .sidebar {
       width: var(--sidebar-w);
       position: fixed;
       top: 0; left: 0; bottom: 0;
-      background: rgba(11, 15, 25, 0.92);
+      background: var(--surface);
       border-right: 1px solid var(--border);
-      backdrop-filter: blur(12px);
       overflow-y: auto;
-      padding: 1.5rem 1rem 2rem;
-      z-index: 20;
+      padding: 1.25rem 0.875rem 2rem;
+      z-index: 50;
+      transition: transform var(--transition);
     }
-    .brand {
+    .sidebar-brand {
       display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.5rem 0.75rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 1rem;
+      padding: 0.25rem 0.5rem 1rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-muted);
     }
-    .brand-mark {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      display: grid; place-items: center;
-      font-weight: 800; color: white; font-size: 0.85rem;
+    .sidebar-brand h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+    .sidebar-brand p { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .sidebar-theme { padding: 0 0.5rem 0.75rem; }
+    .theme-toggle {
+      display: flex; width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-subtle);
     }
-    .brand h1 { font-size: 1.05rem; line-height: 1.2; }
-    .brand p { font-size: 0.75rem; color: var(--text-muted); }
-    .nav-group { margin-bottom: 1rem; }
+    .theme-toggle button {
+      flex: 1; padding: 0.4rem 0.5rem;
+      border: none; background: transparent;
+      font-size: 0.75rem; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .theme-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-group { margin-bottom: 0.75rem; }
     .nav-group-title {
-      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--text-muted); padding: 0.35rem 0.75rem;
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0.35rem 0.5rem;
     }
     .nav-link {
-      display: block; padding: 0.45rem 0.75rem; border-radius: 8px;
-      color: var(--text-muted); font-size: 0.92rem;
+      display: block;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 450;
+      transition: background var(--transition), color var(--transition);
     }
-    .nav-link:hover, .nav-link.active {
-      background: var(--primary-soft); color: var(--text); text-decoration: none;
-    }
+    .nav-link:hover { background: var(--surface-hover); color: var(--text); text-decoration: none; }
+    .nav-link.active { background: var(--primary-soft); color: var(--primary); font-weight: 500; }
+
     .main {
       margin-left: var(--sidebar-w);
       flex: 1;
-      max-width: 980px;
-      padding: 2.5rem 2.5rem 5rem;
+      min-width: 0;
+      padding: 2rem clamp(1rem, 4vw, 2.5rem) 4rem;
     }
+    .content { max-width: 820px; margin: 0 auto; }
+
     .hero {
-      background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(34,211,238,0.08));
+      background: var(--hero-gradient);
       border: 1px solid var(--border);
-      border-radius: calc(var(--radius) + 4px);
-      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      padding: clamp(1.5rem, 4vw, 2.25rem);
       margin-bottom: 2.5rem;
-      box-shadow: var(--shadow);
     }
     .hero-badge {
-      display: inline-block; font-size: 0.75rem; font-weight: 600;
-      padding: 0.25rem 0.65rem; border-radius: 999px;
-      background: var(--primary-soft); color: #c7d2fe; margin-bottom: 1rem;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid transparent;
+      margin-bottom: 0.875rem;
     }
     .hero h2 {
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      line-height: 1.15; margin-bottom: 0.75rem;
-      letter-spacing: -0.02em;
+      font-size: clamp(1.65rem, 4.5vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
     }
-    .hero-lead { color: var(--text-muted); font-size: 1.08rem; max-width: 62ch; }
-    .hero-actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .hero-lead { color: var(--text-secondary); font-size: 1.02rem; max-width: 58ch; }
+    .hero-actions { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.625rem; }
+
     .btn {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.65rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.92rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-weight: 600; font-size: 0.875rem;
       border: 1px solid transparent;
+      transition: background var(--transition), border-color var(--transition);
+      white-space: nowrap;
     }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { filter: brightness(1.08); text-decoration: none; }
-    .btn-ghost { border-color: var(--border); color: var(--text); background: rgba(255,255,255,0.02); }
-    .btn-ghost:hover { background: rgba(255,255,255,0.05); text-decoration: none; }
-    section { margin-bottom: 3rem; scroll-margin-top: 1.5rem; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; color: #fff; }
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); text-decoration: none; color: var(--text); }
+
+    section { margin-bottom: 2.75rem; scroll-margin-top: calc(var(--header-h) + 1rem); }
     h2.section-title {
-      font-size: 1.65rem; margin-bottom: 0.35rem; letter-spacing: -0.02em;
+      font-size: clamp(1.35rem, 3vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-muted);
     }
-    h3 { font-size: 1.15rem; margin: 1.5rem 0 0.65rem; color: #f1f5f9; }
-    h4 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #cbd5e1; }
-    .section-desc { color: var(--text-muted); margin-bottom: 1.25rem; max-width: 70ch; }
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.35rem 0 0.5rem; color: var(--text); }
+    h4 { font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.4rem; color: var(--text); }
+    .section-desc { color: var(--text-secondary); margin-bottom: 1rem; max-width: 65ch; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 0.875rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0.875rem; }
+
     .card {
-      background: var(--bg-card);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.15rem 1.25rem;
+      padding: 1rem 1.125rem;
+      transition: border-color var(--transition);
     }
+    .card:hover { border-color: var(--border); }
     .card h4 { margin-top: 0; }
-    .card p { color: var(--text-muted); font-size: 0.93rem; }
+    .card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.55; }
+
     .pill {
-      display: inline-block; font-size: 0.72rem; font-weight: 600;
-      padding: 0.15rem 0.5rem; border-radius: 999px;
-      background: rgba(255,255,255,0.06); color: #cbd5e1; margin-right: 0.35rem;
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 600;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      margin-bottom: 0.35rem;
+      margin-right: 0.25rem;
     }
-    .pill-green { background: rgba(52,211,153,0.15); color: var(--success); }
-    .pill-blue { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-    .pill-amber { background: rgba(251,191,36,0.15); color: var(--warning); }
-    pre {
-      background: var(--code-bg);
+    .pill-blue { background: var(--primary-soft); color: var(--primary); }
+    .pill-green { background: var(--accent-soft); color: var(--accent); }
+    .pill-amber { background: var(--warning-soft); color: var(--warning); }
+
+    p, ul, ol { margin-bottom: 0.75rem; color: var(--text-secondary); }
+    ul, ol { padding-left: 1.25rem; }
+    li { margin-bottom: 0.3rem; }
+    li::marker { color: var(--text-muted); }
+
+    :not(pre) > code {
+      font-family: var(--mono);
+      font-size: 0.84em;
+      padding: 0.15em 0.4em;
+      border-radius: 5px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-muted);
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1.1rem;
-      overflow-x: auto;
-      font-family: var(--mono);
-      font-size: 0.82rem;
-      line-height: 1.55;
+      -webkit-overflow-scrolling: touch;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 480px; }
+    th, td { padding: 0.625rem 0.875rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border-muted); }
+    tr:last-child td { border-bottom: none; }
+    th { background: var(--bg-subtle); color: var(--text); font-weight: 600; white-space: nowrap; }
+    td { color: var(--text-secondary); }
+    td code { white-space: nowrap; }
+
+    .code-block {
       margin: 0.75rem 0 1rem;
-    }
-    code { font-family: var(--mono); font-size: 0.88em; }
-    p, ul, ol { margin-bottom: 0.85rem; color: #cbd5e1; }
-    ul, ol { padding-left: 1.25rem; }
-    li { margin-bottom: 0.35rem; }
-    table {
-      width: 100%; border-collapse: collapse; margin: 0.75rem 0 1.25rem;
-      font-size: 0.92rem;
-    }
-    th, td {
       border: 1px solid var(--border);
-      padding: 0.65rem 0.75rem;
-      text-align: left;
-      vertical-align: top;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--code-bg);
     }
-    th { background: rgba(255,255,255,0.03); color: #f8fafc; }
-    td { color: #cbd5e1; }
+    .code-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.35rem 0.625rem;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-muted);
+    }
+    .code-lang {
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .copy-btn {
+      font-size: 0.68rem; font-weight: 500;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .code-block pre {
+      margin: 0; padding: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .code-block pre code.hljs {
+      display: block;
+      padding: 1rem 1.125rem;
+      font-family: var(--mono);
+      font-size: clamp(0.75rem, 2.5vw, 0.8125rem);
+      line-height: 1.6;
+      background: transparent !important;
+      tab-size: 2;
+    }
+
     .flow {
       background: var(--code-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1.25rem;
+      padding: 1rem 1.125rem;
       font-family: var(--mono);
-      font-size: 0.78rem;
-      line-height: 1.5;
+      font-size: clamp(0.72rem, 2.5vw, 0.78rem);
+      line-height: 1.55;
       white-space: pre;
       overflow-x: auto;
-      color: #94a3b8;
+      color: var(--text-secondary);
+      -webkit-overflow-scrolling: touch;
     }
-    .use-case {
-      border-left: 3px solid var(--primary);
-      padding-left: 1rem;
-      margin: 1.25rem 0;
-    }
-    .use-case h4 { margin-top: 0; }
+
     .callout {
       border-radius: var(--radius);
-      padding: 1rem 1.15rem;
+      padding: 0.875rem 1rem;
       margin: 1rem 0;
       border: 1px solid var(--border);
+      font-size: 0.9rem;
     }
-    .callout-info { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.25); }
-    .callout-warn { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.25); }
-    .callout strong { color: #f8fafc; }
+    .callout-info { background: var(--primary-soft); border-color: rgba(47, 129, 247, 0.25); }
+    .callout-warn { background: var(--warning-soft); border-color: rgba(210, 153, 34, 0.25); }
+    .callout strong { color: var(--text); display: block; margin-bottom: 0.25rem; }
+    .callout p { margin: 0; font-size: 0.875rem; }
+
+    .use-case { border-left: 3px solid var(--primary); }
+
     footer {
-      margin-top: 3rem; padding-top: 1.5rem;
+      margin-top: 2.5rem;
+      padding-top: 1.25rem;
       border-top: 1px solid var(--border);
-      color: var(--text-muted); font-size: 0.88rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
     }
-    .mobile-toggle { display: none; }
-    @media (max-width: 960px) {
-      .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
-      .sidebar.open { transform: translateX(0); }
-      .main { margin-left: 0; padding: 1.25rem; }
-      .mobile-toggle {
-        display: inline-flex; position: fixed; top: 1rem; right: 1rem; z-index: 30;
-        background: var(--bg-card); border: 1px solid var(--border);
-        color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px;
-        cursor: pointer;
+    footer p { margin-bottom: 0.4rem; color: var(--text-muted); }
+
+    @media (max-width: 1024px) {
+      .site-header { display: flex; }
+      .sidebar {
+        top: var(--header-h);
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-md);
       }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-backdrop { display: block; }
+      .main {
+        margin-left: 0;
+        padding-top: calc(var(--header-h) + 1.25rem);
+      }
+      .sidebar-theme { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      .hero-actions { flex-direction: column; }
+      .btn { width: 100%; }
+      table { min-width: 360px; font-size: 0.8125rem; }
+      th, td { padding: 0.5rem 0.625rem; }
     }
   </style>
 </head>
 <body>
-  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">Menu</button>
+  <header class="site-header">
+    <a href="#overview" class="site-header-brand">
+      <span class="brand-icon">LA</span>
+      <span>Limen AI</span>
+    </a>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="theme-toggle-mobile" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="menu-toggle" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
   <div class="layout">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">LA</div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">LA</span>
         <div>
           <h1>Limen AI</h1>
           <p>Laravel Agent Framework</p>
         </div>
       </div>
-      <nav>
+      <div class="sidebar-theme">
+        <div class="theme-toggle" role="group" aria-label="Color theme">
+          <button type="button" data-theme-set="dark" class="active">Dark</button>
+          <button type="button" data-theme-set="light">Light</button>
+        </div>
+      </div>
+      <nav aria-label="Documentation">
         <div class="nav-group">
           <div class="nav-group-title">Getting started</div>
           <a class="nav-link" href="#overview">Overview</a>
@@ -255,82 +499,93 @@
     </aside>
 
     <main class="main">
-      <header class="hero" id="overview">
-        <span class="hero-badge">v1.0.0 · Laravel 11 &amp; 12 · PHP 8.2+</span>
-        <h2>Build production-ready AI agents in Laravel</h2>
-        <p class="hero-lead">
-          Limen AI is a reusable Laravel package for config-driven agents, tools, skills, workflows,
-          memory, knowledge retrieval (RAG), approvals, and a embeddable chat UI — with authorization,
-          SSRF protection, and audit logging built in from day one.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#quickstart">Quick start (5 min)</a>
-          <a class="btn btn-ghost" href="https://github.com/hatem-isnaad/limen-ai">GitHub repository</a>
-        </div>
-      </header>
-
-      <section>
-        <h2 class="section-title">Core principle</h2>
-        <p class="section-desc">Every design decision follows one rule:</p>
-        <div class="callout callout-info">
-          <strong>The LLM proposes actions. Laravel decides whether they are allowed and executes them safely.</strong>
-          <p style="margin:0.5rem 0 0;color:var(--text-muted)">
-            User identity, permissions, data scoping, and side effects never come from model output — they come from
-            your authenticated Laravel context, Gates, and host application services.
+      <div class="content">
+        <header class="hero" id="overview">
+          <span class="hero-badge">v1.0.0 · Laravel 11 &amp; 12 · PHP 8.2+</span>
+          <h2>Build production-ready AI agents in Laravel</h2>
+          <p class="hero-lead">
+            Limen AI is a reusable Laravel package for config-driven agents, tools, skills, workflows,
+            memory, knowledge retrieval (RAG), approvals, and an embeddable chat UI — with authorization,
+            SSRF protection, and audit logging built in from day one.
           </p>
-        </div>
-        <div class="grid-3">
-          <div class="card"><h4>Config-first</h4><p>Define agents, tools, and workflows in PHP config — no redeploy to switch models or providers.</p></div>
-          <div class="card"><h4>Host-owned logic</h4><p>Business rules live in <code>App\LimenAi\Tools\</code> and your services — the package stays domain-agnostic.</p></div>
-          <div class="card"><h4>Test without LLM bills</h4><p><code>FakeLlmProvider</code> queues deterministic responses for fast CI and local development.</p></div>
-        </div>
-      </section>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#quickstart">Quick start (5 min)</a>
+            <a class="btn btn-secondary" href="https://github.com/hatem-isnaad/limen-ai" target="_blank" rel="noopener">GitHub repository</a>
+          </div>
+        </header>
 
-      <section id="installation">
-        <h2 class="section-title">Installation</h2>
-        <p class="section-desc">Complete setup from zero to a working agent in your Laravel application.</p>
+        <section>
+          <h2 class="section-title">Core principle</h2>
+          <p class="section-desc">Every design decision follows one rule:</p>
+          <div class="callout callout-info">
+            <strong>The LLM proposes actions. Laravel decides whether they are allowed and executes them safely.</strong>
+            <p>User identity, permissions, data scoping, and side effects never come from model output — they come from your authenticated Laravel context, Gates, and host application services.</p>
+          </div>
+          <div class="grid-3">
+            <div class="card"><h4>Config-first</h4><p>Define agents, tools, and workflows in PHP config — no redeploy to switch models or providers.</p></div>
+            <div class="card"><h4>Host-owned logic</h4><p>Business rules live in <code>App\LimenAi\Tools\</code> and your services — the package stays domain-agnostic.</p></div>
+            <div class="card"><h4>Test without LLM bills</h4><p><code>FakeLlmProvider</code> queues deterministic responses for fast CI and local development.</p></div>
+          </div>
+        </section>
 
-        <h3>1. Require the package</h3>
-        <pre><code>composer require limen-ai/limen-ai</code></pre>
+        <section id="installation">
+          <h2 class="section-title">Installation</h2>
+          <p class="section-desc">Complete setup from zero to a working agent in your Laravel application.</p>
 
-        <h3>2. Publish assets</h3>
-        <pre><code>php artisan vendor:publish --tag=limen-ai-config
+          <h3>1. Require the package</h3>
+          <div class="code-block" data-lang="Shell">
+            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-bash">composer require limen-ai/limen-ai</code></pre>
+          </div>
+
+          <h3>2. Publish assets</h3>
+          <div class="code-block" data-lang="Shell">
+            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-bash">php artisan vendor:publish --tag=limen-ai-config
 php artisan vendor:publish --tag=limen-ai-views
 php artisan vendor:publish --tag=limen-ai-assets
 php artisan vendor:publish --tag=limen-ai-migrations</code></pre>
+          </div>
 
-        <h3>3. Run migrations &amp; validate</h3>
-        <pre><code>php artisan migrate
+          <h3>3. Run migrations &amp; validate</h3>
+          <div class="code-block" data-lang="Shell">
+            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-bash">php artisan migrate
 php artisan limen-ai:doctor
 php artisan limen-ai:validate</code></pre>
+          </div>
 
-        <h3>4. Configure environment</h3>
-        <table>
-          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
-          <tbody>
-            <tr><td><code>LIMEN_AI_DEFAULT_AGENT</code></td><td>Agent key used when none is specified (default: <code>example</code>)</td></tr>
-            <tr><td><code>LIMEN_AI_PROVIDER</code></td><td>Default LLM provider: <code>fake</code>, <code>openai</code>, <code>anthropic</code>, <code>gemini</code>, <code>openrouter</code></td></tr>
-            <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key (when using <code>openai</code> provider)</td></tr>
-            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic API key</td></tr>
-            <tr><td><code>GEMINI_API_KEY</code></td><td>Google Gemini API key</td></tr>
-            <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter API key</td></tr>
-            <tr><td><code>LIMEN_AI_QUEUE_AGENT_RUNS</code></td><td>Dispatch long runs to queue (<code>true</code>/<code>false</code>)</td></tr>
-            <tr><td><code>LIMEN_AI_BROADCASTING_ENABLED</code></td><td>Enable realtime chat updates</td></tr>
-          </tbody>
-        </table>
+          <h3>4. Configure environment</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>LIMEN_AI_DEFAULT_AGENT</code></td><td>Agent key when none is specified (default: <code>example</code>)</td></tr>
+                <tr><td><code>LIMEN_AI_PROVIDER</code></td><td>LLM provider: <code>fake</code>, <code>openai</code>, <code>anthropic</code>, <code>gemini</code>, <code>openrouter</code></td></tr>
+                <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key</td></tr>
+                <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic API key</td></tr>
+                <tr><td><code>GEMINI_API_KEY</code></td><td>Google Gemini API key</td></tr>
+                <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter API key</td></tr>
+                <tr><td><code>LIMEN_AI_QUEUE_AGENT_RUNS</code></td><td>Dispatch long runs to queue</td></tr>
+                <tr><td><code>LIMEN_AI_BROADCASTING_ENABLED</code></td><td>Enable realtime chat updates</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-        <div class="callout callout-warn">
-          <strong>Production tip:</strong> Keep <code>fake</code> as the provider in local/testing.
-          Set real provider keys only in production <code>.env</code> — never commit secrets.
-        </div>
-      </section>
+          <div class="callout callout-warn">
+            <strong>Production tip</strong>
+            <p>Keep <code>fake</code> as the provider in local/testing. Set real provider keys only in production <code>.env</code> — never commit secrets.</p>
+          </div>
+        </section>
 
-      <section id="quickstart">
-        <h2 class="section-title">Quick start</h2>
-        <p class="section-desc">Ship a working chat agent in four steps.</p>
+        <section id="quickstart">
+          <h2 class="section-title">Quick start</h2>
+          <p class="section-desc">Ship a working chat agent in four steps.</p>
 
-        <h3>Step 1 — Register a tool class</h3>
-        <pre><code>// app/LimenAi/Tools/ExampleEchoTool.php
+          <h3>Step 1 — Register a tool class</h3>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">// app/LimenAi/Tools/ExampleEchoTool.php
 namespace App\LimenAi\Tools;
 
 use LimenAi\Contracts\Tools\Tool;
@@ -357,32 +612,41 @@ class ExampleEchoTool implements Tool
         return ['message' => $input['message'], 'user_id' => $context->userId()];
     }
 }</code></pre>
+          </div>
 
-        <h3>Step 2 — Point config at your tool</h3>
-        <pre><code>// config/limen-ai.php
+          <h3>Step 2 — Point config at your tool</h3>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">// config/limen-ai.php
 'tools' => [
     'example_echo' => [
         'class' => App\LimenAi\Tools\ExampleEchoTool::class,
         // ... other fields from published config
     ],
 ],</code></pre>
+          </div>
 
-        <h3>Step 3 — Embed the chat UI</h3>
-        <pre><code>&lt;x-limen-ai::chatbot agent="example" /&gt;
+          <h3>Step 3 — Embed the chat UI</h3>
+          <div class="code-block" data-lang="Blade">
+            <div class="code-toolbar"><span class="code-lang">Blade</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-xml">&lt;x-limen-ai::chatbot agent="example" /&gt;
 
 &lt;!-- Floating widget --&gt;
 &lt;x-limen-ai::widget agent="example" /&gt;</code></pre>
+          </div>
 
-        <h3>Step 4 — Test with the fake provider</h3>
-        <pre><code>php artisan limen-ai:agent:test example
+          <h3>Step 4 — Test with the fake provider</h3>
+          <div class="code-block" data-lang="Shell">
+            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-bash">php artisan limen-ai:agent:test example
 composer test</code></pre>
-      </section>
+          </div>
+        </section>
 
-      <section id="architecture">
-        <h2 class="section-title">Architecture</h2>
-        <p class="section-desc">Modular layers keep AI orchestration separate from your business logic.</p>
-
-        <div class="flow">User Message
+        <section id="architecture">
+          <h2 class="section-title">Architecture</h2>
+          <p class="section-desc">Modular layers keep AI orchestration separate from your business logic.</p>
+          <div class="flow">User Message
     ↓
 ConversationService
     ↓
@@ -405,189 +669,142 @@ ToolPipeline
     └─ Audit + events
     ↓
 LlmProvider (with tool result) → persist + broadcast</div>
+          <div class="grid-2" style="margin-top:1rem">
+            <div class="card"><span class="pill pill-blue">Package</span><h4>Runtime &amp; orchestration</h4><p>Agents, tools pipeline, workflows, memory, knowledge, UI components, observability.</p></div>
+            <div class="card"><span class="pill pill-green">Host app</span><h4>Business &amp; data</h4><p>Eloquent models, policies, domain services, tool implementations under <code>App\LimenAi\</code>.</p></div>
+          </div>
+        </section>
 
-        <div class="grid-2" style="margin-top:1rem">
-          <div class="card"><span class="pill pill-blue">Package</span><h4>Runtime &amp; orchestration</h4><p>Agents, tools pipeline, workflows, memory, knowledge, UI components, observability.</p></div>
-          <div class="card"><span class="pill pill-green">Host app</span><h4>Business &amp; data</h4><p>Eloquent models, policies, domain services, tool implementations under <code>App\LimenAi\</code>.</p></div>
-        </div>
-      </section>
-
-      <section id="agents">
-        <h2 class="section-title">Agents</h2>
-        <p class="section-desc">An agent binds instructions, provider, tools, skills, memory policy, and authorization into one deployable unit.</p>
-
-        <pre><code>'agents' => [
+        <section id="agents">
+          <h2 class="section-title">Agents</h2>
+          <p class="section-desc">An agent binds instructions, provider, tools, skills, memory policy, and authorization into one deployable unit.</p>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">'agents' => [
     'customer_support' => [
         'name' => 'Customer Support',
-        'description' => 'Helps authenticated users with orders and shipments.',
-        'model' => env('SUPPORT_MODEL', 'gpt-4.1-mini'),
         'provider' => 'openai',
+        'model' => env('SUPPORT_MODEL', 'gpt-4.1-mini'),
         'instructions' => 'You are a helpful support agent. Use tools for lookups.',
         'persona' => [
             'display_name' => 'Support Assistant',
             'tone' => 'professional',
             'language' => 'auto',
-            'response_style' => 'concise',
-            'rules' => ['Never invent order or shipment data.'],
         ],
-        'skills' => ['general_assistance'],
         'tools' => ['get_shipment_status'],
-        'knowledge' => ['shipping_policy'],
-        'memory' => [
-            'conversation' => true,
-            'user' => true,
-            'allowed_keys' => ['preferred_language', 'timezone'],
-        ],
-        'authorization' => [
-            'required' => true,
-            'abilities' => ['support.use'],
-            'guest_allowed' => false,
-        ],
-        'limits' => [
-            'max_tool_calls' => 10,
-            'max_steps' => 20,
-            'temperature' => 0.2,
-            'max_tokens' => 1200,
-        ],
-        'version' => '1.0.0',
+        'authorization' => ['required' => true, 'abilities' => ['support.use']],
+        'limits' => ['max_tool_calls' => 10, 'temperature' => 0.2],
     ],
 ],</code></pre>
+          </div>
+          <h3>Built-in example agents</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>example</code></td><td>Development agent using the fake LLM provider</td></tr>
+                <tr><td><code>limen_3pl</code></td><td>Logistics demo: shipment lookup + approval-gated messaging</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-        <h3>Built-in example agents</h3>
-        <table>
-          <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
-          <tbody>
-            <tr><td><code>example</code></td><td>Development agent using the fake LLM provider</td></tr>
-            <tr><td><code>limen_3pl</code></td><td>Logistics demo: shipment lookup + approval-gated customer messaging</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section id="tools">
-        <h2 class="section-title">Tools</h2>
-        <p class="section-desc">Tools are Laravel classes or declarative HTTP integrations the LLM can invoke — always through authorization and validation.</p>
-
-        <h3>Class-based tool</h3>
-        <pre><code>'get_shipment_status' => [
+        <section id="tools">
+          <h2 class="section-title">Tools</h2>
+          <p class="section-desc">Tools are Laravel classes or declarative HTTP integrations the LLM can invoke — always through authorization and validation.</p>
+          <h3>Class-based tool</h3>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">'get_shipment_status' => [
     'name' => 'Get Shipment Status',
-    'description' => 'Look up shipment by ID.',
     'class' => App\LimenAi\Tools\GetShipmentStatusTool::class,
     'input_schema' => [
         'shipment_id' => ['type' => 'string', 'required' => true],
     ],
     'authorization' => ['abilities' => ['shipments.read']],
     'confirmation' => false,
-    'timeout' => 10,
 ],</code></pre>
+          </div>
+          <h3>Tool pipeline guarantees</h3>
+          <ul>
+            <li>Authorization via Laravel Gates before execution</li>
+            <li>Schema validation on all LLM-provided arguments</li>
+            <li>Human approval pause for sensitive tools (<code>confirmation: true</code>)</li>
+            <li>Idempotency guards and SSRF validation on outbound HTTP</li>
+            <li>Audit logging with sensitive field redaction</li>
+          </ul>
+        </section>
 
-        <h3>HTTP integration tool</h3>
-        <pre><code>'example_http_status' => [
-    'name' => 'Example HTTP Status',
-    'integration' => [
-        'connector' => 'example_api',
-        'method' => 'GET',
-        'path' => '/status/{{ input.resource }}',
-    ],
-    'input_schema' => [
-        'resource' => ['type' => 'string', 'required' => true],
-    ],
-],</code></pre>
-
-        <h3>Tool pipeline guarantees</h3>
-        <ul>
-          <li>Authorization via Laravel Gates before execution</li>
-          <li>Schema validation on all LLM-provided arguments</li>
-          <li>Human approval pause for sensitive tools (<code>confirmation: true</code>)</li>
-          <li>Idempotency guards for side-effect operations</li>
-          <li>SSRF validation on outbound HTTP</li>
-          <li>Audit logging with sensitive field redaction</li>
-        </ul>
-      </section>
-
-      <section id="workflows">
-        <h2 class="section-title">Workflows</h2>
-        <p class="section-desc">Multi-step automations with agent steps, tool steps, branches, and approval gates.</p>
-
-        <pre><code>'workflows' => [
+        <section id="workflows">
+          <h2 class="section-title">Workflows</h2>
+          <p class="section-desc">Multi-step automations with agent steps, tool steps, branches, and approval gates.</p>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">'workflows' => [
     'shipment_notify' => [
-        'name' => 'Shipment Delay Notification',
         'start' => 'draft',
         'steps' => [
-            'draft' => [
-                'type' => 'agent',
-                'agent' => 'limen_3pl',
-                'message' => 'Draft a professional delay notification.',
-                'next' => 'approve_send',
-            ],
-            'approve_send' => [
-                'type' => 'approval',
-                'message' => 'Approve sending the customer notification?',
-                'next' => 'send',
-            ],
-            'send' => [
-                'type' => 'tool',
-                'tool' => 'send_customer_message',
-                'input' => [
-                    'shipment_id' => '{{ input.shipment_id }}',
-                    'message' => '{{ step_outputs.draft.output }}',
-                ],
-            ],
+            'draft' => ['type' => 'agent', 'agent' => 'limen_3pl', 'next' => 'approve_send'],
+            'approve_send' => ['type' => 'approval', 'next' => 'send'],
+            'send' => ['type' => 'tool', 'tool' => 'send_customer_message'],
         ],
     ],
 ],</code></pre>
-      </section>
+          </div>
+        </section>
 
-      <section id="memory-knowledge">
-        <h2 class="section-title">Memory &amp; knowledge (RAG)</h2>
-        <p class="section-desc">Inject scoped memory and retrieved documents into every agent turn.</p>
-
-        <h3>Memory</h3>
-        <ul>
-          <li><strong>Conversation memory</strong> — recent context within a thread</li>
-          <li><strong>User memory</strong> — persisted preferences scoped to authenticated users</li>
-          <li><strong>Strict policy</strong> — key allowlists, regex validation, value truncation</li>
-        </ul>
-
-        <h3>Knowledge collections</h3>
-        <pre><code>'knowledge' => [
+        <section id="memory-knowledge">
+          <h2 class="section-title">Memory &amp; knowledge (RAG)</h2>
+          <p class="section-desc">Inject scoped memory and retrieved documents into every agent turn.</p>
+          <ul>
+            <li><strong>Conversation memory</strong> — recent context within a thread</li>
+            <li><strong>User memory</strong> — persisted preferences scoped to authenticated users</li>
+            <li><strong>Strict policy</strong> — key allowlists, regex validation, value truncation</li>
+          </ul>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">'knowledge' => [
     'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
     'collections' => [
         'getting_started' => [
             'documents' => [
-                ['content' => 'Limen AI tools require Laravel authorization.', 'metadata' => ['source' => 'docs']],
+                ['content' => 'Limen AI tools require Laravel authorization.'],
             ],
         ],
     ],
 ],</code></pre>
-        <p>Set <code>knowledge.driver</code> to <code>vector</code> with OpenAI embeddings for production RAG.</p>
-      </section>
+          </div>
+        </section>
 
-      <section id="providers">
-        <h2 class="section-title">LLM providers</h2>
-        <p class="section-desc">Switch models and vendors per agent — entirely from config.</p>
-
-        <table>
-          <thead><tr><th>Provider</th><th>Driver</th><th>Typical use</th></tr></thead>
-          <tbody>
-            <tr><td><code>fake</code></td><td>FakeLlmProvider</td><td>Tests, local dev (default)</td></tr>
-            <tr><td><code>openai</code></td><td>OpenAiProvider</td><td>GPT models via OpenAI API</td></tr>
-            <tr><td><code>anthropic</code></td><td>AnthropicProvider</td><td>Claude models</td></tr>
-            <tr><td><code>gemini</code></td><td>GeminiProvider</td><td>Google Gemini</td></tr>
-            <tr><td><code>openrouter</code></td><td>OpenAiProvider (compatible)</td><td>Any OpenRouter-listed model</td></tr>
-          </tbody>
-        </table>
-
-        <pre><code>// Different agents, different providers — same codebase
-'support_claude' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-4-20250514'],
+        <section id="providers">
+          <h2 class="section-title">LLM providers</h2>
+          <p class="section-desc">Switch models and vendors per agent — entirely from config.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Provider</th><th>Driver</th><th>Typical use</th></tr></thead>
+              <tbody>
+                <tr><td><code>fake</code></td><td>FakeLlmProvider</td><td>Tests, local dev (default)</td></tr>
+                <tr><td><code>openai</code></td><td>OpenAiProvider</td><td>GPT models via OpenAI API</td></tr>
+                <tr><td><code>anthropic</code></td><td>AnthropicProvider</td><td>Claude models</td></tr>
+                <tr><td><code>gemini</code></td><td>GeminiProvider</td><td>Google Gemini</td></tr>
+                <tr><td><code>openrouter</code></td><td>OpenAiProvider (compatible)</td><td>Any OpenRouter-listed model</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">'support_claude' => ['provider' => 'anthropic', 'model' => 'claude-sonnet-4-20250514'],
 'support_gpt'    => ['provider' => 'openai',    'model' => 'gpt-4.1-mini'],
 'support_or'     => ['provider' => 'openrouter','model' => 'anthropic/claude-3.5-sonnet'],</code></pre>
-      </section>
+          </div>
+        </section>
 
-      <section id="programmatic">
-        <h2 class="section-title">Programmatic API</h2>
-        <p class="section-desc">Run agents from controllers, jobs, or listeners — without the HTTP layer or Blade UI.</p>
-
-        <pre><code>use LimenAi\Contracts\Runtime\AgentRuntime;
+        <section id="programmatic">
+          <h2 class="section-title">Programmatic API</h2>
+          <p class="section-desc">Run agents from controllers, jobs, or listeners — without the HTTP layer or Blade UI.</p>
+          <div class="code-block" data-lang="PHP">
+            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-php">use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Runtime\RunContextData;
 
 $runId = app(AgentRuntime::class)->run(
@@ -595,287 +812,280 @@ $runId = app(AgentRuntime::class)->run(
     conversationId: 'conv-' . $user->id,
     message: 'Summarize open tickets for today.',
     context: RunContextData::make(['user_id' => $user->id]),
-);
+);</code></pre>
+          </div>
+          <div class="callout callout-info">
+            <strong>RunContextData is server-derived</strong>
+            <p>Always pass the authenticated user ID from Laravel — never from LLM output or client-supplied JSON.</p>
+          </div>
+        </section>
 
-// Poll run status
-$run = app(\LimenAi\Contracts\Runtime\RunRepository::class)->find($runId);
-// $run['status'], $run['final_message']</code></pre>
-
-        <div class="callout callout-info">
-          <strong>RunContextData is server-derived.</strong> Always pass the authenticated user ID from Laravel — never from LLM output or client-supplied JSON.
-        </div>
-
-        <h3>Conversation service</h3>
-        <pre><code>use LimenAi\Conversations\ConversationService;
-
-$service = app(ConversationService::class);
-$conversation = $service->start('example', RunContextData::make(['user_id' => 1]));
-$messages = $service->storedMessages($conversation['id']);</code></pre>
-      </section>
-
-      <section id="http-api">
-        <h2 class="section-title">HTTP API</h2>
-        <p class="section-desc">REST endpoints for custom frontends. Default prefix: <code>/limen-ai</code> (configurable).</p>
-
-        <table>
-          <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation</td></tr>
-            <tr><td>GET</td><td><code>/conversations/{id}</code></td><td>Fetch conversation with messages</td></tr>
-            <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send a user message (starts agent run)</td></tr>
-            <tr><td>GET</td><td><code>/runs/{id}</code></td><td>Poll run status and output</td></tr>
-            <tr><td>GET</td><td><code>/runs/{id}/observability</code></td><td>Audit trace and usage metrics</td></tr>
-            <tr><td>POST</td><td><code>/approvals/{id}/approve</code></td><td>Approve a paused tool action</td></tr>
-            <tr><td>POST</td><td><code>/approvals/{id}/reject</code></td><td>Reject a paused tool action</td></tr>
-          </tbody>
-        </table>
-
-        <pre><code>// Start conversation
-POST /limen-ai/conversations
+        <section id="http-api">
+          <h2 class="section-title">HTTP API</h2>
+          <p class="section-desc">REST endpoints for custom frontends. Default prefix: <code>/limen-ai</code>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation</td></tr>
+                <tr><td>GET</td><td><code>/conversations/{id}</code></td><td>Fetch conversation with messages</td></tr>
+                <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send a user message</td></tr>
+                <tr><td>GET</td><td><code>/runs/{id}</code></td><td>Poll run status and output</td></tr>
+                <tr><td>POST</td><td><code>/approvals/{id}/approve</code></td><td>Approve a paused tool action</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-block" data-lang="HTTP">
+            <div class="code-toolbar"><span class="code-lang">HTTP</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-http">POST /limen-ai/conversations
 { "agent": "example" }
 
-// Send message
 POST /limen-ai/conversations/{uuid}/messages
 { "content": "Echo hello world" }
 
-// Poll run
 GET /limen-ai/runs/{runId}</code></pre>
-      </section>
+          </div>
+        </section>
 
-      <section id="queue-broadcasting">
-        <h2 class="section-title">Queue &amp; realtime</h2>
-        <p class="section-desc">Offload long agent runs to the queue and stream updates to the chat UI.</p>
-
-        <h3>Background agent runs</h3>
-        <pre><code># .env
-LIMEN_AI_QUEUE_AGENT_RUNS=true
+        <section id="queue-broadcasting">
+          <h2 class="section-title">Queue &amp; realtime</h2>
+          <div class="code-block" data-lang="Env">
+            <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-ini">LIMEN_AI_QUEUE_AGENT_RUNS=true
 LIMEN_AI_QUEUE_CONNECTION=redis
-LIMEN_AI_QUEUE=default</code></pre>
-        <p>When enabled, message endpoints return immediately with a <code>run_id</code> while the worker processes the agent loop.</p>
-
-        <h3>Broadcasting (Pusher-compatible)</h3>
-        <pre><code># .env
 LIMEN_AI_BROADCASTING_ENABLED=true
-LIMEN_AI_BROADCAST_DRIVER=pusher
-LIMEN_AI_BROADCAST_CHANNEL_PREFIX=limen-ai.conversation</code></pre>
-        <p>The chat widget listens on <code>{prefix}.{conversationId}</code> for message and run status events — no polling required in production.</p>
-      </section>
+LIMEN_AI_BROADCAST_DRIVER=pusher</code></pre>
+          </div>
+        </section>
 
-      <section id="chat-ui">
-        <h2 class="section-title">Chat UI &amp; theming</h2>
-        <p class="section-desc">Drop-in Blade components with RTL/LTR, light/dark modes, and custom palettes.</p>
-
-        <pre><code>&lt;x-limen-ai::chatbot agent="example" /&gt;
-
+        <section id="chat-ui">
+          <h2 class="section-title">Chat UI &amp; theming</h2>
+          <div class="code-block" data-lang="Blade">
+            <div class="code-toolbar"><span class="code-lang">Blade</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-xml">&lt;x-limen-ai::chatbot agent="example" /&gt;
 &lt;x-limen-ai::chatbot :theme="['preset' => 'arabic', 'mode' => 'auto']" /&gt;
-
 &lt;x-limen-ai::widget agent="limen_3pl" /&gt;</code></pre>
+          </div>
+        </section>
 
-        <table>
-          <thead><tr><th>Env variable</th><th>Values</th></tr></thead>
-          <tbody>
-            <tr><td><code>LIMEN_AI_THEME_PRESET</code></td><td><code>default</code>, <code>arabic</code>, or custom preset</td></tr>
-            <tr><td><code>LIMEN_AI_THEME_MODE</code></td><td><code>light</code>, <code>dark</code>, <code>auto</code></td></tr>
-            <tr><td><code>LIMEN_AI_THEME_TOGGLE</code></td><td>Show in-widget mode toggle</td></tr>
-            <tr><td><code>LIMEN_AI_ROUTE_PREFIX</code></td><td>API route prefix (default <code>limen-ai</code>)</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section id="security">
-        <h2 class="section-title">Security</h2>
-        <p class="section-desc">Defense in depth — the LLM never becomes your authorization layer.</p>
-
-        <div class="flow">Authentication (Laravel Guards)
+        <section id="security">
+          <h2 class="section-title">Security</h2>
+          <p class="section-desc">Defense in depth — the LLM never becomes your authorization layer.</p>
+          <div class="flow">Authentication (Laravel Guards)
     ↓ Agent authorization (abilities)
-    ↓ Server-derived RunContext (user ID, never from LLM)
-    ↓ Prompt injection sanitization on untrusted content
+    ↓ Server-derived RunContext (user ID)
+    ↓ Prompt injection sanitization
     ↓ Tool authorization + validation
     ↓ Approval gate for sensitive tools
-    ↓ SSRF-safe HTTP integrations
-    ↓ Output redaction + audit log</div>
+    ↓ SSRF-safe HTTP + audit log</div>
+          <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model.</p>
+        </section>
 
-        <h3>Never trust from LLM output</h3>
-        <ul>
-          <li>User IDs, tenant IDs, or permission decisions</li>
-          <li>Record ownership claims</li>
-          <li>Raw URLs for server-side fetch without SSRF checks</li>
-        </ul>
-        <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model.</p>
-      </section>
+        <section id="observability">
+          <h2 class="section-title">Observability</h2>
+          <ul>
+            <li><code>trace_id</code> — correlates run, LLM calls, and tool spans</li>
+            <li>Audit actions: <code>agent.started</code>, <code>tool.completed</code>, <code>agent.failed</code></li>
+            <li>Usage metrics: prompt/completion tokens per provider/model</li>
+            <li>Export via <code>GET /limen-ai/runs/{id}/observability</code></li>
+          </ul>
+        </section>
 
-      <section id="observability">
-        <h2 class="section-title">Observability</h2>
-        <p class="section-desc">Trace IDs, audit logs, and token usage tracking for every run.</p>
-        <ul>
-          <li><code>trace_id</code> — correlates run, LLM calls, and tool spans</li>
-          <li>Audit actions: <code>agent.started</code>, <code>tool.completed</code>, <code>agent.failed</code>, etc.</li>
-          <li>Usage metrics: prompt/completion tokens per provider/model</li>
-          <li>Export via <code>GET /limen-ai/runs/{id}/observability</code></li>
-        </ul>
-      </section>
-
-      <section id="use-cases">
-        <h2 class="section-title">Use cases</h2>
-        <p class="section-desc">Real-world patterns you can implement today with Limen AI.</p>
-
-        <div class="use-case card">
-          <span class="pill pill-blue">Support</span>
-          <h4>1. Customer support chatbot</h4>
-          <p>Authenticated users ask about orders. Agent uses <code>get_order_status</code> tool backed by your Eloquent models. Gates enforce <code>orders.read</code>. Memory stores preferred language.</p>
-          <pre><code>&lt;x-limen-ai::widget agent="customer_support" /&gt;</code></pre>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-green">Operations</span>
-          <h4>2. Internal ops assistant (Limen 3PL)</h4>
-          <p>Warehouse operators look up shipments and draft customer notifications. Outbound messages require human approval before <code>send_customer_message</code> executes.</p>
-          <pre><code>User: "Where is shipment 12345?"
-→ get_shipment_status → summarized reply
-
-User: "Notify customer about delay on 67890"
-→ drafts message → approval UI → send on approve</code></pre>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-blue">Multi-model</span>
-          <h4>3. Route agents to different LLM providers</h4>
-          <p>Run cheap models for triage, premium models for complex reasoning — per agent in config. No code changes when switching vendors.</p>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-amber">Compliance</span>
-          <h4>4. Approval-gated sensitive actions</h4>
-          <p>Set <code>confirmation: true</code> on tools that send emails, charge cards, or delete data. Runtime pauses until an authenticated operator approves in the chat UI or via API.</p>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-blue">Automation</span>
-          <h4>5. Workflow-driven batch notifications</h4>
-          <p>Use <code>shipment_notify</code> workflow: agent drafts → approval step → tool sends. Ideal for operational playbooks with human oversight.</p>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-green">RAG</span>
-          <h4>6. Policy-aware knowledge assistant</h4>
-          <p>Load handbook documents into a knowledge collection. Agent retrieves relevant chunks each turn. Content is sanitized before injection to mitigate prompt injection.</p>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-blue">API</span>
-          <h4>7. Custom React/Vue frontend</h4>
-          <p>Skip Blade components — call the HTTP API directly from your SPA. Poll <code>/runs/{id}</code> or subscribe to Pusher channels for live updates.</p>
-        </div>
-
-        <div class="use-case card">
-          <span class="pill pill-green">Testing</span>
-          <h4>8. CI-safe agent tests</h4>
-          <p>Queue responses on <code>FakeLlmProvider</code>, assert tool calls and authorization — zero API spend in CI.</p>
-          <pre><code>$fake = app(FakeLlmProvider::class);
+        <section id="use-cases">
+          <h2 class="section-title">Use cases</h2>
+          <div class="use-case card">
+            <span class="pill pill-blue">Support</span>
+            <h4>Customer support chatbot</h4>
+            <p>Authenticated users ask about orders. Gates enforce <code>orders.read</code>. Memory stores preferred language.</p>
+          </div>
+          <div class="use-case card">
+            <span class="pill pill-green">Operations</span>
+            <h4>Internal ops assistant (Limen 3PL)</h4>
+            <p>Shipment lookup and approval-gated customer messaging via <code>limen_3pl</code> agent.</p>
+          </div>
+          <div class="use-case card">
+            <span class="pill pill-amber">Compliance</span>
+            <h4>Approval-gated sensitive actions</h4>
+            <p>Set <code>confirmation: true</code> on tools that send emails, charge cards, or delete data.</p>
+          </div>
+          <div class="use-case card">
+            <span class="pill pill-green">Testing</span>
+            <h4>CI-safe agent tests</h4>
+            <div class="code-block" data-lang="PHP">
+              <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
+              <pre><code class="language-php">$fake = app(FakeLlmProvider::class);
 $fake->queueResponse(LlmResponseData::fromArray([
     'content' => 'Done.',
     'tool_calls' => [[
-        'id' => 'call_1', 'type' => 'function',
+        'id' => 'call_1',
         'function' => ['name' => 'example_echo', 'arguments' => '{"message":"hi"}'],
     ]],
 ]));</code></pre>
-        </div>
-      </section>
+            </div>
+          </div>
+        </section>
 
-      <section id="artisan">
-        <h2 class="section-title">Artisan commands</h2>
-        <table>
-          <thead><tr><th>Command</th><th>Description</th></tr></thead>
-          <tbody>
-            <tr><td><code>limen-ai:install</code></td><td>Publish config, views, assets, migrations</td></tr>
-            <tr><td><code>limen-ai:doctor</code></td><td>Health check: config, providers, queue, broadcasting</td></tr>
-            <tr><td><code>limen-ai:validate</code></td><td>Validate all agent/tool/skill/workflow definitions</td></tr>
-            <tr><td><code>limen-ai:list</code></td><td>Summary of registered components</td></tr>
-            <tr><td><code>limen-ai:make:agent</code></td><td>Generate agent stub</td></tr>
-            <tr><td><code>limen-ai:make:tool</code></td><td>Generate tool class + test</td></tr>
-            <tr><td><code>limen-ai:make:skill</code></td><td>Generate skill definition</td></tr>
-            <tr><td><code>limen-ai:make:workflow</code></td><td>Generate workflow definition</td></tr>
-            <tr><td><code>limen-ai:agent:test {agent}</code></td><td>Run agent against fake or live provider</td></tr>
-            <tr><td><code>limen-ai:run {agent}</code></td><td>Interactive CLI chat session</td></tr>
-            <tr><td><code>limen-ai:agents</code></td><td>List registered agents</td></tr>
-            <tr><td><code>limen-ai:tools</code></td><td>List registered tools</td></tr>
-            <tr><td><code>limen-ai:workflows</code></td><td>List registered workflows</td></tr>
-            <tr><td><code>limen-ai:tool:test {tool}</code></td><td>Execute a tool with sample input</td></tr>
-            <tr><td><code>limen-ai:workflow:test {workflow}</code></td><td>Dry-run a workflow</td></tr>
-            <tr><td><code>limen-ai:make:connector</code></td><td>Generate HTTP connector config</td></tr>
-            <tr><td><code>limen-ai:make:provider</code></td><td>Scaffold a custom LLM provider</td></tr>
-          </tbody>
-        </table>
-        <p>Full command map: <a href="artisan-command-map.md">artisan-command-map.md</a></p>
-      </section>
+        <section id="artisan">
+          <h2 class="section-title">Artisan commands</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Command</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>limen-ai:install</code></td><td>Publish config, views, assets, migrations</td></tr>
+                <tr><td><code>limen-ai:doctor</code></td><td>Health check: config, providers, queue</td></tr>
+                <tr><td><code>limen-ai:validate</code></td><td>Validate all definitions</td></tr>
+                <tr><td><code>limen-ai:make:tool</code></td><td>Generate tool class + test</td></tr>
+                <tr><td><code>limen-ai:agent:test {agent}</code></td><td>Run agent against fake or live provider</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Full map: <a href="artisan-command-map.md">artisan-command-map.md</a></p>
+        </section>
 
-      <section id="configuration">
-        <h2 class="section-title">Configuration reference</h2>
-        <p class="section-desc">Primary file: <code>config/limen-ai.php</code></p>
-        <table>
-          <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
-          <tbody>
-            <tr><td><code>default_agent</code></td><td>Fallback agent key</td></tr>
-            <tr><td><code>providers</code></td><td>LLM provider registry and API credentials</td></tr>
-            <tr><td><code>embeddings</code></td><td>Embedding providers for vector RAG</td></tr>
-            <tr><td><code>agents</code></td><td>Agent definitions (instructions, tools, limits)</td></tr>
-            <tr><td><code>tools</code></td><td>Tool definitions (class or HTTP integration)</td></tr>
-            <tr><td><code>skills</code></td><td>Reusable instruction + tool bundles</td></tr>
-            <tr><td><code>workflows</code></td><td>Multi-step workflow definitions</td></tr>
-            <tr><td><code>knowledge</code></td><td>RAG collections and vector store driver</td></tr>
-            <tr><td><code>memory</code></td><td>Memory store, retriever, strict policy</td></tr>
-            <tr><td><code>authorization</code></td><td>Guest session validation settings</td></tr>
-            <tr><td><code>security</code></td><td>SSRF, injection patterns, redaction keys</td></tr>
-            <tr><td><code>observability</code></td><td>Audit, usage tracking, trace toggles</td></tr>
-            <tr><td><code>ui</code></td><td>Chat widget, themes, route prefix, middleware</td></tr>
-            <tr><td><code>queue</code></td><td>Queue connection for background agent runs</td></tr>
-            <tr><td><code>broadcasting</code></td><td>Realtime adapter (Pusher-compatible)</td></tr>
-          </tbody>
-        </table>
-        <p>Full schema: <a href="configuration-schema.md">configuration-schema.md</a></p>
-      </section>
+        <section id="configuration">
+          <h2 class="section-title">Configuration reference</h2>
+          <p class="section-desc">Primary file: <code>config/limen-ai.php</code></p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Key</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>agents</code></td><td>Agent definitions</td></tr>
+                <tr><td><code>tools</code></td><td>Tool definitions</td></tr>
+                <tr><td><code>workflows</code></td><td>Multi-step workflow definitions</td></tr>
+                <tr><td><code>knowledge</code></td><td>RAG collections and vector store</td></tr>
+                <tr><td><code>security</code></td><td>SSRF, injection patterns, redaction</td></tr>
+                <tr><td><code>ui</code></td><td>Chat widget, themes, route prefix</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Full schema: <a href="configuration-schema.md">configuration-schema.md</a></p>
+        </section>
 
-      <section id="testing">
-        <h2 class="section-title">Testing</h2>
-        <pre><code>composer install
-composer test              # full PHPUnit suite
-composer test:gates        # architecture + security gates
-composer test:release      # pre-release validation</code></pre>
-        <p>CI runs on PHP 8.2/8.3 × Laravel 11/12. Use <code>FakeLlmProvider</code> in tests — never call real LLM APIs in CI.</p>
-        <p>Details: <a href="../TESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
-      </section>
+        <section id="testing">
+          <h2 class="section-title">Testing</h2>
+          <div class="code-block" data-lang="Shell">
+            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-bash">composer test
+composer test:gates
+composer test:release</code></pre>
+          </div>
+          <p>Details: <a href="../TESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
+        </section>
 
-      <section id="releases">
-        <h2 class="section-title">Releases</h2>
-        <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>.</p>
-        <table>
-          <thead><tr><th>Change type</th><th>Version bump</th></tr></thead>
-          <tbody>
-            <tr><td>Breaking API or config schema</td><td>MAJOR</td></tr>
-            <tr><td>New features (backward compatible)</td><td>MINOR</td></tr>
-            <tr><td>Bug fixes, security patches</td><td>PATCH</td></tr>
-          </tbody>
-        </table>
-        <p>Changelog: <a href="../CHANGELOG.md">CHANGELOG.md</a> · Release guide: <a href="release.md">release.md</a></p>
-      </section>
+        <section id="releases">
+          <h2 class="section-title">Releases</h2>
+          <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Change type</th><th>Version bump</th></tr></thead>
+              <tbody>
+                <tr><td>Breaking API or config schema</td><td>MAJOR</td></tr>
+                <tr><td>New features (backward compatible)</td><td>MINOR</td></tr>
+                <tr><td>Bug fixes, security patches</td><td>PATCH</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <footer>
-        <p><strong>Limen AI</strong> · MIT License · <a href="https://github.com/hatem-isnaad/limen-ai">github.com/hatem-isnaad/limen-ai</a></p>
-        <p>Also see: <a href="../ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="../AI_SPEC.md">AI_SPEC.md</a> · <a href="providers.md">providers.md</a> · <a href="limen-integration.md">limen-integration.md</a></p>
-      </footer>
+        <footer>
+          <p><strong>Limen AI</strong> · MIT License · <a href="https://github.com/hatem-isnaad/limen-ai">github.com/hatem-isnaad/limen-ai</a></p>
+          <p><a href="../ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="../AI_SPEC.md">AI_SPEC.md</a> · <a href="providers.md">providers.md</a></p>
+        </footer>
+      </div>
     </main>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/http.min.js"></script>
   <script>
-    const links = document.querySelectorAll('.nav-link');
-    const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    const HLJS_THEMES = {
+      dark: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css',
+      light: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css',
+    };
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('hljs-theme').href = HLJS_THEMES[theme];
+      localStorage.setItem('limen-docs-theme', theme);
+      document.querySelectorAll('[data-theme-set]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeSet === theme);
+      });
+      document.querySelectorAll('pre code').forEach(block => {
+        block.removeAttribute('data-highlighted');
+        hljs.highlightElement(block);
+      });
+    }
+
+    const savedTheme = localStorage.getItem('limen-docs-theme')
+      || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    applyTheme(savedTheme);
+
+    document.querySelectorAll('[data-theme-set]').forEach(btn => {
+      btn.addEventListener('click', () => applyTheme(btn.dataset.themeSet));
+    });
+    document.getElementById('theme-toggle-mobile')?.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+    function openSidebar() {
+      sidebar.classList.add('open');
+      backdrop.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    menuToggle?.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    backdrop?.addEventListener('click', closeSidebar);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) closeSidebar();
+      });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const code = btn.closest('.code-block')?.querySelector('code');
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code.textContent.trim());
+          btn.textContent = 'Copied';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        } catch (_) {
+          btn.textContent = 'Failed';
         }
       });
-    }, { rootMargin: '-40% 0px -50% 0px' });
-    sections.forEach(s => observer.observe(s));
+    });
+
+    hljs.highlightAll();
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = [...navLinks].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
   </script>
 </body>
 </html>
