@@ -99,6 +99,7 @@ final class ResolvedAgent
         return array_filter([
             'model' => $this->model(),
             'max_tokens' => $this->limits['max_tokens'] ?? null,
+            'temperature' => $this->limits['temperature'] ?? null,
         ], fn ($value) => $value !== null && $value !== '');
     }
 

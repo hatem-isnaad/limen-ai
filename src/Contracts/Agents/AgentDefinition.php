@@ -29,6 +29,9 @@ interface AgentDefinition
     public function memoryConfig(): array;
 
     /** @return array<string, mixed> */
+    public function personaConfig(): array;
+
+    /** @return array<string, mixed> */
     public function authorizationConfig(): array;
 
     /** @return array<string, mixed> */
