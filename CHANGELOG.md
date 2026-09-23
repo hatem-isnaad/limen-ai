@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 08 authorization hardening with Gate/policy checks, guest session validation, and run context user matching
+- `GuestSessionValidator` contract with null and cache drivers
+- `UnauthenticatedException` and `RunContextAuthorizationException`
+- Authorization unit, integration, and feature tests
+
+### Added (Phase 07)
+
 - Phase 07 conversation persistence with `ConversationService`, in-memory repositories, and runtime history integration
 - `MessageFormatter`, `NullConversationSummarizer`, and conversation events (`MessageCreated`, `ConversationUpdated`)
 - Database migrations for `limen_ai_conversations` and `limen_ai_messages`

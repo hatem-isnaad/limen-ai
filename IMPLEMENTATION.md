@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 08 — Auth & Authorization**
+**Phase 09 — State & Checkpoints**
 
 ## Phase 01 Scope
 
@@ -131,8 +131,17 @@ At the end of each phase:
 6. Migrations for `limen_ai_conversations` and `limen_ai_messages`
 7. Unit, integration, and multi-turn feature tests
 
-## Next Implementation Tasks (Phase 08)
+## Phase 08 Completed
 
-1. Harden agent/tool authorization integration with Laravel gates/policies
-2. Guest session support and ability checks
-3. Authorization feature tests
+1. Hardened `LaravelAuthorizationService` with Gate abilities, policy method checks, and subject arguments
+2. `validateRunContext()` prevents spoofed `user_id` and validates guest sessions
+3. `GuestSessionValidator` contract with `NullGuestSessionValidator` and `CacheGuestSessionValidator`
+4. `UnauthenticatedException` and `RunContextAuthorizationException`
+5. Authorization config section and service provider bindings
+6. Unit, integration, and feature authorization tests
+
+## Next Implementation Tasks (Phase 09)
+
+1. Eloquent run repository and checkpoint persistence
+2. Approval repository skeleton
+3. Resume/cancel hardening with persisted state

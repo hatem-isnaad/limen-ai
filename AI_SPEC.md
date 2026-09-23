@@ -151,3 +151,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 06 — Core runtime loop, limits, run state skeleton
 - [x] Begin Phase 07 — Conversations
 - [x] Phase 07 — Conversation/message persistence, history loading, migrations
+- [x] Begin Phase 08 — Auth & Authorization
+- [x] Phase 08 — Gate/policy integration, guest sessions, context validation

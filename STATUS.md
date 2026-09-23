@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 07 — Conversations** (Complete)
+**Phase 08 — Auth & Authorization** (Complete)
 
 ## Completed
 
@@ -48,6 +48,9 @@
 - Conversation history loaded into agent runtime on each run
 - `MessageFormatter`, `NullConversationSummarizer`, conversation events
 - Database migrations for `limen_ai_conversations` and `limen_ai_messages`
+- Hardened authorization with Gate/policy checks and run context validation
+- Guest session validator and `UnauthenticatedException` separation
+- Authorization unit, integration, and feature tests
 
 ## In Progress
 
@@ -59,9 +62,9 @@
 
 ## Next Steps
 
-1. Begin Phase 08 — Auth integration hardening
-2. Begin Phase 09 — State & checkpoints (Eloquent repositories)
-3. Add queue-dispatched runtime job skeleton
+1. Begin Phase 09 — State & checkpoints (Eloquent repositories)
+2. Add queue-dispatched runtime job skeleton
+3. Begin Phase 10 — Memory
 
 ## Risks
 

@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 08 — Auth & Authorization**
+Current: **Phase 09 — State & Checkpoints**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -147,3 +147,12 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Summarizer hook | `NullConversationSummarizer` |
 | Events | `MessageCreated`, `ConversationUpdated` |
 | Migrations | `limen_ai_conversations`, `limen_ai_messages` |
+
+## Phase 08 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Auth service | Hardened `LaravelAuthorizationService` |
+| Guest sessions | `GuestSessionValidator`, null + cache drivers |
+| Exceptions | `UnauthenticatedException`, `RunContextAuthorizationException` |
+| Context validation | `validateRunContext()` in runtime |

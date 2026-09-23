@@ -143,6 +143,14 @@ return [
         'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
     ],
 
+    'authorization' => [
+        'enforce_context_user_match' => true,
+        'guest' => [
+            'validator' => LimenAi\Authorization\NullGuestSessionValidator::class,
+            'cache_prefix' => 'limen-ai:guest:',
+        ],
+    ],
+
     'memory' => [
         'driver' => env('LIMEN_AI_MEMORY_DRIVER', 'database'),
     ],
