@@ -3,7 +3,7 @@ set -euo pipefail
 
 OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 
-git fetch --tags --force
+git fetch --tags --force || echo "Warning: unable to fetch tags; using local tag refs"
 
 LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
 echo "Latest release tag: ${LAST_TAG:-<none>}"
