@@ -52,6 +52,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Record latest release tag
+        id: before
+        run: |
+          git fetch --tags --force
+          if git describe --tags --match 'v*' --abbrev=0 >/dev/null 2>&1; then
+            echo "tag=$(git describe --tags --match 'v*' --abbrev=0)" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -72,25 +82,42 @@ jobs:
         if: failure()
         run: cat semantic-release.log || true
 
-      - name: Detect release file changes
+      - name: Detect published release
         if: success()
-        id: release_files
+        id: published
         run: |
-          if git diff --quiet -- CHANGELOG.md composer.json README.md; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+          git fetch --tags --force
+          if git describe --tags --match 'v*' --abbrev=0 >/dev/null 2>&1; then
+            AFTER="$(git describe --tags --match 'v*' --abbrev=0)"
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            AFTER=""
           fi
 
+          BEFORE="${{ steps.before.outputs.tag }}"
+          if [ -n "$AFTER" ] && [ "$AFTER" != "$BEFORE" ]; then
+            VERSION="${AFTER#v}"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$AFTER" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sync composer.json and README metadata
+        if: success() && steps.published.outputs.published == 'true'
+        run: |
+          chmod +x .github/scripts/sync-release-metadata.sh
+          .github/scripts/sync-release-metadata.sh "${{ steps.published.outputs.version }}"
+
       - name: Open PR to sync release files
-        if: success() && steps.release_files.outputs.changed == 'true'
+        if: success() && steps.published.outputs.published == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(release): sync version files [skip ci]"
           title: "chore(release): sync version files"
           body: |
-            Automated sync of version metadata after semantic-release.
+            Automated sync of version metadata after semantic-release published `${{ steps.published.outputs.tag }}`.
 
             Merges updated `CHANGELOG.md`, `composer.json`, and `README.md` into `main`.
           branch: chore/release-sync-${{ github.run_id }}
