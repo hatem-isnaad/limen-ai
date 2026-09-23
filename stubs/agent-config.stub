@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'key' => '{{ key }}',
+    'config' => [
+        'name' => '{{ title }}',
+        'description' => 'Describe this agent.',
+        'model' => env('LIMEN_AI_{{ key }}_MODEL', 'gpt-4.1-mini'),
+        'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+        'instructions' => 'You are a helpful assistant.',
+        'skills' => [],
+        'tools' => {{ tools }},
+        'knowledge' => [],
+        'memory' => [
+            'conversation' => true,
+            'user' => false,
+        ],
+        'authorization' => [
+            'required' => true,
+            'abilities' => [],
+            'guest_allowed' => false,
+        ],
+        'output' => [
+            'format' => 'text',
+        ],
+        'limits' => [
+            'max_tool_calls' => 10,
+            'max_steps' => 20,
+            'timeout' => 60,
+        ],
+        'version' => '1.0.0',
+    ],
+];

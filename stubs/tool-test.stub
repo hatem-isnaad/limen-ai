@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ namespace }};
+
+use Tests\TestCase;
+
+class {{ class }}Test extends TestCase
+{
+    public function test_tool_class_is_autoloadable(): void
+    {
+        $this->assertTrue(class_exists(\App\LimenAi\Tools\{{ class }}::class));
+    }
+}
