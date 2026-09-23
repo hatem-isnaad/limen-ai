@@ -22,5 +22,8 @@ interface ToolDefinition
 
     public function executorClass(): string;
 
+    /** @return array<string, mixed> */
+    public function httpIntegration(): array;
+
     public function version(): string;
 }
