@@ -1,0 +1,42 @@
+name: Create v1.0.0 Tag and Release
+
+on:
+  push:
+    branches:
+      - cursor/create-v1.0.0-release-9ec4
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dd5b5e8978b5f609bf939dd4169310c54fe6bf8a
+          fetch-depth: 0
+
+      - name: Create annotated tag v1.0.0
+        id: tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --tags origin v1.0.0 | grep -q v1.0.0; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag v1.0.0 already exists on remote"
+          else
+            git tag -a v1.0.0 -m "Limen AI v1.0.0 — initial stable release"
+            git push origin v1.0.0
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: Limen AI v1.0.0
+          body_path: RELEASE_BODY_v1.0.0.md
+          target_commitish: dd5b5e8978b5f609bf939dd4169310c54fe6bf8a
+          make_latest: true
+          generate_release_notes: false
