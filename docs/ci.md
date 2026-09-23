@@ -22,9 +22,11 @@ GitHub Actions workflow: [`.github/workflows/tests.yml`](../.github/workflows/te
 
 | Dimension | Values |
 |-----------|--------|
-| PHP | 8.2, 8.3 |
+| PHP | 8.2, 8.3 (Laravel 13 cells use 8.3 only — L13 requires `php ^8.3`) |
 | Laravel | 11.x, 12.x, 13.x |
 | Testbench | ^9.0 (L11), ^10.0 (L12), ^11.0 (L13) |
+
+Matrix excludes **PHP 8.2 × Laravel 13** because Illuminate 13 and Laravel 13 require PHP 8.3+.
 
 Each matrix cell runs:
 

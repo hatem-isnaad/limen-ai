@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CI matrix excludes PHP 8.2 × Laravel 13 (Laravel 13 requires PHP ^8.3)
+
 ### Added
 
 - `laravel/pint` dev dependency and `composer test:style` gate in `test:release`

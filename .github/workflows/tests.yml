@@ -18,6 +18,10 @@ jobs:
       matrix:
         php: ['8.2', '8.3']
         laravel: ['11.*', '12.*', '13.*']
+        exclude:
+          # Laravel 13 requires PHP ^8.3 (illuminate/* and framework)
+          - php: '8.2'
+            laravel: '13.*'
 
     steps:
       - uses: actions/checkout@v4
