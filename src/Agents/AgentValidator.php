@@ -88,6 +88,75 @@ class AgentValidator
             }
         }
 
+        $errors = array_merge($errors, $this->validatePersona($key, $agent->personaConfig()));
+        $errors = array_merge($errors, $this->validateMemory($key, $agent->memoryConfig()));
+        $errors = array_merge($errors, $this->validateLimits($key, $agent->limits()));
+
+        return $errors;
+    }
+
+    /** @param  array<string, mixed>  $persona
+     * @return list<string>
+     */
+    protected function validatePersona(string $agentKey, array $persona): array
+    {
+        $errors = [];
+
+        if ($persona === []) {
+            return $errors;
+        }
+
+        $tone = (string) ($persona['tone'] ?? '');
+
+        if ($tone !== '' && ! in_array($tone, AgentPersonaComposer::allowedTones(), true)) {
+            $errors[] = "Agent [{$agentKey}] persona tone [{$tone}] is invalid.";
+        }
+
+        $style = (string) ($persona['response_style'] ?? '');
+
+        if ($style !== '' && ! in_array($style, AgentPersonaComposer::allowedResponseStyles(), true)) {
+            $errors[] = "Agent [{$agentKey}] persona response_style [{$style}] is invalid.";
+        }
+
+        $language = (string) ($persona['language'] ?? '');
+
+        if ($language !== '' && $language !== 'auto' && ! preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $language)) {
+            $errors[] = "Agent [{$agentKey}] persona language [{$language}] must be ISO-639-1 (e.g. en, ar) or auto.";
+        }
+
+        return $errors;
+    }
+
+    /** @param  array<string, mixed>  $memory
+     * @return list<string>
+     */
+    protected function validateMemory(string $agentKey, array $memory): array
+    {
+        $errors = [];
+        $allowed = $memory['allowed_keys'] ?? null;
+
+        if ($allowed !== null && ! is_array($allowed)) {
+            $errors[] = "Agent [{$agentKey}] memory.allowed_keys must be an array.";
+        }
+
+        return $errors;
+    }
+
+    /** @param  array<string, mixed>  $limits
+     * @return list<string>
+     */
+    protected function validateLimits(string $agentKey, array $limits): array
+    {
+        $errors = [];
+
+        if (isset($limits['temperature']) && ! is_numeric($limits['temperature'])) {
+            $errors[] = "Agent [{$agentKey}] limits.temperature must be numeric.";
+        }
+
+        if (isset($limits['max_tokens']) && (int) $limits['max_tokens'] <= 0) {
+            $errors[] = "Agent [{$agentKey}] limits.max_tokens must be greater than zero when set.";
+        }
+
         return $errors;
     }
 }

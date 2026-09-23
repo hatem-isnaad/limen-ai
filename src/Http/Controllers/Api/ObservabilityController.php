@@ -19,19 +19,10 @@ class ObservabilityController
     public function show(Request $request, string $runId): JsonResponse
     {
         $run = $this->runs->find($runId);
-
         abort_if($run === null, 404, 'Run not found.');
-
-        abort_unless(
-            $this->accessGuard->canAccess($request->user(), (string) ($run['conversation_id'] ?? '')),
-            403,
-            'Run access denied.',
-        );
-
+        abort_unless($this->accessGuard->canAccess($request->user(), (string) ($run['conversation_id'] ?? '')), 403, 'Run access denied.');
         $report = $this->reporter->forRun($runId);
-
         abort_if($report === null, 404, 'Run not found.');
-
         return response()->json(['observability' => $report]);
     }
 }

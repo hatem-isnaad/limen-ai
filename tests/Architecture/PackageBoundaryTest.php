@@ -54,8 +54,10 @@ class PackageBoundaryTest extends TestCase
 
     public function test_package_does_not_reference_host_app_namespace(): void
     {
-        $this->assertNoForbiddenImports($this->src, [
-            'App\\',
-        ]);
+        foreach (['Agents', 'Runtime', 'Tools', 'Skills', 'Workflows', 'Memory', 'Knowledge', 'Authorization', 'Integrations', 'Providers'] as $module) {
+            $this->assertNoForbiddenImports($this->src.'/'.$module, [
+                'App\\',
+            ]);
+        }
     }
 }

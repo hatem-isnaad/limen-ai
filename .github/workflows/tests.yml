@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [stg]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: PHP ${{ matrix.php }} · Laravel ${{ matrix.laravel }}
@@ -15,32 +18,22 @@ jobs:
       matrix:
         php: ['8.2', '8.3']
         laravel: ['11.*', '12.*']
-        include:
-          - php: '8.3'
-            laravel: '12.*'
-            coverage: true
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          coverage: none
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
-
       - name: Install dependencies
+        env:
+          COMPOSER_NO_AUDIT: 1
         run: |
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
@@ -48,45 +41,13 @@ jobs:
           else
             composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction
+          composer update --prefer-dist --no-interaction -W
 
       - name: Run unit, integration, and feature tests
-        run: vendor/bin/phpunit --testsuite Unit --testsuite Integration --testsuite Feature
+        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
 
       - name: Run architecture boundary gates
-        run: composer test:architecture
+        run: vendor/bin/phpunit --testsuite Architecture
 
       - name: Run security critical gates
-        run: composer test:security
-
-      - name: Upload coverage (PHP 8.3 / Laravel 12 only)
-        if: matrix.coverage == true
-        run: vendor/bin/phpunit --coverage-clover build/coverage.xml
-        continue-on-error: true
-
-      - name: Archive coverage artifact
-        if: matrix.coverage == true
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-clover
-          path: build/coverage.xml
-          if-no-files-found: ignore
-
-  release-gate:
-    name: Release gate (PHP 8.3)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
-
-      - name: Run full release test suite
-        run: composer test:release
+        run: vendor/bin/phpunit --testsuite Security

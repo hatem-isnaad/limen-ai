@@ -42,7 +42,7 @@ class AgentMemoryTest extends TestCase
     {
         config()->set('limen-ai.agents.example.memory.conversation', true);
 
-        app(MemoryStore::class)->put(MemoryScope::CONVERSATION, 'topic', 'delayed shipment', [
+        app(MemoryStore::class)->put(MemoryScope::CONVERSATION, 'preferred_language', 'delayed shipment', [
             'scope_id' => 'conv-topic',
             'agent_key' => 'example',
         ]);

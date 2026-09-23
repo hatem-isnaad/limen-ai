@@ -14,10 +14,7 @@ class CacheGuestSessionValidator implements GuestSessionValidator
 
     public function isValid(?string $guestToken): bool
     {
-        if ($guestToken === null || $guestToken === '') {
-            return false;
-        }
-
+        if ($guestToken === null || $guestToken === '') { return false; }
         return $this->cache->has($this->prefix.$guestToken);
     }
 }

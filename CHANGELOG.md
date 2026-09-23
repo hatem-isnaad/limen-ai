@@ -7,14 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- CI/CD runs on **`stg`** branch only; `main` is go-live without automated workflow triggers
-- Release workflow is manual (`workflow_dispatch`); release gate runs on `stg` push
-
 ### Added
 
-- `docs/branching.md` — stg pre-production gate before main
+- Example agents for each built-in LLM provider: `example_openai`, `example_anthropic`, `example_gemini`, `example_openrouter` (plus `example` for fake)
+- `.env.example` and publishable `limen-ai-env` tag (`.env.limen-ai.example`) with all Limen AI configuration keys
+- Configurable agent persona: display name, tone, language (`auto` follows request locale), response style, custom rules, and forbidden topics
+- `AgentPersonaComposer` injects persona into system instructions; global `quality.save_tokens` adds concise-response guidance
+- `StrictMemoryPolicy` with key allowlists, regex validation, and value truncation; throws `MemoryPolicyException` on violations
+- `AgentResponseGuard` enforces per-agent `output.max_response_chars` on final assistant replies
+- Per-agent `limits.max_history_messages`, `limits.temperature`, and memory `allowed_keys` / `max_value_length`
+- `docs/agent-configuration.md` — full guide for persona, memory, token control, and security layers
 - First-class `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) LLM drivers
 - `OpenAiEmbeddingProvider` for production vector knowledge
 - Config-driven provider registry (`providers.drivers`) for adding custom LLM adapters without core changes
