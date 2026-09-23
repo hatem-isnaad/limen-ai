@@ -116,7 +116,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null,
+            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
