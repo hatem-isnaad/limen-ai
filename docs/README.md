@@ -2,7 +2,14 @@
 
 Package documentation is organized by topic.
 
-**New developer?** Start with the [black-box host guide](black-box-host-guide.md) — change env, add agents/tools/KB, embed the widget. Or open the [interactive hub](index.html).
+**New developer?** Start with the [interactive hub](index.html) (learning paths + snippets) or the [black-box host guide](black-box-host-guide.md).
+
+| Interactive HTML | Language | Description |
+|------------------|----------|-------------|
+| [index.html](index.html) | English | Official package hub — learning paths, snippets, advanced tutorial, full reference |
+| [host-guide-ar.html](host-guide-ar.html) | Arabic (RTL) | Complete host integration guide — concepts, agents, tools, env reference, 3PL demo |
+
+Blade sources (synced from reference host): [sources/](sources/)
 
 ## AI agents & contributors
 

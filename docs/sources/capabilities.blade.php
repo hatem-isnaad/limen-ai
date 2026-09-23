@@ -1,0 +1,6071 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="دليل Limen AI الكامل بالعربية — الوكلاء، الأدوات، المهارات، قاعدة المعرفة، سير العمل، وكيفية إضافة كل مكوّن داخل Laravel.">
+    <meta name="theme-color" content="#050816">
+    <meta property="og:title" content="Limen AI — دليل القدرات والاستخدام">
+    <meta property="og:description" content="كل ما هو متاح في حزمة Limen AI وكيف تضيفه — بالعربية.">
+    <meta property="og:type" content="website">
+    <title>Limen AI — دليل القدرات والاستخدام</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg: #050816;
+            --bg-2: #0c1229;
+            --surface: rgba(15, 23, 42, 0.72);
+            --surface-solid: #0f172a;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(148, 163, 184, 0.14);
+            --border-glow: rgba(56, 189, 248, 0.35);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-2: #818cf8;
+            --accent: #22d3ee;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+            --radius: 18px;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+            --font: "Cairo", system-ui, sans-serif;
+            --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+            --code-bg: #0a0e1a;
+            --code-head: #10162b;
+            --code-line: rgba(148, 163, 184, 0.08);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        .sprite { display: none; }
+
+        .ico {
+            width: 1em;
+            height: 1em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            vertical-align: -0.125em;
+            overflow: visible;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(900px 500px at 85% -5%, rgba(56, 189, 248, 0.18), transparent 55%),
+                radial-gradient(700px 420px at 5% 15%, rgba(129, 140, 248, 0.16), transparent 50%),
+                radial-gradient(600px 400px at 50% 100%, rgba(34, 211, 238, 0.08), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #7dd3fc; }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 1.25rem 5rem;
+        }
+
+        /* Nav */
+        .topnav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(5, 8, 22, 0.78);
+            border-bottom: 1px solid var(--border);
+            margin: 0 -1.25rem 2rem;
+            padding: 0.85rem 1.25rem;
+        }
+
+        .topnav-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-weight: 800;
+            font-size: 1.05rem;
+        }
+
+        .brand-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem 1rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+        /* Host guide navbar */
+        .host-topnav { margin: 0 -1.25rem 2rem; }
+
+        .host-topnav-inner {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 0.75rem 1rem;
+        }
+
+        .host-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            min-width: 0;
+        }
+
+        .host-nav-main {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.2rem 0.35rem;
+        }
+
+        .host-nav-link,
+        .host-topnav .nav-drop-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.42rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--muted);
+            border: 1px solid transparent;
+            background: transparent;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .host-nav-link:hover,
+        .host-topnav .nav-drop-trigger:hover,
+        .host-topnav .nav-drop.open .nav-drop-trigger {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border);
+            text-decoration: none;
+        }
+
+        .host-nav-link.active,
+        .host-topnav .nav-drop.open .nav-drop-trigger {
+            color: var(--primary);
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.25);
+        }
+
+        .host-nav-link-primary {
+            color: #bae6fd;
+            border-color: rgba(56, 189, 248, 0.22);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .host-nav-link-en .ico { color: var(--primary); }
+
+        .host-topnav .nav-drop { position: relative; }
+
+        .host-topnav .nav-chevron {
+            width: 0.85em;
+            height: 0.85em;
+            transition: transform 0.2s;
+        }
+
+        .host-topnav .nav-drop.open .nav-chevron { transform: rotate(180deg); }
+
+        .host-topnav .nav-drop-panel {
+            position: absolute;
+            top: calc(100% + 0.45rem);
+            right: 50%;
+            left: auto;
+            transform: translateX(50%);
+            z-index: 120;
+            min-width: 220px;
+            padding: 0.55rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(10, 14, 26, 0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            text-align: right;
+        }
+
+        .host-topnav .nav-drop-panel-wide {
+            min-width: min(680px, calc(100vw - 2rem));
+            padding: 0.85rem;
+        }
+
+        .host-topnav .nav-drop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem 1.25rem;
+        }
+
+        @media (min-width: 900px) {
+            .host-topnav .nav-drop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+
+        .host-topnav .nav-drop-title {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            padding: 0.2rem 0.55rem 0.35rem;
+        }
+
+        .host-topnav .nav-drop-link {
+            display: block;
+            padding: 0.38rem 0.55rem;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .host-topnav .nav-drop-link:hover {
+            color: var(--text);
+            background: rgba(56, 189, 248, 0.08);
+            text-decoration: none;
+        }
+
+        .host-nav-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .host-nav-actions .search-wrap {
+            flex: 0 1 240px;
+            max-width: 240px;
+            min-width: 160px;
+        }
+
+        .host-nav-toggle {
+            display: none;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .host-nav-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 140;
+            background: rgba(1, 4, 9, 0.65);
+            backdrop-filter: blur(2px);
+        }
+
+        .host-nav-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 150;
+            width: min(320px, 88vw);
+            height: 100vh;
+            overflow-y: auto;
+            padding: 1rem 0.85rem 2rem;
+            border-left: 1px solid var(--border);
+            background: rgba(8, 12, 24, 0.98);
+            backdrop-filter: blur(16px);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
+            text-align: right;
+        }
+
+        .host-nav-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.35rem 0.45rem 0.85rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0.65rem;
+        }
+
+        .host-nav-close {
+            display: grid;
+            place-items: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .host-nav-panel-group { margin-bottom: 0.85rem; }
+
+        .host-nav-panel-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            padding: 0.35rem 0.45rem 0.25rem;
+        }
+
+        .host-nav-panel a {
+            display: block;
+            padding: 0.42rem 0.45rem;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .host-nav-panel a:hover {
+            color: var(--text);
+            background: rgba(56, 189, 248, 0.08);
+            text-decoration: none;
+        }
+
+        @media (max-width: 960px) {
+            .host-topnav-inner {
+                grid-template-columns: 1fr auto;
+            }
+
+            .host-nav {
+                grid-column: 1 / -1;
+                order: 3;
+                justify-content: space-between;
+            }
+
+            .host-nav-main { display: none; }
+
+            .host-nav-toggle { display: inline-flex; }
+
+            .host-nav-actions { grid-column: 2; }
+
+            .host-nav-actions .search-wrap {
+                max-width: 200px;
+                min-width: 140px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .host-topnav-inner { grid-template-columns: 1fr; }
+            .host-nav-actions { width: 100%; }
+            .host-nav-actions .search-wrap { flex: 1; max-width: none; }
+        }
+
+        .host-paths-strip {
+            margin-bottom: 1.25rem;
+            scroll-margin-top: 5.5rem;
+        }
+
+        .host-paths-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 0.85rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .host-paths-inner strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.92rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .host-paths-inner span {
+            color: #bae6fd;
+            font-size: 0.86rem;
+            font-weight: 500;
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.85rem;
+            font-size: 0.82rem;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            padding: 3rem 2rem 2.5rem;
+            border-radius: calc(var(--radius) + 6px);
+            border: 1px solid var(--border);
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.55));
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto auto -40% -10%;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.25), transparent 70%);
+            filter: blur(8px);
+            animation: pulse 6s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+
+        .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+        }
+
+        .badge-live {
+            border-color: rgba(74, 222, 128, 0.4);
+            color: #86efac;
+            background: rgba(74, 222, 128, 0.08);
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+            animation: livePulse 2s ease-out infinite;
+        }
+
+        @keyframes livePulse {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
+            70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .badge-ai {
+            border-color: rgba(56, 189, 248, 0.35);
+            color: #bae6fd;
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 45%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .lead {
+            margin: 0;
+            max-width: 52ch;
+            font-size: 1.08rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.85rem;
+            margin: 2rem 0 1.75rem;
+        }
+
+        .stat {
+            padding: 1rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-num {
+            font-size: 1.75rem;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--primary);
+        }
+
+        .stat-label { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-top: 0.25rem; }
+
+        .cta-row { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            padding: 0.7rem 1.15rem;
+            border-radius: 12px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 0.92rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+
+        .btn:hover { transform: translateY(-2px); text-decoration: none; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: white;
+            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.35);
+        }
+
+        .btn-ghost {
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        /* Sections */
+        section { margin-bottom: 3rem; scroll-margin-top: 5rem; }
+
+        .section-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.55rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .h2-icon {
+            flex-shrink: 0;
+            width: 2.1rem;
+            height: 2.1rem;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 1.05rem;
+            color: var(--primary);
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .section-sub { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.92rem; font-weight: 500; }
+
+        .grid { display: grid; gap: 1rem; }
+        @media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 900px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+        /* Bento cards */
+        .card {
+            position: relative;
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.85));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.35rem 1.4rem;
+            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        }
+
+        .card:hover {
+            border-color: rgba(56, 189, 248, 0.28);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .card-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+            margin-bottom: 0.85rem;
+            color: var(--primary);
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.22);
+            transition: transform 0.25s cubic-bezier(0.34, 1.5, 0.64, 1), color 0.25s;
+        }
+
+        .card:hover .card-icon { transform: translateY(-2px) scale(1.06); color: #7dd3fc; }
+
+        .card h3 {
+            margin: 0 0 0.4rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h3 > .ico { font-size: 1.05rem; color: var(--primary); }
+
+        .step-dot {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 7px;
+            display: inline-grid;
+            place-items: center;
+            font-size: 0.72rem;
+            font-weight: 900;
+            font-family: var(--mono);
+            color: #04121f;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        }
+        .card p { margin: 0; color: var(--muted); font-size: 0.9rem; font-weight: 500; line-height: 1.65; }
+
+        .card-wide { grid-column: 1 / -1; }
+
+        @media (min-width: 900px) {
+            .bento .span-2 { grid-column: span 2; }
+        }
+
+        /* Timeline */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding-right: 1rem;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0.45rem;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--primary-2), transparent);
+        }
+
+        .step {
+            position: relative;
+            padding: 0.85rem 1.5rem 0.85rem 0;
+        }
+
+        .step::before {
+            content: "";
+            position: absolute;
+            right: -0.15rem;
+            top: 1.15rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+        }
+
+        .step-title {
+            font-weight: 800;
+            font-size: 0.98rem;
+            margin-bottom: 0.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .step-desc { color: var(--muted); font-size: 0.88rem; margin: 0; }
+
+        /* Table */
+        .table-wrap {
+            overflow: hidden;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface-solid);
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+        th, td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border);
+            text-align: right;
+            vertical-align: top;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.95);
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(56, 189, 248, 0.04); }
+
+        code {
+            font-family: var(--mono);
+            font-size: 0.8em;
+            font-weight: 500;
+            direction: ltr;
+            display: inline-block;
+            background: rgba(129, 140, 248, 0.1);
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            padding: 0.08rem 0.4rem;
+            border-radius: 6px;
+            color: #c7d2fe;
+            vertical-align: baseline;
+        }
+
+        .pill {
+            display: inline-block;
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            margin: 0.15rem 0 0.15rem 0.35rem;
+            direction: ltr;
+        }
+
+        .pill-live { background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.35); color: #86efac; }
+        .pill-warn { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); color: #fde68a; }
+
+        /* Prompts */
+        .prompt-box { display: flex; flex-direction: column; gap: 0.55rem; }
+
+        .prompt {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.7);
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .prompt-text { flex: 1; }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
+            order: -1;
+            font-family: var(--font);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .copy-btn:hover { color: var(--text); border-color: var(--primary); }
+        .copy-btn:active { transform: scale(0.95); }
+        .copy-btn.copied { color: var(--success); border-color: rgba(74, 222, 128, 0.5); }
+        .copy-btn.failed { color: var(--danger); border-color: rgba(251, 113, 133, 0.5); }
+        .code-copy.failed { color: #fda4af; border-color: rgba(251, 113, 133, 0.5); background: rgba(251, 113, 133, 0.12); }
+
+        /* CLI command rows */
+        .cli-block {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            background: var(--code-bg);
+            margin-bottom: 0.45rem;
+            direction: ltr;
+            text-align: left;
+            transition: border-color 0.18s, background 0.18s;
+        }
+
+        .cli-block:hover { border-color: rgba(56, 189, 248, 0.32); }
+
+        .cli-block::before {
+            content: "$";
+            flex-shrink: 0;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #4ade80;
+        }
+
+        .cli-block > code {
+            flex: 1;
+            min-width: 0;
+            overflow-x: auto;
+            white-space: pre;
+            background: none;
+            border: none;
+            padding: 0;
+            border-radius: 0;
+            display: block;
+            font-family: var(--mono);
+            font-size: 0.79rem;
+            color: #cdd6f4;
+        }
+
+        .cli-block > code::-webkit-scrollbar { height: 6px; }
+        .cli-block > code::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 6px; }
+
+        .cli-block > span {
+            flex-shrink: 0;
+            max-width: 42%;
+            color: var(--muted);
+            direction: rtl;
+            text-align: right;
+            font-family: var(--font);
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding-right: 0.7rem;
+            border-right: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        @media (max-width: 720px) {
+            .cli-block { flex-wrap: wrap; }
+            .cli-block > span { max-width: 100%; border-right: none; padding-right: 0; padding-top: 0.35rem; }
+        }
+
+        /* Tabs */
+        .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+
+        .tab {
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active, .tab:hover {
+            color: var(--text);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        footer {
+            margin-top: 3rem;
+            padding: 2rem 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--glass);
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        footer strong { color: var(--text); }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            direction: ltr;
+            text-align: center;
+        }
+
+        .flow-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+        }
+
+        .flow-box {
+            padding: 0.55rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.85);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            direction: rtl;
+        }
+
+        .flow-box.highlight {
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.12);
+            color: #bae6fd;
+        }
+
+        .flow-arrow {
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.55;
+            line-height: 1;
+        }
+
+        /* ---------- Code blocks ---------- */
+        pre {
+            margin: 0;
+            padding: 0.95rem 1.1rem;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            background: transparent;
+            border: none;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            line-height: 1.75;
+            color: #cdd6f4;
+            tab-size: 4;
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: inherit;
+            font-family: inherit;
+            display: block;
+            color: inherit;
+        }
+
+        .code-block {
+            position: relative;
+            margin: 0 0 0.85rem;
+            border-radius: 13px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: var(--code-bg);
+            overflow: hidden;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+        }
+
+        .code-head {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--code-head);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+            direction: ltr;
+        }
+
+        .code-dots { display: inline-flex; gap: 0.3rem; margin-left: auto; }
+
+        .code-dots i {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .code-dots i:nth-child(1) { background: #ff5f57; }
+        .code-dots i:nth-child(2) { background: #febc2e; }
+        .code-dots i:nth-child(3) { background: #28c840; }
+
+        .code-lang {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #7f8ba6;
+        }
+
+        .code-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
+            font-family: var(--font);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.26rem 0.6rem;
+            border-radius: 7px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(148, 163, 184, 0.08);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .code-copy:hover {
+            color: #e2e8f0;
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        .code-copy:active { transform: scale(0.95); }
+
+        /* Smooth icon swap */
+        .ico-swap {
+            position: relative;
+            display: inline-block;
+            width: 0.95rem;
+            height: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .ico-swap .ico {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.6, 0.64, 1);
+        }
+
+        .ico-swap .ico-done,
+        .ico-swap .ico-fail {
+            opacity: 0;
+            transform: scale(0.4) rotate(-30deg);
+        }
+
+        .copied .ico-swap .ico-idle,
+        .failed .ico-swap .ico-idle {
+            opacity: 0;
+            transform: scale(0.4) rotate(30deg);
+        }
+
+        .copied .ico-swap .ico-done,
+        .failed .ico-swap .ico-fail {
+            opacity: 1;
+            transform: none;
+        }
+
+        .copy-label {
+            min-width: 2rem;
+            text-align: center;
+            transition: color 0.2s;
+        }
+
+        .code-copy.copied {
+            color: #86efac;
+            border-color: rgba(74, 222, 128, 0.5);
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        .code-body { display: flex; align-items: stretch; }
+
+        .code-gutter {
+            flex-shrink: 0;
+            padding: 0.95rem 0.6rem 0.95rem 0.85rem;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            line-height: 1.75;
+            text-align: right;
+            color: #3e4a63;
+            background: rgba(255, 255, 255, 0.015);
+            border-right: 1px solid var(--code-line);
+            user-select: none;
+            direction: ltr;
+            white-space: pre;
+        }
+
+        .code-body > pre { flex: 1; min-width: 0; }
+
+        pre::-webkit-scrollbar { height: 8px; }
+        pre::-webkit-scrollbar-track { background: transparent; }
+        pre::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 8px; }
+
+        /* Compact command rows */
+        .cmd {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            background: var(--code-bg);
+            direction: ltr;
+            transition: border-color 0.18s;
+        }
+
+        .cmd:hover { border-color: rgba(56, 189, 248, 0.3); }
+
+        .cmd-prompt {
+            flex-shrink: 0;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #4ade80;
+        }
+
+        .cmd-text {
+            flex: 1;
+            min-width: 0;
+            overflow-x: auto;
+            white-space: pre;
+            font-family: var(--mono);
+            font-size: 0.79rem;
+            color: #cdd6f4;
+        }
+
+        .cmd-text::-webkit-scrollbar { height: 6px; }
+        .cmd-text::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 6px; }
+
+        .cmd-note {
+            margin: 0.3rem 0 0.7rem;
+            padding-right: 0.15rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .code-caption {
+            margin: 0.35rem 0 0.65rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* Accordion */
+        .accordion { display: flex; flex-direction: column; gap: 0.55rem; }
+
+        .acc-item {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.55);
+            overflow: hidden;
+        }
+
+        .acc-trigger > span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .acc-trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.15rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.98rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: right;
+        }
+
+        .acc-trigger:hover { background: rgba(56, 189, 248, 0.05); }
+
+        .acc-icon {
+            flex-shrink: 0;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--primary);
+            font-size: 0.85rem;
+            transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.2s;
+        }
+
+        .acc-trigger:hover .acc-icon { background: rgba(56, 189, 248, 0.22); }
+
+        .acc-item.open .acc-icon { transform: rotate(180deg); }
+
+        .acc-body {
+            display: none;
+            padding: 0 1.15rem 1.15rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .acc-item.open .acc-body { display: block; }
+
+        /* Decision map */
+        .decision-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .decision-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .decision {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+        }
+
+        .decision-q {
+            flex-shrink: 0;
+            width: 2.1rem;
+            height: 2.1rem;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 1.05rem;
+            color: var(--primary);
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+
+        .decision h4 {
+            margin: 0 0 0.25rem;
+            font-size: 0.92rem;
+            font-weight: 800;
+        }
+
+        .decision p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 1rem 1.15rem;
+            border-radius: 14px;
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            background: rgba(251, 191, 36, 0.08);
+            color: #fde68a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .alert-info {
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.08);
+            color: #bae6fd;
+        }
+
+        h3.section-mini {
+            margin: 1.25rem 0 0.65rem;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        /* Concept cards */
+        .concepts { display: flex; flex-direction: column; gap: 0.85rem; }
+
+        .concept {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.82));
+            padding: 1.15rem 1.3rem;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+
+        .concept:hover { border-color: rgba(56, 189, 248, 0.26); transform: translateY(-2px); }
+
+        .concept-head {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .concept-icon {
+            flex-shrink: 0;
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            font-size: 1.15rem;
+            color: var(--primary);
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.22);
+        }
+
+        .concept-title { font-size: 1.08rem; font-weight: 900; margin: 0; }
+
+        .concept-en {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: 0.45rem;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .concept-tag {
+            margin: 0;
+            font-size: 0.84rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .concept-row {
+            display: grid;
+            grid-template-columns: 5.5rem 1fr;
+            gap: 0.4rem 0.75rem;
+            padding: 0.55rem 0;
+            border-top: 1px dashed rgba(148, 163, 184, 0.12);
+        }
+
+        .concept-row:first-of-type { border-top: none; padding-top: 0; }
+
+        .concept-label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--primary);
+            padding-top: 0.12rem;
+        }
+
+        .concept-row p { margin: 0; font-size: 0.9rem; color: #cbd5e1; font-weight: 500; line-height: 1.75; }
+        .concept-row .warn { color: #fde68a; }
+        .concept-row .good { color: #86efac; }
+
+        .concept-row .code-block { margin: 0.15rem 0 0; }
+
+        @media (max-width: 560px) {
+            .concept-row { grid-template-columns: 1fr; gap: 0.15rem; }
+            .concept-label { padding-top: 0; }
+        }
+
+        .analogy {
+            border: 1px solid rgba(129, 140, 248, 0.28);
+            background: linear-gradient(145deg, rgba(129, 140, 248, 0.12), rgba(56, 189, 248, 0.06));
+            border-radius: var(--radius);
+            padding: 1.35rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .analogy h3 { margin: 0 0 0.6rem; font-size: 1.1rem; font-weight: 900; }
+        .analogy p { margin: 0 0 0.75rem; font-size: 0.95rem; color: #dbeafe; font-weight: 500; }
+        .analogy p:last-child { margin-bottom: 0; }
+
+        .env-live {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            direction: ltr;
+            padding: 0.12rem 0.45rem;
+            border-radius: 6px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.28);
+            color: #86efac;
+        }
+
+        .env-table { font-size: 0.82rem; }
+        .env-table td:first-child { font-family: var(--mono); direction: ltr; text-align: left; white-space: nowrap; color: #bae6fd; font-size: 0.78rem; }
+        .env-table .val { font-family: var(--mono); font-size: 0.76rem; color: #fde68a; direction: ltr; text-align: left; }
+        .env-table .def { color: var(--muted); font-size: 0.78rem; }
+
+        .live-grid {
+            display: grid;
+            gap: 0.55rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 720px) { .live-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .live-item {
+            padding: 0.7rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+        }
+
+        .live-item kbd {
+            display: block;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--muted);
+            direction: ltr;
+            text-align: left;
+            margin-bottom: 0.25rem;
+        }
+
+        .live-item span { font-size: 0.88rem; font-weight: 700; direction: ltr; display: block; text-align: left; }
+
+        /* Walkthrough steps */
+        .walk { display: flex; flex-direction: column; gap: 0.9rem; }
+
+        .walk-step {
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.82));
+            padding: 1.2rem 1.35rem;
+            transition: border-color 0.25s;
+        }
+
+        .walk-step:hover { border-color: rgba(56, 189, 248, 0.26); }
+
+        .walk-head {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .walk-title { font-size: 1.02rem; font-weight: 800; }
+
+        .walk-file {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #7dd3fc;
+            direction: ltr;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-radius: 6px;
+            padding: 0.1rem 0.45rem;
+            margin-right: auto;
+        }
+
+        .walk-desc {
+            margin: 0 0 0.85rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .walk-step .code-block:last-child { margin-bottom: 0; }
+
+        .scenario {
+            display: grid;
+            gap: 0.65rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 720px) { .scenario { grid-template-columns: repeat(3, 1fr); } }
+
+        .scenario-item {
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+        }
+
+        .scenario-item h4 {
+            margin: 0 0 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .scenario-item p { margin: 0; font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+
+        /* English blocks */
+        .en {
+            direction: ltr;
+            text-align: left;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+        }
+
+        .section-sub .en,
+        .en-note {
+            display: block;
+            margin-top: 0.2rem;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.78);
+            font-weight: 500;
+            font-style: italic;
+        }
+
+        .en-guide {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .en-guide h3 {
+            margin: 0 0 0.35rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .en-guide p { margin: 0 0 0.85rem; color: var(--muted); font-size: 0.9rem; font-weight: 500; }
+        .en-guide ul { margin: 0 0 0.85rem; padding-left: 1.2rem; color: var(--muted); font-size: 0.88rem; }
+        .en-guide li { margin-bottom: 0.3rem; }
+        .en-guide strong { color: var(--text); }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 1.85rem;
+            height: 1.85rem;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            font-size: 0.82rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: #04121f;
+        }
+
+        .lang-toggle {
+            display: inline-flex;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .lang-toggle button {
+            font-family: var(--font);
+            font-size: 0.76rem;
+            font-weight: 800;
+            padding: 0.35rem 0.7rem;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .lang-toggle button.active {
+            background: rgba(56, 189, 248, 0.16);
+            color: #bae6fd;
+        }
+
+        body.hide-en .en-only { display: none !important; }
+        body.hide-ar .ar-only { display: none !important; }
+
+        /* Syntax highlighting — Palenight-inspired */
+        .tok-comment { color: #5f7186; font-style: italic; }
+        .tok-string  { color: #c3e88d; }
+        .tok-var     { color: #f07178; }
+        .tok-keyword { color: #c792ea; }
+        .tok-func    { color: #82aaff; }
+        .tok-number  { color: #f78c6c; }
+        .tok-op      { color: #89ddff; }
+        .tok-key     { color: #ffcb6b; }
+        .tok-tag     { color: #f07178; }
+        .tok-attr    { color: #ffcb6b; }
+        .tok-flag    { color: #f78c6c; }
+        .tok-class   { color: #ffcb6b; }
+
+        /* Scroll progress */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 3px;
+            z-index: 100;
+            background: linear-gradient(90deg, var(--primary), var(--primary-2), var(--accent));
+            transform: scaleX(0);
+            transform-origin: right center;
+            transition: transform 0.08s linear;
+        }
+
+        /* Search */
+        .search-wrap {
+            position: relative;
+            flex: 1 1 200px;
+            max-width: 280px;
+        }
+
+        .search-input {
+            width: 100%;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            padding: 0.5rem 2.2rem 0.5rem 2.2rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.85);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input::placeholder { color: var(--muted); font-weight: 500; }
+
+        .search-input:focus {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 0.75rem;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .search-kbd {
+            position: absolute;
+            top: 50%;
+            left: 0.6rem;
+            transform: translateY(-50%);
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 0.05rem 0.3rem;
+            pointer-events: none;
+        }
+
+        .search-count {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 0.4rem;
+        }
+
+        [hidden] { display: none !important; }
+
+        mark {
+            background: rgba(251, 191, 36, 0.28);
+            color: #fde68a;
+            border-radius: 4px;
+            padding: 0 0.15rem;
+        }
+
+        .empty-state {
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            border-radius: var(--radius);
+            border: 1px dashed var(--border);
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* Scrollspy */
+        .nav-links a {
+            position: relative;
+            padding: 0.2rem 0;
+        }
+
+        .nav-links a::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-2));
+            transition: width 0.25s ease;
+        }
+
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        .nav-links a.active::after { width: 100%; }
+
+        /* Reveal on scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.shown { opacity: 1; transform: none; }
+
+        /* Back to top */
+        .to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 60;
+            width: 2.9rem;
+            height: 2.9rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(10px);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(12px);
+            transition: all 0.25s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .to-top.visible { opacity: 1; visibility: visible; transform: none; }
+        .to-top:hover { border-color: var(--primary); color: var(--primary); }
+
+        .cli-block > .code-copy { order: -1; }
+
+        /* Tool filter */
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-chip {
+            font-family: var(--font);
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active, .filter-chip:hover {
+            color: var(--text);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .tool-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.62);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .tool-card:hover { border-color: rgba(56, 189, 248, 0.3); transform: translateY(-2px); }
+
+        .tool-key {
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #bae6fd;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .tool-desc { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+
+        .tool-flags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+        .flag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .flag-guest { border-color: rgba(74, 222, 128, 0.35); color: #86efac; background: rgba(74, 222, 128, 0.08); }
+        .flag-approval { border-color: rgba(251, 191, 36, 0.35); color: #fde68a; background: rgba(251, 191, 36, 0.08); }
+
+        .tool-grid { display: grid; gap: 0.6rem; }
+        @media (min-width: 640px) { .tool-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1000px) { .tool-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        /* Accordion controls */
+        .acc-controls {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .mini-btn {
+            font-family: var(--font);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .mini-btn:hover { color: var(--text); border-color: var(--primary); }
+
+        /* Anchor links on headings */
+        .anchor {
+            margin-right: 0.45rem;
+            font-size: 0.85em;
+            color: var(--muted);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        h2:hover .anchor { opacity: 1; }
+
+        ::selection { background: rgba(56, 189, 248, 0.3); color: #fff; }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #050816; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 8px; border: 2px solid #050816; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .reveal { opacity: 1; transform: none; }
+        }
+
+        @media print {
+            body { background: #fff; color: #000; }
+            .grid-bg, .topnav, .to-top, .progress-bar, .copy-btn, .code-copy, .search-wrap { display: none !important; }
+            .card, .table-wrap, pre { break-inside: avoid; border-color: #ccc; }
+            .acc-body { display: block !important; }
+            a { color: #000; }
+        }
+
+        @media (max-width: 640px) {
+            .hero { padding: 2rem 1.25rem; }
+            h1 { font-size: 1.75rem; }
+            .nav-links { font-size: 0.8rem; gap: 0.3rem 0.75rem; }
+            .search-wrap { max-width: 100%; }
+            .to-top { bottom: 1rem; left: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01"/><path d="M6 18h.01"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+</svg>
+
+<div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+<div class="grid-bg" aria-hidden="true"></div>
+
+<div class="shell">
+    <nav class="topnav host-topnav">
+        <div class="topnav-inner host-topnav-inner">
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true"><svg class="ico"><use href="#i-sparkles"/></svg></span>
+                <span>Limen AI</span>
+            </div>
+
+            @include('demo.partials.capabilities-navbar')
+
+            <div class="host-nav-actions">
+                <div class="search-wrap">
+                    <span class="search-icon" aria-hidden="true"><svg class="ico"><use href="#i-search"/></svg></span>
+                    <input class="search-input" id="siteSearch" type="search" placeholder="ابحث في الدليل…" aria-label="ابحث في الدليل">
+                    <span class="search-kbd" aria-hidden="true">/</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="learning-paths" class="host-paths-strip">
+        <div class="host-paths-inner">
+            <div>
+                <strong>مسارات التعلّم (إنجليزي)</strong>
+                <span>ثلاث مسارات جاهزة: ويدجت FAQ → أدوات → سير عمل — على صفحة Package docs.</span>
+            </div>
+            <a class="btn btn-primary btn-sm" href="{{ route('demo.limen-ai.docs.hub') }}#learning-paths">فتح Learning paths</a>
+        </div>
+    </section>
+
+    <header class="hero">
+        <div class="badge-row">
+            <span class="badge badge-ai">حزمة Laravel v1.2</span>
+            <span class="badge badge-live"><span class="live-dot" aria-hidden="true"></span> تجربة حية — Ollama</span>
+            <span class="badge">نموذج qwen3:8b</span>
+        </div>
+
+        <h1>دليل Limen AI الكامل</h1>
+        <p class="lead">
+            كل ما هو متاح في الحزمة، وكيف تضيف وكلاء وأدوات ومهارات ومعرفة وسير عمل — بالعربية.
+            هذا التطبيق يتضمن عرضاً تشغيلياً كاملاً لـ <strong>لوجستيات 3PL</strong> مع Ollama محلياً.
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num" data-count="15">15</div>
+                <div class="stat-label">أداة تشغيلية</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" data-count="9">9</div>
+                <div class="stat-label">وكلاء مسجّلون</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" data-count="37" data-suffix="+">37+</div>
+                <div class="stat-label">اختبار آلي</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num" data-count="24">24</div>
+                <div class="stat-label">أمر CLI</div>
+            </div>
+        </div>
+
+        <div class="cta-row">
+            <a class="btn btn-primary" href="#concepts"><svg class="ico"><use href="#i-book-open"/></svg> ابدأ من المفاهيم</a>
+            <a class="btn btn-ghost" href="{{ route('demo.limen-ai.docs.hub') }}"><svg class="ico"><use href="#i-book"/></svg> Official package docs (EN)</a>
+            <a class="btn btn-ghost" href="#integration"><svg class="ico"><use href="#i-book"/></svg> Integration Guide (English)</a>
+            <a class="btn btn-ghost" href="{{ url('/') }}"><svg class="ico"><use href="#i-external"/></svg> فتح ويدجت الدردشة</a>
+            <a class="btn btn-ghost" href="{{ route('login.demo') }}">تسجيل دخول تجريبي</a>
+            <a class="btn btn-ghost" href="{{ route('staff.chat') }}">محادثة الموظفين</a>
+            <a class="btn btn-ghost" href="{{ route('demo.3pl') }}">معرّفات العرض</a>
+        </div>
+    </header>
+
+    <section id="concepts">
+        <div class="section-head">
+            <div>
+                <h2>المفاهيم — اشرحها لي ببساطة</h2>
+                <p class="section-sub">
+                    يعني إيه Tool؟ يعني إيه Skill؟ والفرق بينهم وبين Knowledge؟
+                    <span class="en">Every core concept explained with a plain analogy, a real example, and the mistake people make.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="analogy">
+            <h3>التشبيه الكبير — تخيّل إنك بتوظّف موظف خدمة عملاء جديد</h3>
+            <p>
+                كل مصطلح في الحزمة له ما يقابله في الشركة الحقيقية. لو فهمت التشبيه ده، باقي الصفحة هيبقى سهل.
+            </p>
+            <div class="table-wrap" style="margin-top: 0.85rem;">
+                <table>
+                    <thead>
+                        <tr><th>في الحزمة</th><th>في الشركة</th><th>الوظيفة</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Agent</code></td><td>الموظف نفسه</td><td>اللي بيستقبل السؤال ويرد</td></tr>
+                        <tr><td><code>Instructions</code></td><td>التوصيف الوظيفي</td><td>ورقة مكتوب فيها اشتغل إزاي</td></tr>
+                        <tr><td><code>Tool</code></td><td>إيده اللي بتنفّذ</td><td>يفتح النظام ويجيب البيانات</td></tr>
+                        <tr><td><code>Skill</code></td><td>دورة تدريبية</td><td>تعليمات + أدوات مجمّعة في حزمة</td></tr>
+                        <tr><td><code>Knowledge</code></td><td>الكُتيّب على مكتبه</td><td>معلومات ثابتة يرجع لها</td></tr>
+                        <tr><td><code>Memory</code></td><td>دفتر ملاحظاته</td><td>يفتكر تفضيلات العميل</td></tr>
+                        <tr><td><code>Workflow</code></td><td>إجراء رسمي</td><td>خطوات مرقّمة بترتيب ثابت</td></tr>
+                        <tr><td><code>Approval</code></td><td>توقيع المدير</td><td>إذن قبل خطوة خطيرة</td></tr>
+                        <tr><td><code>Authorization</code></td><td>بطاقة الدخول</td><td>مين يدخل فين</td></tr>
+                        <tr><td><code>Provider</code></td><td>عقله</td><td>النموذج اللي بيفكر</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg class="ico"><use href="#i-info"/></svg>
+            <div>
+                <strong>English learning paths &amp; advanced tutorial:</strong>
+                Three curated tracks (FAQ widget → tools → workflows), troubleshooting, and a full support-system walkthrough —
+                <a href="{{ route('demo.limen-ai.docs.hub') }}#learning-paths">open package docs (EN)</a>.
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg class="ico"><use href="#i-info"/></svg>
+            <strong>أهم فكرة في الحزمة كلها:</strong> النموذج (الـ LLM) <strong>لا ينفّذ أي شيء بنفسه</strong>.
+            هو بس بيقول «أنا عايز أنادي الأداة الفلانية بالمدخلات دي». بعد كده Laravel هي اللي تقرر:
+            هل المستخدم ده مسموح له؟ هل المدخلات صحيحة؟ وهي اللي تنفّذ فعلاً وترجّع النتيجة.
+            يعني حتى لو النموذج «اتجنن» أو حد حاول يخدعه، مش هيقدر يعمل حاجة مش مسموح بيها.
+        </div>
+
+        <div class="concepts">
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-bot"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الوكيل <span class="concept-en">Agent</span></h3>
+                        <p class="concept-tag">الموظف نفسه</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>موظف ليه اسم، وشخصية، وحدود صلاحيات، وقائمة بالحاجات اللي يقدر يعملها.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        ملف إعدادات بيحدد: أي نموذج يستخدم، إيه تعليماته، أنهي أدوات متاحة له،
+                        مين يقدر يكلّمه، وكام خطوة أقصى يعملها. مفيش كود — كله إعدادات.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مثال</span>
+                    <p>
+                        <code>app_assistant</code> للزوار (أداتين بس)، و<code>three_pl_agent</code>
+                        للموظفين (15 أداة). نفس التطبيق، وكيلين مختلفين تماماً.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">غلط شائع</span>
+                    <p class="warn">تعمل وكيل واحد وتحطله كل الأدوات. النماذج المحلية بتتوه بعد ~10 أدوات. قسّم حسب الجمهور.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-wrench"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الأداة <span class="concept-en">Tool</span></h3>
+                        <p class="concept-tag">الإيد اللي بتنفّذ</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>الموظف عايز يعرف حالة الطلب؟ لازم يفتح النظام. الأداة هي «فتح النظام».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        كلاس PHP عادي فيه دالتين مهمّتين: <code>authorize()</code> بتقول مين مسموح له،
+                        و<code>handle()</code> بتنفّذ الشغل الفعلي (استعلام قاعدة بيانات، نداء API، إرسال إيميل).
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مثال</span>
+                    <div class="code-block-holder">
+                        <pre data-lang="php"><code>public function handle(array $input, ToolExecutionContext $context): array
+{
+    $order = Order::where('number', $input['order_number'])-&gt;first();
+
+    return ['status' =&gt; $order?-&gt;status ?? 'not_found'];
+}</code></pre>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">استخدمها لما</span>
+                    <p class="good">المعلومة بتتغير: حالة شحنة، رصيد مخزون، سعر، حساب عميل. أو لما تحتاج تعمل حاجة فعلاً (تفتح تذكرة، تبعت رسالة).</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">غلط شائع</span>
+                    <p class="warn">تكتب <code>description</code> غامض. النموذج بيقرأ الوصف ده بس عشان يقرر متى يستدعي الأداة — لو مش واضح، مش هيناديها.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-target"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">المهارة <span class="concept-en">Skill</span></h3>
+                        <p class="concept-tag">دورة تدريبية = تعليمات + أدوات</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>بدل ما تشرح لكل موظف جديد نفس الكلام، تعمل «دورة تدريب المبيعات» وتحضّرها له.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        حزمة قابلة لإعادة الاستخدام بتجمع: تعليمات متخصصة + مجموعة أدوات + قواعد معرفة.
+                        تربطها بأي وكيل بسطر واحد.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مثال</span>
+                    <div class="code-block-holder">
+                        <pre data-lang="php"><code>'store_public_help' =&gt; [
+    'instructions' =&gt; 'لما المستخدم يذكر رقم طلب، نادِ get_order_status قبل ما ترد.',
+    'tools' =&gt; ['get_order_status'],
+    'knowledge' =&gt; ['store_faq'],
+],</code></pre>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">أهم قاعدة</span>
+                    <p class="warn">
+                        الوكيل يشوف <strong>تقاطع</strong> الأدوات: اللي في <code>agent.tools</code>
+                        <strong>و</strong> في <code>skill.tools</code>. لو الأداة في واحد بس — مش هتشتغل خالص،
+                        والوكيل هيرد رد عام كأن الأداة مش موجودة.
+                    </p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-book-open"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">قاعدة المعرفة <span class="concept-en">Knowledge / RAG</span></h3>
+                        <p class="concept-tag">الكُتيّب على المكتب</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>ملف الأسئلة الشائعة اللي الموظف بيفتحه لما حد يسأل «سياسة الإرجاع إيه؟».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        فقرات نصية قصيرة بتكتبها في الإعدادات. لما ييجي سؤال، النظام بيدوّر على أقرب
+                        فقرات ويحطّها في سياق المحادثة قبل ما النموذج يرد. ده اسمه RAG.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">استخدمها لما</span>
+                    <p class="good">المعلومة <strong>ثابتة</strong>: سياسات، ساعات العمل، شروط، تعريفات. حاجة مش بتتغير كل دقيقة.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">غلط شائع</span>
+                    <p class="warn">
+                        تكتب مستند بيناقض أداة. مثلاً تكتب «لا أستطيع الوصول لبيانات الطلبات، راجع البوابة»
+                        وإنت مفعّل <code>get_order_status</code> — النموذج هيصدّق المستند ويتجاهل الأداة.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">نصيحة</span>
+                    <p>اكتب فقرات من 2 لـ 4 جمل. متحطّش PDF كامل في مستند واحد — البحث هيبوظ.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-cpu"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الذاكرة <span class="concept-en">Memory</span></h3>
+                        <p class="concept-tag">دفتر الملاحظات الصغير</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>الموظف بيكتب جنب اسم العميل: «بيفضّل العربي — منطقته الرياض».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        نوعان: <strong>ذاكرة المحادثة</strong> (يفتكر اللي اتقال في نفس الشات)،
+                        و<strong>ذاكرة المستخدم</strong> (تفضيلات تفضل معاه عبر المحادثات).
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الأمان</span>
+                    <p>
+                        مقيّدة بقائمة مفاتيح مسموحة (<code>allowed_keys</code>) وحد أقصى للطول،
+                        عشان ما يتخزّنش كلام عشوائي أو بيانات حساسة.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مش للـ</span>
+                    <p class="warn">تخزين بيانات أعمال. الطلبات والشحنات مكانها قاعدة البيانات وتوصلها بأداة — مش بالذاكرة.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-zap"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">سير العمل <span class="concept-en">Workflow</span></h3>
+                        <p class="concept-tag">إجراء رسمي بخطوات</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">التشبيه</span>
+                    <p>«لو شحنة اتأخرت: اكتب مسودة اعتذار ← خُد موافقة المشرف ← ابعتها للعميل».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        خطوات مرقّمة بترتيب محدد. كل خطوة نوعها واحد من أربعة:
+                        <code>agent</code> (وكيل يكتب حاجة)، <code>tool</code> (تنفيذ أداة)،
+                        <code>approval</code> (استنى موافقة)، <code>branch</code> (لو كذا اعمل كذا).
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الفرق عن الوكيل</span>
+                    <p>
+                        الوكيل بيقرر بنفسه أي أداة يستخدم. الـ Workflow إنت اللي حاددله الترتيب سلفاً —
+                        استخدمه لما الإجراء لازم يمشي بنفس الطريقة كل مرة.
+                    </p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-shield"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الموافقة والصلاحيات <span class="concept-en">Approval &amp; Authorization</span></h3>
+                        <p class="concept-tag">توقيع المدير + بطاقة الدخول</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">طبقتان</span>
+                    <p>
+                        <strong>الصلاحية</strong> بتقرر «هل ينفع أصلاً؟» — على مستوى الوكيل
+                        (<code>guest_allowed</code>) وعلى مستوى الأداة (<code>authorize()</code>).<br>
+                        <strong>الموافقة</strong> بتقرر «تمام ينفع، بس استنى المستخدم يأكّد» — بـ <code>confirmation: true</code>.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">القاعدة</span>
+                    <p class="good">
+                        أي أداة <strong>بتغيّر</strong> حاجة في النظام (إرسال رسالة، فتح تذكرة، تعديل طلب)
+                        لازم يكون عليها <code>confirmation: true</code>.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الضيوف</span>
+                    <p>
+                        <code>guest_safe: true</code> على الأداة، و<code>guest_allowed: true</code> على الوكيل.
+                        الاتنين لازم يتفقوا — لو واحد ناقص، الزائر هيترفض.
+                    </p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-layers"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">مخطط المدخلات <span class="concept-en">input_schema</span></h3>
+                        <p class="concept-tag">استمارة الطلب</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        بتقول للنموذج: «الأداة دي محتاجة منك الحقول دي بالظبط». النظام بيتحقق من المدخلات
+                        قبل ما يشغّل الأداة، فمستحيل توصلك بيانات ناقصة أو بنوع غلط.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مثال</span>
+                    <div class="code-block-holder">
+                        <pre data-lang="php"><code>'input_schema' =&gt; [
+    'order_number' =&gt; ['type' =&gt; 'string', 'required' =&gt; true],
+    'limit' =&gt; ['type' =&gt; 'integer', 'required' =&gt; false],
+],</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-server"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">المزوّد والنموذج <span class="concept-en">Provider &amp; Model</span></h3>
+                        <p class="concept-tag">العقل اللي بيفكر</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        المزوّد = الشركة (OpenAI، Anthropic، Gemini، أو Ollama محلي).
+                        النموذج = الموديل نفسه (<code>gpt-4.1-mini</code>، <code>qwen3:8b</code>).
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">ميزة</span>
+                    <p class="good">كل وكيل يقدر ياخد مزوّد ونموذج مختلف. وكيل بسيط على نموذج رخيص، ووكيل معقّد على نموذج أقوى.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">للاختبارات</span>
+                    <p><code>LIMEN_AI_PROVIDER=fake</code> — نموذج وهمي بردود ثابتة. اختباراتك تمشي في CI بدون أي تكلفة.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-globe"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الموصّل <span class="concept-en">Connector</span></h3>
+                        <p class="concept-tag">خط تليفون لجهة خارجية</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">يعني إيه</span>
+                    <p>
+                        لو عايز الوكيل يكلّم API خارجي (شركة شحن مثلاً)، مش لازم تكتب كلاس PHP.
+                        تعرّف الاتصال في الإعدادات، وتعمل أداة تشاور عليه.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الأمان</span>
+                    <p>الحزمة بتمنع الاتصال بعناوين IP داخلية تلقائياً (حماية SSRF)، وبتخفي التوكنات من السجلات.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-database"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">الحفظ والطابور <span class="concept-en">Persistence &amp; Queue</span></h3>
+                        <p class="concept-tag">الأرشيف وغرفة الانتظار</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الحفظ</span>
+                    <p>
+                        بعد <code>php artisan migrate</code>، المحادثات والرسائل والتشغيلات بتتسجّل في
+                        قاعدة البيانات — فالمستخدم يلاقي محادثته القديمة لما يرجع.
+                    </p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الطابور</span>
+                    <p>
+                        لو النموذج بطيء، تقدر تشغّل الرد في الخلفية بـ
+                        <code>LIMEN_AI_QUEUE_AGENT_RUNS=true</code> — بس ساعتها محتاج
+                        <code>queue:work</code> شغّال، والجلسة مش بتنتقل للعامل تلقائياً.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <h3 class="section-mini">جدول الحيرة — إمتى أستخدم إيه؟</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>الموقف</th><th>الحل</th><th>ليه</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>معلومة ثابتة (سياسة إرجاع، ساعات عمل)</td>
+                        <td><span class="pill pill-live">Knowledge</span></td>
+                        <td>مش محتاجة استعلام — اكتبها مرة وخلاص</td>
+                    </tr>
+                    <tr>
+                        <td>معلومة بتتغير (حالة شحنة، رصيد مخزون)</td>
+                        <td><span class="pill pill-live">Tool</span></td>
+                        <td>لازم تُقرأ من قاعدة البيانات لحظياً</td>
+                    </tr>
+                    <tr>
+                        <td>حاجة بتغيّر في النظام (إرسال، حذف، تعديل)</td>
+                        <td><span class="pill pill-warn">Tool + confirmation</span></td>
+                        <td>لازم موافقة بشرية قبل التنفيذ</td>
+                    </tr>
+                    <tr>
+                        <td>نفس التعليمات بتتكرر في أكتر من وكيل</td>
+                        <td><span class="pill pill-live">Skill</span></td>
+                        <td>اكتبها مرة واربطها بالكل</td>
+                    </tr>
+                    <tr>
+                        <td>خطوات لازم تمشي بترتيب ثابت كل مرة</td>
+                        <td><span class="pill pill-live">Workflow</span></td>
+                        <td>مش سايبها لاجتهاد النموذج</td>
+                    </tr>
+                    <tr>
+                        <td>تفضيل شخصي للمستخدم (لغة، توقيت)</td>
+                        <td><span class="pill pill-live">Memory</span></td>
+                        <td>صغيرة ومرتبطة بالشخص</td>
+                    </tr>
+                    <tr>
+                        <td>جمهور مختلف بصلاحيات مختلفة</td>
+                        <td><span class="pill pill-live">Agent جديد</span></td>
+                        <td>أأمن من وكيل واحد بكل الأدوات</td>
+                    </tr>
+                    <tr>
+                        <td>API خارجي بسيط بدون منطق</td>
+                        <td><span class="pill pill-live">Connector</span></td>
+                        <td>إعدادات بدل كلاس PHP</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-mini">رحلة رسالة واحدة — خطوة بخطوة</h3>
+        <div class="card">
+            <div class="timeline">
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">1</span> المستخدم يكتب</div>
+                    <p class="step-desc">«ما حالة الطلب ORD-1001؟» من الويدجت.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">2</span> Laravel تتحقق</div>
+                    <p class="step-desc">مين ده؟ مستخدم مسجّل ولا ضيف؟ ومسموح له يكلّم الوكيل ده أصلاً؟</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">3</span> تجهيز السياق</div>
+                    <p class="step-desc">تعليمات الوكيل + تعليمات المهارة + فقرات المعرفة القريبة + الذاكرة + آخر رسائل المحادثة.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">4</span> النموذج يقترح</div>
+                    <p class="step-desc">«نادِ <code>get_order_status</code> بـ <code>order_number = ORD-1001</code>». هو لسه ما نفّذش حاجة.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">5</span> Laravel تقرر وتنفّذ</div>
+                    <p class="step-desc">تتحقق من الصلاحية، تتحقق من المدخلات، تشغّل <code>handle()</code>، وترجّع JSON حقيقي.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">6</span> النموذج يصيغ الرد</div>
+                    <p class="step-desc">ياخد الـ JSON ويحوّله لجملة مفهومة بلغة المستخدم.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">7</span> الحفظ والتدقيق</div>
+                    <p class="step-desc">الرسالة والرد وكل نداء أداة يتسجّلوا مع معرّف تتبّع وعدد التوكنات.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="install">
+        <div class="section-head">
+            <div>
+                <h2>طرق التثبيت — كل الخيارات</h2>
+                <p class="section-sub">
+                    أربع طرق لتركيب الحزمة في أي مشروع Laravel
+                    <span class="en">Packagist, Git, local path, or a private registry — pick one.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-tab="packagist">Packagist</button>
+            <button class="tab" type="button" data-tab="vcs">Git / VCS</button>
+            <button class="tab" type="button" data-tab="path">مسار محلي</button>
+            <button class="tab" type="button" data-tab="private">Registry خاص</button>
+        </div>
+
+        <div class="tab-panel active" id="panel-packagist">
+            <div class="card">
+                <h3>الطريقة الأسهل — للإنتاج</h3>
+                <p style="margin-bottom: 0.85rem;">لو الحزمة منشورة على Packagist، أمر واحد يكفي.</p>
+                <pre data-lang="bash"><code>composer require limen-ai/limen-ai</code></pre>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-vcs">
+            <div class="card">
+                <h3>من مستودع Git مباشرة — بدون Packagist</h3>
+                <p style="margin-bottom: 0.85rem;">ضِف المستودع في <code>composer.json</code> بتاع المشروع المضيف:</p>
+                <pre data-lang="php"><code>{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/hatem-isnaad/limen-ai.git"
+        }
+    ],
+    "require": {
+        "limen-ai/limen-ai": "^1.2"
+    }
+}</code></pre>
+                <pre data-lang="bash"><code>composer update limen-ai/limen-ai</code></pre>
+                <p style="margin: 0.5rem 0 0; color: var(--muted); font-size: 0.85rem;">
+                    للمستودعات الخاصة: أضف SSH key أو توكن في <code>auth.json</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-path">
+            <div class="card">
+                <h3>مسار محلي بـ symlink — للتطوير</h3>
+                <p style="margin-bottom: 0.85rem;">
+                    استنسخ الحزمة بجانب مشروعك. أي تعديل في كود الحزمة ينعكس فوراً بدون
+                    <code>composer update</code> — وده الوضع المستخدم في هذا المشروع.
+                </p>
+                <pre data-lang="bash"><code>cd ~/Herd
+git clone https://github.com/hatem-isnaad/limen-ai.git limen-ai-main</code></pre>
+                <pre data-lang="php"><code>{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../limen-ai-main",
+            "options": { "symlink": true }
+        }
+    ],
+    "require": {
+        "limen-ai/limen-ai": "^1.2.2@dev"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}</code></pre>
+                <pre data-lang="bash"><code>composer update limen-ai/limen-ai</code></pre>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-private">
+            <div class="card">
+                <h3>Satis أو Private Packagist — للشركات</h3>
+                <p style="margin-bottom: 0.85rem;">وجّه Composer لمستودعك الخاص، وضع بيانات الاعتماد في <code>auth.json</code> (لا تضعها في Git).</p>
+                <pre data-lang="php"><code>{
+    "repositories": [
+        { "type": "composer", "url": "https://packages.your-company.com" }
+    ],
+    "require": { "limen-ai/limen-ai": "^1.2" }
+}</code></pre>
+                <pre data-lang="bash"><code>composer config --global --auth http-basic.packages.your-company.com TOKEN_USER TOKEN_SECRET
+composer require limen-ai/limen-ai</code></pre>
+            </div>
+        </div>
+
+        <h3 class="section-mini">بعد التثبيت — خطوات مشتركة لكل الطرق</h3>
+        <div class="card">
+            <div class="cli-block"><code>php artisan limen-ai:install</code><span>نشر الإعدادات والـ views والـ stubs</span></div>
+            <div class="cli-block"><code>php artisan migrate</code><span>إنشاء جداول limen_ai_* لحفظ المحادثات</span></div>
+            <div class="cli-block"><code>php artisan config:clear</code><span>مسح الكاش بعد تعديل .env</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:doctor</code><span>فحص البيئة والاتصال بالمزوّد</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:validate</code><span>التحقق من الوكلاء والأدوات والمهارات</span></div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: 1rem;">
+            <div class="card">
+                <h3>الحد الأدنى في <code>.env</code></h3>
+                <pre data-lang="env"><code>LIMEN_AI_DEFAULT_AGENT=app_assistant
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+LIMEN_AI_AUTHORIZATION_MODE=simple
+LIMEN_AI_UI_GUEST_ENABLED=true</code></pre>
+            </div>
+            <div class="card">
+                <h3>المتطلبات</h3>
+                <p style="margin-top: 0.6rem;">
+                    PHP <code>^8.2</code><br>
+                    Laravel <code>^11</code> · <code>^12</code> · <code>^13</code><br>
+                    مزوّد نماذج: OpenAI أو Ollama محلي<br>
+                    قاعدة بيانات (اختياري — لحفظ المحادثات)
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="example">
+        <div class="section-head">
+            <div>
+                <h2>مثال كامل من الصفر — مساعد متجر إلكتروني</h2>
+                <p class="section-sub">
+                    من جدول فارغ إلى مساعد يرد ببيانات حقيقية — كل ملف وكل سطر
+                    <span class="en">A complete, production-shaped walkthrough: migration, service, three tools, knowledge, skill, two agents, widget, and tests.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="scenario">
+            <div class="scenario-item">
+                <h4>السيناريو</h4>
+                <p>متجر إلكتروني يريد مساعداً يتابع الطلبات، يفحص المخزون، ويفتح تذاكر دعم.</p>
+            </div>
+            <div class="scenario-item">
+                <h4>الناتج</h4>
+                <p>وكيلان: واحد عام للزوار (بحث بالطلب فقط)، وواحد للموظفين بكل الصلاحيات.</p>
+            </div>
+            <div class="scenario-item">
+                <h4>الوقت المتوقع</h4>
+                <p>حوالي 30 دقيقة — معظمها كتابة منطق الأعمال الخاص بك، لا إعدادات الحزمة.</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 1rem;">
+            <h3>الملفات التي سننشئها</h3>
+            <pre data-lang="text"><code>app/
+├── Models/
+│   ├── Order.php
+│   ├── Product.php
+│   └── SupportTicket.php
+├── Services/
+│   └── StoreService.php              ← منطق الأعمال (لا يعرف شيئاً عن AI)
+└── LimenAi/
+    ├── Tools/
+    │   ├── GetOrderStatus.php        ← أداة قراءة  (آمنة للضيوف)
+    │   ├── CheckProductStock.php     ← أداة قراءة  (موظفين)
+    │   └── CreateSupportTicket.php   ← أداة كتابة  (تحتاج موافقة)
+    └── Agents/
+        ├── store_assistant.php       ← وكيل عام
+        └── store_staff_agent.php     ← وكيل موظفين
+
+config/
+├── limen-ai.php                      ← skills + knowledge + ربط الأدوات
+└── limen-ai-store-tools.php          ← تعريفات الأدوات (ملف منفصل أنظف)
+
+tests/Feature/
+└── StoreAssistantTest.php</code></pre>
+        </div>
+
+        <div class="walk">
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">1</span>
+                    <span class="walk-title">قاعدة البيانات والموديلات</span>
+                    <span class="walk-file">database/migrations · app/Models</span>
+                </div>
+                <p class="walk-desc">ابدأ ببيانات حقيقية. الحزمة لا تفرض أي هيكل — استخدم جداولك الحالية إن وُجدت.</p>
+                <pre data-lang="bash"><code>php artisan make:model Order -mf
+php artisan make:model Product -mf
+php artisan make:model SupportTicket -mf</code></pre>
+                <pre data-lang="php"><code>// database/migrations/xxxx_create_orders_table.php
+Schema::create('orders', function (Blueprint $table) {
+    $table->id();
+    $table->string('number')->unique();          // ORD-1001
+    $table->string('customer_email')->index();
+    $table->string('status')->default('pending'); // pending|paid|shipped|delivered
+    $table->decimal('total', 10, 2);
+    $table->string('tracking_number')->nullable();
+    $table->date('eta')->nullable();
+    $table->timestamps();
+});
+
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->string('sku')->unique();             // SKU-TSHIRT-M
+    $table->string('name');
+    $table->unsignedInteger('stock')->default(0);
+    $table->unsignedInteger('reorder_level')->default(10);
+    $table->timestamps();
+});</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">2</span>
+                    <span class="walk-title">طبقة الخدمة — منطق الأعمال</span>
+                    <span class="walk-file">app/Services/StoreService.php</span>
+                </div>
+                <p class="walk-desc">
+                    ضع منطق الاستعلامات هنا، لا داخل الأدوات. الأدوات تصبح غلافاً رفيعاً، والخدمة قابلة
+                    لإعادة الاستخدام في الـ Controllers والـ Jobs والاختبارات.
+                </p>
+                <pre data-lang="bash"><code>php artisan make:class Services/StoreService</code></pre>
+                <pre data-lang="php"><code>namespace App\Services;
+
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\SupportTicket;
+
+class StoreService
+{
+    /**
+     * @return array&lt;string, mixed&gt;|null
+     */
+    public function findOrder(string $number): ?array
+    {
+        $order = Order::query()->where('number', $number)->first();
+
+        if ($order === null) {
+            return null;
+        }
+
+        return [
+            'order_number' => $order->number,
+            'status' => $order->status,
+            'total' => (float) $order->total,
+            'tracking_number' => $order->tracking_number,
+            'eta' => $order->eta?->toDateString(),
+        ];
+    }
+
+    /**
+     * @return array&lt;string, mixed&gt;|null
+     */
+    public function checkStock(string $sku): ?array
+    {
+        $product = Product::query()->where('sku', $sku)->first();
+
+        if ($product === null) {
+            return null;
+        }
+
+        return [
+            'sku' => $product->sku,
+            'name' => $product->name,
+            'stock' => $product->stock,
+            'is_low' => $product->stock &lt;= $product->reorder_level,
+        ];
+    }
+
+    /**
+     * @return array&lt;string, mixed&gt;
+     */
+    public function openTicket(string $orderNumber, string $subject, int $userId): array
+    {
+        $ticket = SupportTicket::query()->create([
+            'order_number' => $orderNumber,
+            'subject' => $subject,
+            'opened_by' => $userId,
+            'status' => 'open',
+        ]);
+
+        return [
+            'ticket_id' => $ticket->id,
+            'status' => $ticket->status,
+        ];
+    }
+}</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">3</span>
+                    <span class="walk-title">الأداة الأولى — قراءة آمنة للضيوف</span>
+                    <span class="walk-file">app/LimenAi/Tools/GetOrderStatus.php</span>
+                </div>
+                <p class="walk-desc">
+                    <code>authorize()</code> هي بوابة Laravel. ترجع <code>true</code> هنا لأن أي زائر
+                    يملك رقم طلب صحيح يحق له رؤية حالته.
+                </p>
+                <pre data-lang="bash"><code>php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status</code></pre>
+                <pre data-lang="php"><code>namespace App\LimenAi\Tools;
+
+use App\Services\StoreService;
+use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Tools\BaseTool;
+
+class GetOrderStatus extends BaseTool
+{
+    public function __construct(private StoreService $store) {}
+
+    public function key(): string
+    {
+        return 'get_order_status';
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return true; // رقم الطلب نفسه هو المفتاح
+    }
+
+    /**
+     * @param  array&lt;string, mixed&gt;  $input
+     * @return array&lt;string, mixed&gt;
+     */
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
+        $order = $this-&gt;store-&gt;findOrder((string) $input['order_number']);
+
+        if ($order === null) {
+            return ['found' =&gt; false, 'message' =&gt; 'No order with that number.'];
+        }
+
+        return ['found' =&gt; true, ...$order];
+    }
+}</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">4</span>
+                    <span class="walk-title">الأداة الثانية — للموظفين فقط</span>
+                    <span class="walk-file">app/LimenAi/Tools/CheckProductStock.php</span>
+                </div>
+                <p class="walk-desc">نفس البنية، لكن <code>authorize()</code> ترفض غير المسجّلين. المخزون بيانات داخلية.</p>
+                <pre data-lang="php"><code>class CheckProductStock extends BaseTool
+{
+    public function __construct(private StoreService $store) {}
+
+    public function key(): string
+    {
+        return 'check_product_stock';
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context-&gt;userId() !== null;
+    }
+
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
+        $stock = $this-&gt;store-&gt;checkStock((string) $input['sku']);
+
+        return $stock ?? ['found' =&gt; false, 'sku' =&gt; $input['sku']];
+    }
+}</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">5</span>
+                    <span class="walk-title">الأداة الثالثة — كتابة، تحتاج موافقة بشرية</span>
+                    <span class="walk-file">app/LimenAi/Tools/CreateSupportTicket.php</span>
+                </div>
+                <p class="walk-desc">
+                    أي أداة تغيّر حالة النظام يجب أن تُعلَّم بـ <code>confirmation: true</code> في الإعدادات —
+                    عندها تعرض الواجهة زر موافقة قبل التنفيذ.
+                </p>
+                <pre data-lang="php"><code>class CreateSupportTicket extends BaseTool
+{
+    public function __construct(private StoreService $store) {}
+
+    public function key(): string
+    {
+        return 'create_support_ticket';
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context-&gt;userId() !== null;
+    }
+
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
+        return $this-&gt;store-&gt;openTicket(
+            (string) $input['order_number'],
+            (string) $input['subject'],
+            (int) $context-&gt;userId(),
+        );
+    }
+}</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">6</span>
+                    <span class="walk-title">تسجيل الأدوات في ملف منفصل</span>
+                    <span class="walk-file">config/limen-ai-store-tools.php</span>
+                </div>
+                <p class="walk-desc">
+                    فصل تعريفات الأدوات في ملف خاص يبقي <code>limen-ai.php</code> قابلاً للقراءة عندما يكبر المشروع.
+                    الـ <code>description</code> هو ما يقرأه النموذج ليقرر متى يستدعي الأداة — اكتبه بدقة.
+                </p>
+                <pre data-lang="php"><code>&lt;?php
+
+use App\LimenAi\Tools\CheckProductStock;
+use App\LimenAi\Tools\CreateSupportTicket;
+use App\LimenAi\Tools\GetOrderStatus;
+
+return [
+    'get_order_status' =&gt; [
+        'name' =&gt; 'Get Order Status',
+        'description' =&gt; 'Look up an order by its number (e.g. ORD-1001) and return status, total, tracking number, and ETA.',
+        'class' =&gt; GetOrderStatus::class,
+        'input_schema' =&gt; [
+            'order_number' =&gt; ['type' =&gt; 'string', 'required' =&gt; true],
+        ],
+        'guest_safe' =&gt; true,
+        'confirmation' =&gt; false,
+        'timeout' =&gt; 10,
+        'version' =&gt; '1.0.0',
+    ],
+
+    'check_product_stock' =&gt; [
+        'name' =&gt; 'Check Product Stock',
+        'description' =&gt; 'Return current stock level for a product SKU and whether it is below the reorder level.',
+        'class' =&gt; CheckProductStock::class,
+        'input_schema' =&gt; [
+            'sku' =&gt; ['type' =&gt; 'string', 'required' =&gt; true],
+        ],
+        'guest_safe' =&gt; false,
+        'confirmation' =&gt; false,
+        'timeout' =&gt; 10,
+        'version' =&gt; '1.0.0',
+    ],
+
+    'create_support_ticket' =&gt; [
+        'name' =&gt; 'Create Support Ticket',
+        'description' =&gt; 'Open a support ticket for an order. Requires explicit human approval before it runs.',
+        'class' =&gt; CreateSupportTicket::class,
+        'input_schema' =&gt; [
+            'order_number' =&gt; ['type' =&gt; 'string', 'required' =&gt; true],
+            'subject' =&gt; ['type' =&gt; 'string', 'required' =&gt; true],
+        ],
+        'guest_safe' =&gt; false,
+        'confirmation' =&gt; true,
+        'timeout' =&gt; 15,
+        'version' =&gt; '1.0.0',
+    ],
+];</code></pre>
+                <p class="walk-desc" style="margin-top: 0.85rem; margin-bottom: 0.5rem;">ثم ادمجه داخل <code>config/limen-ai.php</code>:</p>
+                <pre data-lang="php"><code>'tools' =&gt; array_merge(
+    require __DIR__.'/limen-ai-store-tools.php',
+    [
+        // أدوات أخرى...
+    ],
+),</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">7</span>
+                    <span class="walk-title">قاعدة المعرفة — الأسئلة الشائعة</span>
+                    <span class="walk-file">config/limen-ai.php → knowledge.collections</span>
+                </div>
+                <p class="walk-desc">
+                    مقاطع قصيرة ومحدّدة. <strong>لا تكتب مستنداً يناقض أداة موجودة</strong> — مثلاً لا تقل
+                    «لا يمكنني الوصول لبيانات الطلبات» بينما <code>get_order_status</code> مفعّلة، لأن النموذج
+                    سيصدّق المستند ويتجاهل الأداة.
+                </p>
+                <pre data-lang="php"><code>'knowledge' =&gt; [
+    'driver' =&gt; env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
+    'limit' =&gt; 5,
+    'collections' =&gt; [
+        'store_faq' =&gt; [
+            'name' =&gt; 'Store FAQ',
+            'description' =&gt; 'Shipping, returns, and payment policies.',
+            'documents' =&gt; [
+                [
+                    'content' =&gt; 'الشحن العادي 3-5 أيام عمل داخل السعودية. الشحن السريع 1-2 يوم برسوم 25 ريال.',
+                    'metadata' =&gt; ['topic' =&gt; 'shipping', 'lang' =&gt; 'ar'],
+                ],
+                [
+                    'content' =&gt; 'الإرجاع متاح خلال 14 يوماً من الاستلام إذا كان المنتج غير مستخدم وبعلبته الأصلية.',
+                    'metadata' =&gt; ['topic' =&gt; 'returns', 'lang' =&gt; 'ar'],
+                ],
+                [
+                    'content' =&gt; 'طرق الدفع: مدى، فيزا، ماستركارد، Apple Pay، والدفع عند الاستلام (رسوم 15 ريال).',
+                    'metadata' =&gt; ['topic' =&gt; 'payment', 'lang' =&gt; 'ar'],
+                ],
+                [
+                    'content' =&gt; 'ساعات الدعم: الأحد إلى الخميس، 9 صباحاً حتى 6 مساءً بتوقيت الرياض.',
+                    'metadata' =&gt; ['topic' =&gt; 'contact', 'lang' =&gt; 'ar'],
+                ],
+            ],
+        ],
+    ],
+],</code></pre>
+                <p class="walk-desc" style="margin-top: 0.85rem; margin-bottom: 0.5rem;">أو استورد عشرات الأسئلة دفعة واحدة من ملف:</p>
+                <pre data-lang="bash"><code>php artisan limen-ai:import:knowledge storage/faq.json --collection=store_faq</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">8</span>
+                    <span class="walk-title">المهارات — تجميع التعليمات مع الأدوات</span>
+                    <span class="walk-file">config/limen-ai.php → skills</span>
+                </div>
+                <p class="walk-desc">
+                    مهارتان: واحدة عامة محدودة، وواحدة كاملة للموظفين. تذكّر أن الوكيل يرى
+                    <strong>تقاطع</strong> <code>agent.tools</code> مع أدوات المهارة.
+                </p>
+                <pre data-lang="php"><code>'skills' =&gt; [
+    'store_public_help' =&gt; [
+        'name' =&gt; 'Store Public Help',
+        'instructions' =&gt; 'When the user mentions an order number (ORD-xxxx), you MUST call get_order_status before answering. Never invent a status, tracking number, or delivery date. For policy questions answer from the knowledge base.',
+        'tools' =&gt; ['get_order_status'],
+        'knowledge' =&gt; ['store_faq'],
+        'version' =&gt; '1.0.0',
+    ],
+
+    'store_staff_ops' =&gt; [
+        'name' =&gt; 'Store Staff Operations',
+        'instructions' =&gt; 'Call the narrowest matching tool before answering. Always cite the order number or SKU. Ask for explicit confirmation of the exact subject line before creating a support ticket.',
+        'tools' =&gt; [
+            'get_order_status',
+            'check_product_stock',
+            'create_support_ticket',
+        ],
+        'knowledge' =&gt; ['store_faq'],
+        'version' =&gt; '1.0.0',
+    ],
+],</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">9</span>
+                    <span class="walk-title">الوكيل العام — للزوار</span>
+                    <span class="walk-file">app/LimenAi/Agents/store_assistant.php</span>
+                </div>
+                <p class="walk-desc">
+                    أداة واحدة فقط، <code>guest_allowed</code> مفعّل، و<code>temperature: 0</code> لأن الردود
+                    التشغيلية يجب أن تكون حرفية لا إبداعية.
+                </p>
+                <pre data-lang="php"><code>&lt;?php
+
+return [
+    'name' =&gt; 'Store Assistant',
+    'description' =&gt; 'Public storefront assistant — order lookup and policy questions.',
+    'model' =&gt; env('LIMEN_AI_STORE_MODEL', 'qwen3:8b'),
+    'provider' =&gt; env('LIMEN_AI_PROVIDER', 'openai'),
+    'instructions' =&gt; &lt;&lt;&lt;'TEXT'
+You are the public assistant for an online store.
+
+Rules:
+- ALWAYS call get_order_status when the user gives an order number. Never guess.
+- Answer shipping, returns, and payment questions from the knowledge base.
+- You cannot see stock levels or open tickets — ask the user to sign in for those.
+- Reply in the user's language (Arabic or English).
+TEXT,
+    'persona' =&gt; [
+        'display_name' =&gt; 'مساعد المتجر',
+        'tone' =&gt; 'friendly',
+        'language' =&gt; 'auto',
+        'response_style' =&gt; 'concise',
+        'rules' =&gt; ['Never invent order data.'],
+        'forbidden' =&gt; ['Promising delivery dates without tool confirmation'],
+    ],
+    'skills' =&gt; ['store_public_help'],
+    'tools' =&gt; ['get_order_status'],
+    'knowledge' =&gt; ['store_faq'],
+    'memory' =&gt; [
+        'conversation' =&gt; true,
+        'user' =&gt; false,
+        'limit' =&gt; 8,
+        'allowed_keys' =&gt; ['preferred_language'],
+    ],
+    'authorization' =&gt; [
+        'required' =&gt; false,
+        'guest_allowed' =&gt; true,
+        'abilities' =&gt; [],
+    ],
+    'output' =&gt; [
+        'format' =&gt; 'text',
+        'max_response_chars' =&gt; 2000,
+    ],
+    'limits' =&gt; [
+        'temperature' =&gt; 0,
+        'max_tool_calls' =&gt; 3,
+        'max_steps' =&gt; 8,
+        'max_tokens' =&gt; 700,
+        'max_history_messages' =&gt; 16,
+    ],
+    'version' =&gt; '1.0.0',
+];</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">10</span>
+                    <span class="walk-title">وكيل الموظفين + التسجيل</span>
+                    <span class="walk-file">app/LimenAi/Agents/store_staff_agent.php · config/limen-ai.php</span>
+                </div>
+                <p class="walk-desc">نفس البنية بصلاحيات أوسع، ثم اربط الوكيلين في ملف الإعدادات.</p>
+                <pre data-lang="php"><code>// app/LimenAi/Agents/store_staff_agent.php
+return [
+    'name' =&gt; 'Store Staff Agent',
+    'model' =&gt; env('LIMEN_AI_STORE_MODEL', 'qwen3:8b'),
+    'provider' =&gt; env('LIMEN_AI_PROVIDER', 'openai'),
+    'instructions' =&gt; 'You support store staff. Call tools before answering. Cite order numbers and SKUs.',
+    'skills' =&gt; ['store_staff_ops'],
+    'tools' =&gt; [
+        'get_order_status',
+        'check_product_stock',
+        'create_support_ticket',
+    ],
+    'knowledge' =&gt; ['store_faq'],
+    'authorization' =&gt; [
+        'required' =&gt; true,
+        'guest_allowed' =&gt; false,
+        'abilities' =&gt; [],
+    ],
+    'limits' =&gt; ['temperature' =&gt; 0, 'max_tool_calls' =&gt; 6, 'max_steps' =&gt; 12],
+    'version' =&gt; '1.0.0',
+];</code></pre>
+                <pre data-lang="php"><code>// config/limen-ai.php
+'agents' =&gt; [
+    'store_assistant' =&gt; require app_path('LimenAi/Agents/store_assistant.php'),
+    'store_staff_agent' =&gt; require app_path('LimenAi/Agents/store_staff_agent.php'),
+],</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">11</span>
+                    <span class="walk-title">عرض الواجهة</span>
+                    <span class="walk-file">resources/views</span>
+                </div>
+                <p class="walk-desc">ويدجت عائم في الصفحات العامة، وشات مدمج في لوحة الموظفين.</p>
+                <pre data-lang="blade"><code>&lt;!-- resources/views/welcome.blade.php --&gt;
+&lt;x-limen-ai::widget agent="store_assistant" /&gt;
+
+&lt;!-- resources/views/staff/dashboard.blade.php --&gt;
+&lt;x-limen-ai::chatbot agent="store_staff_agent" /&gt;</code></pre>
+                <pre data-lang="php"><code>// routes/web.php
+Route::middleware(['auth'])-&gt;group(function () {
+    Route::view('/staff/chat', 'staff.dashboard')-&gt;name('staff.chat');
+});</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">12</span>
+                    <span class="walk-title">الاختبارات — بدون تكلفة نماذج</span>
+                    <span class="walk-file">tests/Feature/StoreAssistantTest.php</span>
+                </div>
+                <p class="walk-desc">
+                    اختبر الأدوات مباشرة عبر خط الأنابيب. لا حاجة لاستدعاء نموذج لغة، فالأدوات هي الجزء
+                    الذي يمكن أن ينكسر.
+                </p>
+                <pre data-lang="bash"><code>php artisan make:test --pest StoreAssistantTest</code></pre>
+                <pre data-lang="php"><code>use App\Models\Order;
+use App\Models\Product;
+
+it('returns a real order status', function () {
+    Order::factory()-&gt;create([
+        'number' =&gt; 'ORD-1001',
+        'status' =&gt; 'shipped',
+        'tracking_number' =&gt; 'TRK-99',
+    ]);
+
+    $result = app(App\LimenAi\Tools\GetOrderStatus::class)
+        -&gt;handle(['order_number' =&gt; 'ORD-1001'], toolContext());
+
+    expect($result['status'])-&gt;toBe('shipped')
+        -&gt;and($result['tracking_number'])-&gt;toBe('TRK-99');
+});
+
+it('flags a product below its reorder level', function () {
+    Product::factory()-&gt;create([
+        'sku' =&gt; 'SKU-TSHIRT-M',
+        'stock' =&gt; 3,
+        'reorder_level' =&gt; 10,
+    ]);
+
+    $result = app(App\LimenAi\Tools\CheckProductStock::class)
+        -&gt;handle(['sku' =&gt; 'SKU-TSHIRT-M'], toolContext());
+
+    expect($result['is_low'])-&gt;toBeTrue();
+});</code></pre>
+            </div>
+
+            <div class="walk-step">
+                <div class="walk-head">
+                    <span class="step-dot">13</span>
+                    <span class="walk-title">التشغيل والتحقق</span>
+                    <span class="walk-file">terminal</span>
+                </div>
+                <p class="walk-desc">امسح الكاش أولاً — أغلب مشاكل «الأداة لا تعمل» سببها إعدادات مخزّنة.</p>
+                <div class="cli-block"><code>php artisan config:clear</code><span>ضروري بعد أي تعديل في config</span></div>
+                <div class="cli-block"><code>php artisan limen-ai:validate</code><span>يكشف تعارض الأدوات والمهارات</span></div>
+                <div class="cli-block"><code>php artisan limen-ai:tools</code><span>تأكد أن الأدوات الثلاث مسجّلة</span></div>
+                <div class="cli-block"><code>php artisan limen-ai:tool:test get_order_status --input='{"order_number":"ORD-1001"}'</code><span>اختبار الأداة وحدها</span></div>
+                <div class="cli-block"><code>php artisan limen-ai:agent:test store_assistant --message="ما حالة الطلب ORD-1001؟"</code><span>تشغيل الوكيل الحقيقي</span></div>
+                <div class="cli-block"><code>php artisan test tests/Feature/StoreAssistantTest.php</code><span>تشغيل الاختبارات</span></div>
+            </div>
+        </div>
+
+        <div class="alert" style="margin-top: 1.25rem;">
+            <svg class="ico"><use href="#i-alert"/></svg>
+            <strong>قبل النشر:</strong> راجع أن كل أداة كتابة عليها <code>confirmation: true</code>، وأن
+            <code>guest_safe</code> مفعّل فقط على أدوات القراءة العامة، وأن مستندات المعرفة لا تناقض أي أداة.
+        </div>
+    </section>
+
+    <section id="integration">
+        <div class="section-head">
+            <div>
+                <h2>Integration Guide — Add Limen AI to Your Own Project</h2>
+                <p class="section-sub">
+                    دليل التكامل الكامل بالإنجليزية — انسخه خطوة بخطوة في أي مشروع Laravel
+                    <span class="en">Copy-paste path from a blank Laravel app to a working AI chat widget.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="alert alert-info en-guide">
+            <strong>Requirements:</strong> PHP ^8.2 · Laravel ^11, ^12, or ^13 · an LLM provider
+            (OpenAI key, or a local <strong>Ollama</strong> server — free, no API spend).
+        </div>
+
+        <div class="accordion" id="integrationSteps">
+            <div class="acc-item open">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 1 — Install the package</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>Install into an <strong>existing</strong> Laravel app. Packagist is not required — a Git or local path repository works too.</p>
+                    <pre data-lang="bash"><code>composer require limen-ai/limen-ai
+php artisan limen-ai:install    # publishes config, views, stubs, .env template
+php artisan migrate             # creates limen_ai_* tables (chat history)
+php artisan limen-ai:doctor     # verifies environment + provider reachability</code></pre>
+                    <p>No Packagist? Add a VCS repository to your host <code>composer.json</code> instead:</p>
+                    <pre data-lang="php"><code>"repositories": [
+    { "type": "vcs", "url": "https://github.com/hatem-isnaad/limen-ai.git" }
+],
+"require": { "limen-ai/limen-ai": "^1.2" }</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 2 — Configure <code>.env</code></span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>Pick <strong>one</strong> provider block. Everything else has sane defaults.</p>
+                    <pre data-lang="env"><code># --- Core ---
+LIMEN_AI_DEFAULT_AGENT=app_assistant
+LIMEN_AI_AUTHORIZATION_MODE=simple   # no Laravel Gates needed
+LIMEN_AI_UI_GUEST_ENABLED=true       # let logged-out visitors chat
+
+# --- Option A: OpenAI (production) ---
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+
+# --- Option B: Ollama (local, free) ---
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434/v1
+OPENAI_TIMEOUT=120
+LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+
+# --- Option C: CI / tests (zero cost, deterministic) ---
+# LIMEN_AI_PROVIDER=fake</code></pre>
+                    <div class="alert en-guide" style="margin: 0;">
+                        <strong>Local Ollama gotcha:</strong> small models take 10–25s per turn. Raise
+                        <code>OPENAI_TIMEOUT</code> and PHP's <code>max_execution_time</code>, or the browser
+                        will drop the request with <code>ERR_EMPTY_RESPONSE</code>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 3 — Define your first agent</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>An agent is plain config. Start with <strong>zero tools</strong> — knowledge-only chat already works.</p>
+                    <pre data-lang="bash"><code>php artisan limen-ai:make:agent AppAssistant --key=app_assistant</code></pre>
+                    <p>Register it in <code>config/limen-ai.php</code> under <code>agents</code>:</p>
+                    <pre data-lang="php"><code>'app_assistant' => [
+    'name' => 'Support Assistant',
+    'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+    'model' => env('LIMEN_AI_APP_ASSISTANT_MODEL', 'gpt-4.1-mini'),
+    'instructions' => 'You help users with product questions. Be concise. Never invent data.',
+    'skills' => [],
+    'tools' => [],
+    'knowledge' => ['product_help'],
+    'authorization' => [
+        'required' => false,
+        'guest_allowed' => true,
+        'abilities' => [],
+    ],
+    'limits' => [
+        'temperature' => 0,
+        'max_tool_calls' => 6,
+        'max_steps' => 12,
+        'max_history_messages' => 20,
+    ],
+],</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 4 — Add knowledge (RAG, no vector DB)</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>Config-driven retrieval works out of the box. Write <strong>short factual chunks</strong> (2–4 sentences), not PDF dumps.</p>
+                    <pre data-lang="php"><code>'knowledge' => [
+    'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
+    'limit' => 5,
+    'collections' => [
+        'product_help' => [
+            'name' => 'Product Help',
+            'documents' => [
+                [
+                    'content' => 'Shipping: standard delivery is 3-5 business days. Express is 1-2 days.',
+                    'metadata' => ['topic' => 'shipping'],
+                ],
+                [
+                    'content' => 'Returns: items can be returned within 14 days if unused.',
+                    'metadata' => ['topic' => 'returns'],
+                ],
+            ],
+        ],
+    ],
+],</code></pre>
+                    <p>Bulk import from a file instead:</p>
+                    <pre data-lang="bash"><code>php artisan limen-ai:import:knowledge faq.json --collection=product_help</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 5 — Create a tool (when Laravel must <em>do</em> something)</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>Only add a tool when the model must execute your app: look up an order, create a ticket, send an email.</p>
+                    <pre data-lang="bash"><code>php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status</code></pre>
+                    <pre data-lang="php"><code>namespace App\LimenAi\Tools;
+
+use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Tools\BaseTool;
+
+class GetOrderStatusTool extends BaseTool
+{
+    public function key(): string
+    {
+        return 'get_order_status';
+    }
+
+    // Laravel decides — never the model.
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context->userId() !== null;
+    }
+
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
+        $order = Order::query()
+            ->where('number', $input['order_id'])
+            ->firstOrFail();
+
+        return [
+            'order_id' => $order->number,
+            'status' => $order->status,
+            'eta' => $order->eta?->toDateString(),
+        ];
+    }
+}</code></pre>
+                    <p>Register it under <code>tools</code> in <code>config/limen-ai.php</code>:</p>
+                    <pre data-lang="php"><code>'get_order_status' => [
+    'name' => 'Get Order Status',
+    'description' => 'Look up an order by its number.',
+    'class' => App\LimenAi\Tools\GetOrderStatusTool::class,
+    'input_schema' => [
+        'order_id' => ['type' => 'string', 'required' => true],
+    ],
+    'guest_safe' => false,   // true = logged-out visitors may call it
+    'confirmation' => false, // true = requires human approval in chat
+    'timeout' => 10,
+],</code></pre>
+                    <p>Test it without spending a single token:</p>
+                    <pre data-lang="bash"><code>php artisan limen-ai:tool:test get_order_status --input='{"order_id":"ORD-1001"}'</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 6 — Wire tool → skill → agent</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <div class="alert en-guide" style="margin: 0 0 0.85rem;">
+                        <strong>The #1 trap:</strong> an agent only sees the <strong>intersection</strong> of
+                        <code>agent.tools</code> and the tools listed in every attached skill. A tool present in
+                        <code>agent.tools</code> but missing from the skill is silently stripped at runtime — the
+                        model never sees it and falls back to generic answers.
+                    </div>
+                    <pre data-lang="php"><code>// 1. skills
+'order_support' => [
+    'name' => 'Order Support',
+    'instructions' => 'When the user gives an order number, ALWAYS call get_order_status first. Never guess a status.',
+    'tools' => ['get_order_status'],   // <-- must be listed here
+    'knowledge' => ['product_help'],
+],
+
+// 2. agents
+'app_assistant' => [
+    'skills' => ['order_support'],
+    'tools' => ['get_order_status'],   // <-- and here
+    // ...
+],</code></pre>
+                    <p>Verify the resolved tool list actually reaches the agent:</p>
+                    <pre data-lang="bash"><code>php artisan limen-ai:validate
+php artisan limen-ai:agents</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 7 — Embed the widget</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <p>One Blade tag. The REST API, history, guest sessions, and theming come along for free.</p>
+                    <pre data-lang="blade"><code>&lt;!-- floating launcher, any layout --&gt;
+&lt;x-limen-ai::widget agent="app_assistant" /&gt;
+
+&lt;!-- or a full inline chat panel --&gt;
+&lt;x-limen-ai::chatbot agent="support_agent" /&gt;</code></pre>
+                    <p>Theme it from <code>.env</code> — no Blade props needed:</p>
+                    <pre data-lang="env"><code>LIMEN_AI_UI_TITLE="Acme Support"
+LIMEN_AI_UI_SUBTITLE="We reply instantly"
+LIMEN_AI_UI_WELCOME_MESSAGE="Hi! How can we help?"
+LIMEN_AI_THEME_MODE=dark
+LIMEN_AI_THEME_PRIMARY="#2563EB"
+LIMEN_AI_UI_DIRECTION=rtl          # Arabic / Hebrew layouts
+LIMEN_AI_UI_HISTORY_ENABLED=true</code></pre>
+                    <p>Publishing the views lets you override markup and CSS:</p>
+                    <pre data-lang="bash"><code>php artisan vendor:publish --tag=limen-ai-ui</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en">Step 8 — Verify end to end</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <pre data-lang="bash"><code>php artisan config:clear
+php artisan limen-ai:doctor      # env, bindings, provider reachability
+php artisan limen-ai:validate    # agents, tools, skills consistency
+php artisan limen-ai:list        # everything registered
+
+# one-shot run against the real provider
+php artisan limen-ai:agent:test app_assistant \
+    --message="What is the status of ORD-1001?" \
+    --expect-contains="shipped"
+
+# interactive CLI chat (no browser needed)
+php artisan limen-ai:run app_assistant --user=1</code></pre>
+                    <p>In CI, flip <code>LIMEN_AI_PROVIDER=fake</code> so the suite is deterministic and costs nothing.</p>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span class="en"><svg class="ico"><use href="#i-alert"/></svg> Common pitfalls (learned the hard way)</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body en-guide">
+                    <h3 style="font-size: 0.95rem;">1. The agent ignores your tools</h3>
+                    <p>
+                        The skill attached to the agent lists a different tool set. <code>filterToolsBySkills()</code>
+                        intersects both lists, so the agent ends up with <strong>zero</strong> tools and answers from
+                        knowledge only. Keep both lists in sync.
+                    </p>
+
+                    <h3 style="font-size: 0.95rem;">2. Knowledge contradicts your tools</h3>
+                    <p>
+                        A FAQ entry saying <em>"the assistant cannot access private data, visit the portal"</em> will
+                        beat your tool every time. Remove or rewrite conflicting documents when you add a tool that
+                        covers that topic.
+                    </p>
+
+                    <h3 style="font-size: 0.95rem;">3. Guests get rejected</h3>
+                    <p>
+                        Set <code>guest_safe =&gt; true</code> on the tool <strong>and</strong>
+                        <code>guest_allowed =&gt; true</code> plus <code>required =&gt; false</code> in the agent's
+                        <code>authorization</code> block. Both layers must agree.
+                    </p>
+
+                    <h3 style="font-size: 0.95rem;">4. Queued runs lose the user</h3>
+                    <p>
+                        A queue worker has no web session, so a job carrying <code>user_id</code> is treated as an
+                        anonymous guest and the run fails. Either restore auth on <code>JobProcessing</code>, or keep
+                        <code>LIMEN_AI_QUEUE_AGENT_RUNS=false</code> for local/demo use.
+                    </p>
+                    <pre data-lang="php"><code>// app/Listeners/RestoreLimenAiQueueAuthentication.php
+public function handle(JobProcessing $event): void
+{
+    $userId = data_get($event->job->payload(), 'data.command.context.user_id');
+
+    if ($userId !== null) {
+        Auth::loginUsingId($userId);
+    }
+}</code></pre>
+
+                    <h3 style="font-size: 0.95rem;">5. Browser drops slow local requests</h3>
+                    <p>
+                        Ollama can take 20s+. Raise <code>OPENAI_TIMEOUT</code>, add middleware that calls
+                        <code>set_time_limit(120)</code> on the Limen AI routes, and set
+                        <code>LIMEN_AI_BROADCAST_DRIVER=null</code> if you are not running a websocket server.
+                    </p>
+
+                    <h3 style="font-size: 0.95rem;">6. Too many tools on one agent</h3>
+                    <p>
+                        Local models degrade badly past ~10 tools. Split by audience: a public widget with 2 safe
+                        lookups, a staff agent with the full set, an admin agent with mutations behind approvals.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="principle">
+        <div class="section-head">
+            <div>
+                <h2>المبدأ الأساسي</h2>
+                <p class="section-sub">
+                    النموذج يقترح — Laravel يقرّر وينفّذ بأمان
+                    <span class="en">The LLM proposes actions. Laravel decides whether they are allowed and executes them safely.</span>
+                </p>
+            </div>
+        </div>
+        <div class="card card-wide">
+            <div class="flow">
+                <div class="flow-row">
+                    <span class="flow-box">المستخدم / الويدجت</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-box">Agent</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-box">Skills + Knowledge + Memory</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-box highlight">LLM</span>
+                </div>
+                <div class="flow-row"><span class="flow-arrow">↓</span></div>
+                <div class="flow-row">
+                    <span class="flow-box">يقترح Tool</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-box highlight">authorize + validate + execute</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-box">رد للمستخدم</span>
+                </div>
+            </div>
+            <p style="margin: 1.25rem 0 0; color: var(--muted); font-size: 0.92rem; font-weight: 500;">
+                الهوية، الصلاحيات، نطاق البيانات، والتأثيرات الجانبية <strong style="color: var(--text);">لا تأتي من مخرجات النموذج</strong> —
+                بل من جلسة Laravel المصادَق عليها، و<code>authorize()</code> في كل أداة، وخدمات التطبيق.
+            </p>
+        </div>
+    </section>
+
+    <section id="components">
+        <div class="section-head">
+            <div>
+                <h2>المكونات المتاحة في الباكدج</h2>
+                <p class="section-sub">
+                    كل ما يمكنك تفعيله أو توسيعه — بدون كتابة runtime من الصفر
+                    <span class="en">Every extension point the package exposes, and the command that scaffolds it.</span>
+                </p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>المكوّن</th>
+                        <th>دوره</th>
+                        <th>كيف تضيفه</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Agents</strong> <span class="pill">وكلاء</span></td>
+                        <td>شخصية + model + instructions + أدوات + صلاحيات</td>
+                        <td><code>limen-ai:make:agent</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tools</strong> <span class="pill">أدوات</span></td>
+                        <td>تنفيذ كود Laravel (DB، APIs، إيميل…)</td>
+                        <td><code>limen-ai:make:tool</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Skills</strong> <span class="pill">مهارات</span></td>
+                        <td>حزمة: تعليمات + أدوات + knowledge</td>
+                        <td><code>limen-ai:make:skill</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Knowledge</strong> <span class="pill">RAG</span></td>
+                        <td>FAQ ومستندات تُحقَن في سياق المحادثة</td>
+                        <td>config أو <code>limen-ai:import:knowledge</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Workflows</strong></td>
+                        <td>خطوات: agent → tool → approval → branch</td>
+                        <td><code>limen-ai:make:workflow</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory</strong></td>
+                        <td>ذاكرة محادثة/مستخدم (لغة، timezone…)</td>
+                        <td>إعداد agent + <code>MemoryService</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Connectors</strong></td>
+                        <td>تكامل HTTP بدون class كامل</td>
+                        <td><code>limen-ai:make:connector</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Providers</strong></td>
+                        <td>OpenAI, Anthropic, Gemini, Ollama, Fake</td>
+                        <td><code>.env</code> + config</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI Widget</strong></td>
+                        <td>ويدجت دردشة RTL/LTR جاهز</td>
+                        <td><code>&lt;x-limen-ai::widget /&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>REST API</strong></td>
+                        <td>frontend مخصص (React/Vue/mobile)</td>
+                        <td>routes تحت <code>/limen-ai/*</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Attachments</strong></td>
+                        <td>رفع ملفات + استخراج نص + RAG اختياري</td>
+                        <td><code>LIMEN_AI_ATTACHMENTS_*</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Output validation</strong></td>
+                        <td>Heuristic · semantic · forbidden topics · custom validator</td>
+                        <td><code>LIMEN_AI_HEURISTIC_*</code> · <code>LIMEN_AI_SEMANTIC_*</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Observability</strong></td>
+                        <td>Audit · usage · trace · <code>limen-ai:logs</code></td>
+                        <td><code>LIMEN_AI_AUDIT_ENABLED</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Broadcasting</strong></td>
+                        <td>Realtime websocket (Reverb/Pusher)</td>
+                        <td><code>LIMEN_AI_BROADCAST_*</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom adapters</strong></td>
+                        <td>LLM provider · memory · knowledge retriever</td>
+                        <td><code>make:provider</code> · <code>make:memory</code> · <code>make:knowledge</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Attachments</strong></td>
+                        <td>رفع ملفات + RAG على المرفقات</td>
+                        <td><code>.env</code> + config</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Approvals</strong></td>
+                        <td>موافقة قبل أدوات خطرة</td>
+                        <td><code>confirmation: true</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Persistence</strong></td>
+                        <td>حفظ المحادثات في DB</td>
+                        <td><code>php artisan migrate</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Queue</strong></td>
+                        <td>تشغيل agent في الخلفية</td>
+                        <td><code>LIMEN_AI_QUEUE_AGENT_RUNS=true</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Observability</strong></td>
+                        <td>audit, traces, token usage</td>
+                        <td>مفعّل افتراضياً</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="how-to-add">
+        <div class="section-head">
+            <div>
+                <h2>كيف تضيف كل حاجة — خطوة بخطوة</h2>
+                <p class="section-sub">
+                    أمثلة عملية جاهزة للنسخ
+                    <span class="en">Copy-paste recipes for each building block.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg class="ico"><use href="#i-info"/></svg> قاعدة ذهبية: الـ Agent يشوف <strong>تقاطع</strong> الأدوات في <code>agent.tools</code> <strong>و</strong> في كل <code>skill</code> مرفق.
+            لو حطيت أداة في <code>tools</code> بس مش في الـ skill — مش هتشتغل!
+        </div>
+
+        <div class="acc-controls">
+            <button class="mini-btn" type="button" id="accExpand">توسيع الكل</button>
+            <button class="mini-btn" type="button" id="accCollapse">طي الكل</button>
+        </div>
+
+        <div class="accordion">
+            <div class="acc-item open">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">1</span> إضافة Agent جديد</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <div class="cli-block"><code>php artisan limen-ai:make:agent SalesAssistant --key=sales_assistant</code></div>
+                    <p class="code-caption">سجّله في config/limen-ai.php:</p>
+                    <pre><code>'sales_assistant' => require app_path('LimenAi/Agents/sales_assistant.php'),</code></pre>
+                    <p class="code-caption">محتوى الملف app/LimenAi/Agents/sales_assistant.php:</p>
+                    <pre><code>return [
+    'name' => 'Sales Assistant',
+    'model' => 'qwen3:8b',
+    'provider' => 'openai',
+    'instructions' => 'You help with pricing and product questions.',
+    'skills' => ['sales_help'],
+    'tools' => ['get_product_price'],
+    'knowledge' => ['product_catalog'],
+    'authorization' => [
+        'required' => false,
+        'guest_allowed' => true,
+    ],
+];</code></pre>
+                    <p class="code-caption">استخدمه في Blade:</p>
+                    <pre><code>&lt;x-limen-ai::widget agent="sales_assistant" /&gt;</code></pre>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">2</span> إضافة Tool جديد</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <div class="cli-block"><code>php artisan limen-ai:make:tool GetProductPrice --key=get_product_price</code></div>
+                    <p class="code-caption">في app/LimenAi/Tools/GetProductPrice.php:</p>
+                    <pre><code>public function handle(array $input, ToolExecutionContext $context): array
+{
+    $product = Product::find($input['product_id']);
+    return ['price' => $product->price, 'currency' => 'SAR'];
+}
+
+public function authorize(array $input, ToolExecutionContext $context): bool
+{
+    return true; // أو: return $context->userId() !== null;
+}</code></pre>
+                    <p class="code-caption">سجّله في config/limen-ai.php → tools:</p>
+                    <pre><code>'get_product_price' => [
+    'name' => 'Get Product Price',
+    'description' => 'Look up product price by ID.',
+    'class' => App\LimenAi\Tools\GetProductPrice::class,
+    'input_schema' => [
+        'product_id' => ['type' => 'string', 'required' => true],
+    ],
+    'guest_safe' => true,
+    'confirmation' => false,
+    'timeout' => 10,
+],</code></pre>
+                    <div class="cli-block"><code>php artisan limen-ai:tool:test get_product_price --input='{"product_id":"SKU-123"}'</code><span>اختبار بدون LLM</span></div>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">3</span> إضافة Skill</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <div class="cli-block"><code>php artisan limen-ai:make:skill SalesHelp --key=sales_help</code></div>
+                    <pre><code>'sales_help' => [
+    'name' => 'Sales Help',
+    'instructions' => 'When user asks about price, ALWAYS call get_product_price first.',
+    'tools' => ['get_product_price'],
+    'knowledge' => ['product_catalog'],
+],</code></pre>
+                    <p style="margin: 0.75rem 0 0; color: var(--warning); font-size: 0.88rem; font-weight: 600;">
+                        <svg class="ico"><use href="#i-alert"/></svg> ضيف نفس الأدوات في agent.tools و skill.tools
+                    </p>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">4</span> إضافة Knowledge (FAQ / RAG)</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <pre><code>'product_catalog' => [
+    'name' => 'Product Catalog',
+    'documents' => [
+        ['content' => 'SKU-OIL-1L: زيت محرك 1L — 45 SAR', 'metadata' => ['sku' => 'SKU-OIL-1L']],
+        ['content' => 'الشحن: 3-5 أيام داخل السعودية', 'metadata' => ['topic' => 'shipping']],
+    ],
+],</code></pre>
+                    <div class="cli-block"><code>php artisan limen-ai:import:knowledge faq.json --collection=product_help</code><span>استيراد من CSV/JSON</span></div>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">5</span> إضافة Workflow</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <div class="cli-block"><code>php artisan limen-ai:make:workflow OrderFulfillment --key=order_fulfillment</code></div>
+                    <div class="table-wrap" style="margin-top: 0.75rem;">
+                        <table>
+                            <thead><tr><th>نوع الخطوة</th><th>الوظيفة</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>agent</code></td><td>يشغّل agent ويرسل message</td></tr>
+                                <tr><td><code>tool</code></td><td>ينفّذ أداة</td></tr>
+                                <tr><td><code>approval</code></td><td>ينتظر موافقة المستخدم</td></tr>
+                                <tr><td><code>branch</code></td><td>if/else حسب condition</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin: 0.75rem 0 0; color: var(--muted); font-size: 0.88rem;">
+                        مثال موجود: <code>shipment_notify</code> → draft (agent) → approve_send (approval) → send (tool)
+                    </p>
+                </div>
+            </div>
+
+            <div class="acc-item">
+                <button class="acc-trigger" type="button">
+                    <span><span class="step-dot">6</span> Connector (HTTP بدون PHP class)</span>
+                    <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
+                </button>
+                <div class="acc-body">
+                    <pre><code>// integrations.connectors
+'carrier_api' => [
+    'base_url' => env('CARRIER_API_URL'),
+    'authentication' => ['type' => 'bearer', 'token' => env('CARRIER_TOKEN')],
+],
+
+// tools — declarative HTTP
+'track_carrier' => [
+    'integration' => [
+        'connector' => 'carrier_api',
+        'method' => 'GET',
+        'path' => '/track/@{{ input.tracking_number }}',
+    ],
+    'input_schema' => ['tracking_number' => ['type' => 'string', 'required' => true]],
+],</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @php
+        $registeredAgents = [
+            ['app_assistant', 'App Assistant', 'live', 'ويدجت عام — تتبع شحنات'],
+            ['three_pl_agent', '3PL Operations Agent', 'live', '15 أداة — موظفين'],
+            ['support_agent', 'Support Agent', '', 'دعم'],
+            ['admin_agent', 'Admin Agent', '', 'أدمن'],
+            ['example', 'Example Agent', '', 'مثال'],
+            ['example_openai', 'OpenAI Example', '', 'مزود OpenAI'],
+            ['example_anthropic', 'Anthropic Example', '', 'مزود Anthropic'],
+            ['example_gemini', 'Gemini Example', '', 'مزود Gemini'],
+            ['example_openrouter', 'OpenRouter Example', '', 'مزود OpenRouter'],
+        ];
+
+        $registeredTools = [
+            ['get_shipment_status', 'Get Shipment Status', '3PL'],
+            ['lookup_shipment_by_tracking', 'Lookup Shipment By Tracking', '3PL · guest'],
+            ['get_order_details', 'Get Order Details', '3PL'],
+            ['list_merchant_orders', 'List Merchant Orders', '3PL'],
+            ['search_orders_by_customer', 'Search Orders By Customer', '3PL'],
+            ['get_merchant_profile', 'Get Merchant Profile', '3PL'],
+            ['list_merchant_stores', 'List Merchant Stores', '3PL'],
+            ['list_delayed_shipments', 'List Delayed Shipments', '3PL'],
+            ['list_shipments_by_status', 'List Shipments By Status', '3PL'],
+            ['get_warehouse_details', 'Get Warehouse Details', '3PL'],
+            ['check_inventory_by_sku', 'Check Inventory By Sku', '3PL'],
+            ['list_low_stock_items', 'List Low Stock Items', '3PL'],
+            ['get_return_request_status', 'Get Return Request Status', '3PL'],
+            ['send_customer_message', 'Send Customer Message', '3PL · mutation'],
+            ['add_shipment_note', 'Add Shipment Note', '3PL · mutation'],
+            ['example_echo', 'Example Echo', 'demo'],
+            ['example_http_status', 'Example HTTP Status', 'demo · connector'],
+        ];
+
+        $registeredSkills = [
+            ['general_assistance', 'example_echo', 'مساعدة عامة'],
+            ['public_shipment_tracking', 'lookup + get_shipment_status', 'تتبع عام للضيوف'],
+            ['logistics_support', 'كل أدوات 3PL', 'عمليات لوجستية'],
+        ];
+
+        $registeredWorkflows = [
+            ['example_flow', 'agent → branch → tool', 'مثال'],
+            ['shipment_notify', 'draft → approval → send', 'إشعار تأخير + موافقة'],
+        ];
+
+        $artisanCommands = [
+            ['limen-ai:install', '--force · --migrate', 'نشر config/env/views/stubs (+ migrate)', 'تثبيت'],
+            ['limen-ai:checklist', '—', 'قائمة خطوات أول تشغيل', 'تثبيت'],
+            ['limen-ai:doctor', '--json', 'فحص env + persistence + provider + Ollama', 'تحقق'],
+            ['limen-ai:validate', '{agent?} · --strict', 'تناسق agents/tools/skills', 'تحقق'],
+            ['limen-ai:list', '—', 'agents + tools + skills + workflows', 'اكتشاف'],
+            ['limen-ai:agents', '—', 'تفاصيل الوكلاء', 'اكتشاف'],
+            ['limen-ai:tools', '—', 'قائمة الأدوات', 'اكتشاف'],
+            ['limen-ai:skills', '—', 'قائمة المهارات', 'اكتشاف'],
+            ['limen-ai:workflows', '—', 'قائمة workflows', 'اكتشاف'],
+            ['limen-ai:logs', '--run= · --limit=20', 'سجل audit من buffer الذاكرة', 'مراقبة'],
+            ['limen-ai:run', '{agent} · --message= · --conversation= · --user=1', 'محادثة CLI تفاعلية', 'تشغيل'],
+            ['limen-ai:agent:test', '{agent} · --message= · --conversation=', 'تشغيل وكيل مرة واحدة', 'تشغيل'],
+            ['limen-ai:tool:test', '{tool} · --input={} · --user=1', 'تنفيذ أداة بدون LLM', 'تشغيل'],
+            ['limen-ai:skill:test', '{skill} · --agent=', 'معاينة تعليمات skill + composition', 'تشغيل'],
+            ['limen-ai:workflow:test', '{workflow} · --input={} · --user=1', 'dry-run workflow', 'تشغيل'],
+            ['limen-ai:import:knowledge', '{file} · --collection= · --name=', 'استيراد FAQ من JSON/CSV', 'معرفة'],
+            ['limen-ai:make:agent', '{name} · --tools=*', 'stub → app/LimenAi/Agents/{key}.php', 'توليد'],
+            ['limen-ai:make:tool', '{name} · --key= · --test', 'class → app/LimenAi/Tools/', 'توليد'],
+            ['limen-ai:make:skill', '{name} · --tools=*', 'stub → app/LimenAi/Skills/', 'توليد'],
+            ['limen-ai:make:workflow', '{name} · --agent= · --start=', 'stub → app/LimenAi/Workflows/', 'توليد'],
+            ['limen-ai:make:connector', '{name}', 'stub connector في config', 'توليد'],
+            ['limen-ai:make:provider', '{name}', 'مزود LLM مخصص', 'توليد'],
+            ['limen-ai:make:knowledge', '{name}', 'Knowledge retriever مخصص', 'توليد'],
+            ['limen-ai:make:memory', '{name}', 'Memory store مخصص', 'توليد'],
+        ];
+
+        $fileGroups = [
+            [
+                'id' => 'files-config',
+                'label' => 'Config',
+                'rows' => [
+                    ['config/limen-ai.php', 'agents · tools · skills · workflows · UI · queue'],
+                    ['config/limen-ai-knowledge.php', 'FAQ collections (RAG config driver)'],
+                    ['config/limen-ai-threepl-tools.php', 'تسجيل 15 أداة 3PL'],
+                    ['config/limen-ai-provider-agents.php', 'وكلاء أمثلة المزوّدين'],
+                    ['.env.limen-ai.example', 'قالب متغيرات البيئة الكامل'],
+                ],
+            ],
+            [
+                'id' => 'files-app',
+                'label' => 'App',
+                'rows' => [
+                    ['app/LimenAi/Agents/app_assistant.php', 'وكيل الويدجت'],
+                    ['app/LimenAi/Agents/three_pl_agent.php', 'وكيل 3PL'],
+                    ['app/LimenAi/Agents/support_agent.php', 'دعم'],
+                    ['app/LimenAi/Agents/admin_agent.php', 'أدمن'],
+                    ['app/LimenAi/Tools/*.php', '16 كلاس أداة + Concerns/InteractsWithThreePlToolConfig'],
+                    ['app/Services/ThreePlService.php', 'منطق 3PL للأدوات'],
+                    ['app/Services/ShipmentService.php', 'خدمة الشحنات'],
+                    ['app/Contracts/ShipmentService.php', 'عقد الخدمة'],
+                    ['app/Models/Merchant.php', '… Store · Order · Shipment · Warehouse · InventoryItem · ReturnRequest'],
+                    ['app/Http/Middleware/ExtendLimenAiExecutionTime.php', 'timeout للطلبات الطويلة'],
+                    ['app/Listeners/RestoreLimenAiQueueAuthentication.php', 'auth في queue worker'],
+                    ['app/Providers/AppServiceProvider.php', 'تسجيل listener + middleware alias'],
+                ],
+            ],
+            [
+                'id' => 'files-published',
+                'label' => 'Published',
+                'rows' => [
+                    ['resources/views/vendor/limen-ai/components/widget.blade.php', 'ويدجت Blade'],
+                    ['resources/views/vendor/limen-ai/components/chatbot.blade.php', 'صفحة دردشة كاملة'],
+                    ['resources/views/vendor/limen-ai/partials/ui-config.blade.php', 'JSON config للـ JS'],
+                    ['resources/views/vendor/limen-ai/partials/theme-attributes.blade.php', 'data-theme attributes'],
+                    ['public/vendor/limen-ai/js/limen-ai/chat.js', 'واجهة الدردشة'],
+                    ['public/vendor/limen-ai/css/limen-ai/chat.css', 'أنماط الويدجت'],
+                    ['resources/views/demo/capabilities.blade.php', 'دليل Host (AR) — /demo/limen-ai'],
+                    ['resources/views/demo/package-docs/page.blade.php', 'عرض Markdown — /demo/limen-ai/docs/{file}'],
+                    ['app/Http/Controllers/PackageDocsController.php', 'يخدم docs/index.html من الحزمة'],
+                    ['app/Support/LimenAiPackageDocs.php', 'resolve مسار docs + render markdown'],
+                ],
+            ],
+            [
+                'id' => 'files-stubs',
+                'label' => 'Stubs',
+                'rows' => [
+                    ['stubs/limen-ai/agent-config.stub', 'limen-ai:make:agent'],
+                    ['stubs/limen-ai/tool.stub', 'limen-ai:make:tool'],
+                    ['stubs/limen-ai/skill-config.stub', 'limen-ai:make:skill'],
+                    ['stubs/limen-ai/workflow-config.stub', 'limen-ai:make:workflow'],
+                    ['stubs/limen-ai/connector-config.stub', 'limen-ai:make:connector'],
+                    ['stubs/limen-ai/custom-llm-provider.stub', 'limen-ai:make:provider'],
+                    ['stubs/limen-ai/knowledge-handler.stub', 'limen-ai:make:knowledge'],
+                    ['stubs/limen-ai/memory-store.stub', 'limen-ai:make:memory'],
+                    ['stubs/limen-ai/limen-ai.env.example', 'قالب env من publish'],
+                ],
+            ],
+            [
+                'id' => 'files-tests',
+                'label' => 'Tests',
+                'rows' => [
+                    ['tests/Feature/ThreePlAllToolsTest.php', '15 أداة 3PL'],
+                    ['tests/Feature/OllamaThreePlAgentTest.php', 'وكيل 3PL + Ollama'],
+                    ['tests/Feature/OllamaAppAssistantTest.php', 'app_assistant + Ollama'],
+                    ['tests/Feature/ThreePlDemoTest.php', 'سيناريو demo'],
+                    ['tests/Feature/LimenAi/AppAssistantTest.php', 'وكيل عام'],
+                    ['tests/Feature/LimenAi/GetShipmentStatusToolTest.php', 'أداة واحدة'],
+                    ['tests/Feature/LimenAi/RestoreLimenAiQueueAuthenticationTest.php', 'queue auth'],
+                    ['tests/Feature/LimenAi/ExtendExecutionTimeMiddlewareTest.php', 'middleware timeout'],
+                    ['tests/Feature/LimenAi/ArabicBidirectionalChatTest.php', 'RTL/LTR'],
+                ],
+            ],
+            [
+                'id' => 'files-routes',
+                'label' => 'Routes',
+                'rows' => [
+                    ['GET /limen-ai/conversations', 'limen-ai.conversations.index'],
+                    ['POST /limen-ai/conversations', 'limen-ai.conversations.store'],
+                    ['POST /limen-ai/conversations/{id}/messages', 'limen-ai.messages.store'],
+                    ['GET /limen-ai/runs/{id}/stream', 'limen-ai.runs.stream · SSE'],
+                    ['POST /limen-ai/guest/session', 'limen-ai.guest.session'],
+                    ['POST /limen-ai/approvals/{id}/approve', 'limen-ai.approvals.approve'],
+                    ['GET /demo/limen-ai', 'demo.limen-ai · دليل Host (AR)'],
+                    ['GET /demo/limen-ai/docs', 'demo.limen-ai.docs.hub · توثيق الحزمة الرسمي (EN)'],
+                    ['GET /demo/limen-ai/docs/{path}', 'markdown/HTML من limen-ai-main/docs'],
+                ],
+            ],
+        ];
+
+        $packageNamespaces = [
+            ['Agents', 'DefaultAgentResolver · AgentValidator · InstructionComposer · Output validators'],
+            ['Tools', 'ToolPipeline · BaseTool · ClassBasedToolExecutor · RuntimeToolRegistry'],
+            ['Runtime', 'DefaultAgentRuntime · QueuedAgentRunDispatcher · RunContextData'],
+            ['Conversations', 'ConversationService · Database/InMemory repositories · LlmConversationSummarizer'],
+            ['Knowledge', 'KnowledgeFormatter · vector stores · import writers'],
+            ['Memory', 'MemoryFormatter · scoped memory stores'],
+            ['Attachments', 'AttachmentService · AttachmentValidator · vector indexer'],
+            ['Authorization', 'LaravelAuthorizationService · GuestSessionService · Approval repositories'],
+            ['Providers', 'OpenAi · Anthropic · Gemini · Fake adapters'],
+            ['Http/Controllers/Api', 'Conversation · Message · Run · Agent · Approval · Attachment · Guest'],
+            ['Ui', 'ChatUiConfig · ThemeResolver · WidgetThemeOptions'],
+            ['Observability', 'AgentObservabilityListener · LogUsageTracker · SkillAdherenceReporter'],
+            ['Broadcasting', 'Laravel broadcaster integration'],
+            ['Workflows', 'workflow engine + step types'],
+            ['Console', '24 Artisan commands (limen-ai:*)'],
+            ['Support', 'LimenAiManager · EnvironmentDoctor · PersistenceConfig'],
+        ];
+
+        $publishTags = [
+            ['limen-ai-config', 'config/limen-ai.php'],
+            ['limen-ai-knowledge', 'config/limen-ai-knowledge.php'],
+            ['limen-ai-env', '.env.limen-ai.example'],
+            ['limen-ai-stubs', 'stubs/limen-ai/*'],
+            ['limen-ai-ui', 'views + public assets'],
+        ];
+
+        $commandCount = count($artisanCommands);
+        $fileCount = array_sum(array_map(static fn (array $g): int => count($g['rows']), $fileGroups));
+    @endphp
+
+    <section id="registered">
+        <div class="section-head">
+            <div>
+                <h2>المسجّل حالياً في هذا التطبيق</h2>
+                <p class="section-sub">
+                    {{ count($registeredAgents) }} agents · {{ count($registeredTools) }} tools · {{ count($registeredSkills) }} skills · {{ count($registeredWorkflows) }} workflows
+                    — من <code>php artisan limen-ai:list</code>
+                </p>
+            </div>
+        </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-bot"/></svg> الوكلاء ({{ count($registeredAgents) }})</h3>
+                <div class="table-wrap" style="margin-top: 0.65rem;">
+                    <table class="env-table">
+                        <thead><tr><th>Key</th><th>الاسم</th><th>ملاحظة</th></tr></thead>
+                        <tbody>
+                            @foreach($registeredAgents as [$key, $title, $badge, $note])
+                                <tr>
+                                    <td>@if($badge === 'live')<span class="pill pill-live">{{ $key }}</span>@else<span class="pill">{{ $key }}</span>@endif</td>
+                                    <td>{{ $title }}</td>
+                                    <td>{{ $note }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-target"/></svg> المهارات ({{ count($registeredSkills) }})</h3>
+                <div class="table-wrap" style="margin-top: 0.65rem;">
+                    <table class="env-table">
+                        <thead><tr><th>Key</th><th>أدوات</th><th>الدور</th></tr></thead>
+                        <tbody>
+                            @foreach($registeredSkills as [$key, $tools, $role])
+                                <tr>
+                                    <td><code>{{ $key }}</code></td>
+                                    <td class="def">{{ $tools }}</td>
+                                    <td>{{ $role }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-zap"/></svg> Workflows ({{ count($registeredWorkflows) }})</h3>
+                <div class="table-wrap" style="margin-top: 0.65rem;">
+                    <table class="env-table">
+                        <thead><tr><th>Key</th><th>خطوات</th><th>ملاحظة</th></tr></thead>
+                        <tbody>
+                            @foreach($registeredWorkflows as [$key, $steps, $note])
+                                <tr>
+                                    <td><code>{{ $key }}</code></td>
+                                    <td class="def">{{ $steps }}</td>
+                                    <td>{{ $note }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-link"/></svg> العلاقة Agent / Skill / Tool</h3>
+                <pre data-lang="text"><code>Agent
+ ├── tools: ['tool_a', 'tool_b']
+ ├── skills: ['my_skill']
+ └── knowledge: ['faq']</code></pre>
+            </div>
+        </div>
+
+        <h3 class="section-mini" style="margin-top: 1.25rem;">الأدوات المسجّلة ({{ count($registeredTools) }})</h3>
+        <div class="table-wrap">
+            <table class="env-table">
+                <thead><tr><th>Key</th><th>Class / الاسم</th><th>الفئة</th></tr></thead>
+                <tbody>
+                    @foreach($registeredTools as [$key, $title, $category])
+                        <tr>
+                            <td><code>{{ $key }}</code></td>
+                            <td>{{ $title }}</td>
+                            <td>{{ $category }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="capabilities">
+        <div class="section-head">
+            <div>
+                <h2>قدرات الحزمة</h2>
+                <p class="section-sub">كل ما تحتاجه لبناء مساعد ذكي داخل تطبيق Laravel</p>
+            </div>
+        </div>
+        <div class="grid grid-3 bento">
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-bot"/></svg></div>
+                <h3>الوكلاء (Agents)</h3>
+                <p>تعريف لكل مساعد: النموذج، الشخصية، الحدود، الصلاحيات، وقائمة الأدوات.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-wrench"/></svg></div>
+                <h3>الأدوات (Tools)</h3>
+                <p>كلاسات PHP تستدعي خدمات Laravel — مع تحقق، تفويض، وتدقيق قبل التنفيذ.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-target"/></svg></div>
+                <h3>المهارات (Skills)</h3>
+                <p>حزم تعليمات + أدوات قابلة لإعادة الاستخدام (مثل: تتبع عام vs عمليات كاملة).</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-book-open"/></svg></div>
+                <h3>قاعدة المعرفة (RAG)</h3>
+                <p>حقن FAQ ومستندات في سياق المحادثة — من الإعدادات أو بحث متجهي.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-cpu"/></svg></div>
+                <h3>الذاكرة (Memory)</h3>
+                <p>ذاكرة المحادثة والمستخدم بمفاتيح مسموحة وحدود طول صارمة.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-zap"/></svg></div>
+                <h3>سير العمل (Workflows)</h3>
+                <p>خطوات متعددة: وكيل، أداة، تفرّع، وبوابات موافقة.</p>
+            </div>
+            <div class="card span-2">
+                <div class="card-icon"><svg class="ico"><use href="#i-shield"/></svg></div>
+                <h3>الأمان والموافقات</h3>
+                <p>
+                    النموذج يقترح — Laravel يقرّر. الأدوات الحساسة (إرسال رسالة، إضافة ملاحظة) تتطلب موافقة بشرية في الواجهة.
+                    حماية SSRF، تعقيم حقن التعليمات، إخفاء البيانات الحساسة، وسجل تدقيق كامل.
+                </p>
+            </div>
+            <div class="card">
+                <div class="card-icon"><svg class="ico"><use href="#i-chat"/></svg></div>
+                <h3>واجهة المحادثة</h3>
+                <p>ويدجت عائم + شات مدمج، RTL/LTR، ضيوف، سجل، ثيمات، وأصوات.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="flow">
+        <div class="section-head">
+            <div>
+                <h2>آلية العمل</h2>
+                <p class="section-sub">من رسالة المستخدم إلى بيانات حقيقية — بأمان</p>
+            </div>
+        </div>
+        <div class="card card-wide">
+            <div class="timeline">
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">1</span> المستخدم / الويدجت</div>
+                    <p class="step-desc">يرسل سؤالاً من الصفحة الرئيسية أو محادثة الموظفين.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">2</span> Laravel — المصادقة</div>
+                    <p class="step-desc">جلسة مستخدم أو جلسة ضيف (guest token) قبل أي تنفيذ.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">3</span> محرك الوكيل (Runtime)</div>
+                    <p class="step-desc">يجمع التعليمات، الذاكرة، المعرفة، وسجل المحادثة.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">4</span> نموذج اللغة (Ollama / OpenAI)</div>
+                    <p class="step-desc">يقترح استدعاء أداة أو يرد نصاً — لا ينفّذ شيئاً مباشرة.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">5</span> تنفيذ الأداة في PHP</div>
+                    <p class="step-desc">ThreePlService يقرأ قاعدة البيانات ويعيد JSON حقيقي.</p>
+                </div>
+                <div class="step">
+                    <div class="step-title"><span class="step-dot">6</span> الرد النهائي للمستخدم</div>
+                    <p class="step-desc">إجابة دقيقة مع أرقام شحنات، SKUs، وحالات فعلية — بدون اختلاق.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="agents">
+        <div class="section-head">
+            <div>
+                <h2>الوكلاء في هذا التطبيق</h2>
+                <p class="section-sub">أربعة وكلاء — لكل واحد دور وصلاحيات مختلفة</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الوكيل</th>
+                        <th>أين يُستخدم</th>
+                        <th>الأدوات</th>
+                        <th>من يصل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>app_assistant</code> <span class="pill pill-live">الويدجت الافتراضي</span></td>
+                        <td><a href="{{ url('/') }}">الصفحة الرئيسية</a></td>
+                        <td>2 — تتبع الشحنات</td>
+                        <td>الضيوف + المسجّلون</td>
+                    </tr>
+                    <tr>
+                        <td><code>three_pl_agent</code></td>
+                        <td><a href="{{ route('staff.chat') }}">/staff/chat</a></td>
+                        <td>15 — عمليات 3PL كاملة</td>
+                        <td>موظفون بعد تسجيل الدخول</td>
+                    </tr>
+                    <tr>
+                        <td><code>support_agent</code></td>
+                        <td>CLI / إعدادات</td>
+                        <td>15</td>
+                        <td>فريق الدعم</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin_agent</code></td>
+                        <td><a href="{{ route('admin.chat') }}">/admin/chat</a></td>
+                        <td>15</td>
+                        <td>المسؤولون</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="tools">
+        <div class="section-head">
+            <div>
+                <h2>15 أداة في العرض التجريبي</h2>
+                <p class="section-sub">
+                    مربوطة ببيانات حقيقية في قاعدة البيانات
+                    <span class="en">All 15 tools hit real database records — nothing is mocked.</span>
+                </p>
+            </div>
+        </div>
+        <div class="filter-row" id="toolFilters">
+            <button class="filter-chip active" type="button" data-filter="all">الكل <span class="flag">15</span></button>
+            <button class="filter-chip" type="button" data-filter="shipments">الشحنات</button>
+            <button class="filter-chip" type="button" data-filter="orders">الطلبات</button>
+            <button class="filter-chip" type="button" data-filter="merchants">التجار</button>
+            <button class="filter-chip" type="button" data-filter="inventory">المخزون</button>
+            <button class="filter-chip" type="button" data-filter="actions">إجراءات</button>
+            <button class="filter-chip" type="button" data-filter="guest">آمنة للضيوف</button>
+        </div>
+
+        <div class="tool-grid" id="toolGrid">
+            <div class="tool-card" data-cat="shipments guest">
+                <span class="tool-key">get_shipment_status</span>
+                <span class="tool-desc">حالة شحنة بالمعرّف (SHP-1001).</span>
+                <div class="tool-flags"><span class="flag flag-guest">guest_safe</span></div>
+            </div>
+            <div class="tool-card" data-cat="shipments guest">
+                <span class="tool-key">lookup_shipment_by_tracking</span>
+                <span class="tool-desc">البحث برقم التتبع (LIMEN-SA-7845123).</span>
+                <div class="tool-flags"><span class="flag flag-guest">guest_safe</span></div>
+            </div>
+            <div class="tool-card" data-cat="shipments">
+                <span class="tool-key">list_delayed_shipments</span>
+                <span class="tool-desc">كل الشحنات المتأخرة مع الأسباب.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="shipments">
+                <span class="tool-key">list_shipments_by_status</span>
+                <span class="tool-desc">تصفية حسب: pending, in_transit, delivered…</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="orders">
+                <span class="tool-key">get_order_details</span>
+                <span class="tool-desc">تفاصيل طلب بالمعرّف أو رقم الطلب.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="orders">
+                <span class="tool-key">list_merchant_orders</span>
+                <span class="tool-desc">طلبات تاجر معيّن مع تصفية بالحالة.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="orders">
+                <span class="tool-key">search_orders_by_customer</span>
+                <span class="tool-desc">بحث بالبريد أو اسم العميل (جزئي).</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="merchants">
+                <span class="tool-key">get_merchant_profile</span>
+                <span class="tool-desc">ملف التاجر (MRC-NOON, MRC-SALLA…).</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="merchants">
+                <span class="tool-key">list_merchant_stores</span>
+                <span class="tool-desc">متاجر التاجر وقنوات البيع.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="inventory">
+                <span class="tool-key">get_warehouse_details</span>
+                <span class="tool-desc">بيانات المستودع (WH-RYD, WH-JED).</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="inventory">
+                <span class="tool-key">check_inventory_by_sku</span>
+                <span class="tool-desc">رصيد SKU في المستودعات.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="inventory">
+                <span class="tool-key">list_low_stock_items</span>
+                <span class="tool-desc">أصناف تحت حد إعادة الطلب.</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="orders">
+                <span class="tool-key">get_return_request_status</span>
+                <span class="tool-desc">حالة طلب إرجاع (RET-1001).</span>
+                <div class="tool-flags"><span class="flag">auth</span></div>
+            </div>
+            <div class="tool-card" data-cat="actions">
+                <span class="tool-key">send_customer_message</span>
+                <span class="tool-desc">إرسال رسالة للعميل — بعد تأكيد النص.</span>
+                <div class="tool-flags"><span class="flag flag-approval">يحتاج موافقة</span></div>
+            </div>
+            <div class="tool-card" data-cat="actions">
+                <span class="tool-key">add_shipment_note</span>
+                <span class="tool-desc">ملاحظة داخلية على الشحنة.</span>
+                <div class="tool-flags"><span class="flag flag-approval">يحتاج موافقة</span></div>
+            </div>
+        </div>
+
+        <div class="empty-state" id="toolEmpty" hidden>لا توجد أدوات مطابقة</div>
+
+        <div class="alert" style="margin-top: 1rem;">
+            <svg class="ico"><use href="#i-alert"/></svg> أدوات التعديل (<code>send_customer_message</code>, <code>add_shipment_note</code>) تتطلب موافقة بشرية في المحادثة قبل التنفيذ.
+        </div>
+    </section>
+
+    <section id="prompts">
+        <div class="section-head">
+            <div>
+                <h2>جرب هذه الأسئلة</h2>
+                <p class="section-sub">انسخ والصق في الدردشة — أو اضغط «نسخ»</p>
+            </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-tab="widget">ويدجت عام</button>
+            <button class="tab" type="button" data-tab="staff">محادثة الموظفين</button>
+            <button class="tab" type="button" data-tab="data">معرّفات العرض</button>
+        </div>
+
+        <div class="tab-panel active" id="panel-widget">
+            <div class="prompt-box">
+                <div class="prompt"><span class="prompt-text">ما حالة الشحنة SHP-1001؟</span><button class="copy-btn" type="button">نسخ</button></div>
+                <div class="prompt"><span class="prompt-text">تتبع الشحنة LIMEN-SA-7845123</span><button class="copy-btn" type="button">نسخ</button></div>
+                <div class="prompt"><span class="prompt-text">هل الشحنة SHP-1002 متأخرة؟</span><button class="copy-btn" type="button">نسخ</button></div>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-staff">
+            <div class="prompt-box">
+                <div class="prompt"><span class="prompt-text">اعرض كل الشحنات المتأخرة</span><button class="copy-btn" type="button">نسخ</button></div>
+                <div class="prompt"><span class="prompt-text">ما مخزون SKU-OIL-1L؟</span><button class="copy-btn" type="button">نسخ</button></div>
+                <div class="prompt"><span class="prompt-text">ابحث عن طلبات ahmed@example.com</span><button class="copy-btn" type="button">نسخ</button></div>
+                <div class="prompt"><span class="prompt-text">ما حالة الإرجاع RET-1001؟</span><button class="copy-btn" type="button">نسخ</button></div>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-data">
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>شحنات</h3>
+                    <p><code>SHP-1001</code> متأخرة · <code>SHP-1002</code> في الطريق · <code>SHP-1003</code> مُسلّمة</p>
+                </div>
+                <div class="card">
+                    <h3>تجار ومخزون</h3>
+                    <p><code>MRC-NOON</code> · <code>WH-RYD</code> · <code>SKU-OIL-1L</code> مخزون منخفض</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="providers">
+        <div class="section-head">
+            <div>
+                <h2>Providers — نماذج AI</h2>
+                <p class="section-sub">
+                    كل agent يقدر ياخد model/provider مختلف
+                    <span class="en">Each agent can pin its own provider and model independently.</span>
+                </p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Provider</th><th>إعداد .env</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Ollama (محلي)</strong> <span class="pill pill-live">مستخدم هنا</span></td>
+                        <td><code>LIMEN_AI_PROVIDER=openai</code> + <code>OPENAI_BASE_URL=http://localhost:11434/v1</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>OpenAI</strong></td>
+                        <td><code>LIMEN_AI_PROVIDER=openai</code> + <code>OPENAI_API_KEY=sk-...</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Anthropic</strong></td>
+                        <td><code>LIMEN_AI_PROVIDER=anthropic</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gemini</strong></td>
+                        <td><code>LIMEN_AI_PROVIDER=gemini</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>OpenRouter</strong></td>
+                        <td><code>LIMEN_AI_PROVIDER=openrouter</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fake (اختبار CI)</strong></td>
+                        <td><code>LIMEN_AI_PROVIDER=fake</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="ui">
+        <div class="section-head">
+            <div>
+                <h2>UI والويدجت</h2>
+                <p class="section-sub">تخصيص من Blade أو .env</p>
+            </div>
+        </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>Blade</h3>
+                <pre data-lang="blade"><code>&lt;x-limen-ai::widget agent="app_assistant" /&gt;
+&lt;x-limen-ai::chatbot agent="three_pl_agent" /&gt;</code></pre>
+            </div>
+            <div class="card">
+                <h3>.env — بدون تعديل Blade</h3>
+                <pre data-lang="env"><code>LIMEN_AI_UI_TITLE="دعم Limen"
+LIMEN_AI_UI_DIRECTION=rtl
+LIMEN_AI_THEME_MODE=dark
+LIMEN_AI_UI_GUEST_ENABLED=true
+LIMEN_AI_DEFAULT_LANGUAGE=auto</code></pre>
+            </div>
+        </div>
+        <p class="code-caption" style="margin-top: 1rem;">نشر views للتعديل:</p>
+        <div class="cli-block"><code>php artisan vendor:publish --tag=limen-ai-ui</code></div>
+    </section>
+
+    <section id="decision">
+        <div class="section-head">
+            <div>
+                <h2>خريطة «عايز أضيف إيه؟»</h2>
+                <p class="section-sub">
+                    قرار سريع — إيه المكوّن المناسب
+                    <span class="en">Pick the right building block for what you want to build.</span>
+                </p>
+            </div>
+        </div>
+        <div class="decision-grid">
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-book-open"/></svg></span>
+                <div>
+                    <h4>الـ AI يرد على FAQ؟</h4>
+                    <p>→ Knowledge collection في config/limen-ai.php</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-wrench"/></svg></span>
+                <div>
+                    <h4>يسأل DB أو API؟</h4>
+                    <p>→ Tool + Skill + Agent</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-bot"/></svg></span>
+                <div>
+                    <h4>شخصيات مختلفة؟</h4>
+                    <p>→ Agents متعددة (ويدجت vs موظفين vs أدمن)</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-zap"/></svg></span>
+                <div>
+                    <h4>خطوات + موافقة؟</h4>
+                    <p>→ Workflow مع خطوة approval</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-chat"/></svg></span>
+                <div>
+                    <h4>ويدجت في الصفحة؟</h4>
+                    <p>→ &lt;x-limen-ai::widget /&gt;</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-phone"/></svg></span>
+                <div>
+                    <h4>frontend React/Vue؟</h4>
+                    <p>→ REST API تحت /limen-ai/*</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-globe"/></svg></span>
+                <div>
+                    <h4>API خارجي بدون PHP class؟</h4>
+                    <p>→ Connector + declarative tool</p>
+                </div>
+            </div>
+            <div class="decision">
+                <span class="decision-q"><svg class="ico"><use href="#i-cpu"/></svg></span>
+                <div>
+                    <h4>يتذكر لغة المستخدم؟</h4>
+                    <p>→ Memory في agent config</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="best-practices">
+        <div class="section-head">
+            <div>
+                <h2>أفضل الممارسات لاستخدام الباكدج</h2>
+                <p class="section-sub">
+                    قواعد عملية من Limen AI — تجنّب الأخطاء الشائعة وابنِ وكلاء مستقرّين في الإنتاج
+                    <span class="en">Practical rules for stable agents in production — not generic Laravel advice.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg class="ico"><use href="#i-info"/></svg>
+            <strong>القاعدة الذهبية:</strong> سجّل كل الأدوات في config، لكن اعرض على كل agent <strong>الحد الأدنى</strong> اللي يحتاجه فقط.
+            النموذج لا ينفّذ شيئاً — Laravel + <code>authorize()</code> هما خط الدفاع.
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom: 1.25rem;">
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-check"/></svg> افعل</h3>
+                <ul style="margin: 0.5rem 0 0; padding-right: 1.1rem; color: var(--muted); font-size: 0.88rem; line-height: 1.7;">
+                    <li>قسّم وكلاء: عام (guest) · موظف · أدمن</li>
+                    <li>5–10 أدوات max مع Ollama · 15–25 مع نماذج سحابية قوية</li>
+                    <li>Knowledge لـ FAQ ثابت · Tools لبيانات متغيرة</li>
+                    <li><code>confirmation: true</code> لأي تعديل أو إرسال</li>
+                    <li>شغّل <code>limen-ai:doctor</code> و <code>limen-ai:validate</code> بعد كل تغيير</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-x"/></svg> تجنّب</h3>
+                <ul style="margin: 0.5rem 0 0; padding-right: 1.1rem; color: var(--muted); font-size: 0.88rem; line-height: 1.7;">
+                    <li>وكيل واحد بـ 20+ أداة — النموذج يختار غلط</li>
+                    <li>وصف أداة غامض — لن تُستدعى أبداً</li>
+                    <li>Skill فيها أداة مش موجودة في <code>agent.tools</code></li>
+                    <li>الاعتماد على الـ LLM للصلاحيات بدل <code>authorize()</code></li>
+                    <li>تعديل vendor مباشرة — استخدم stubs و config</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="concepts">
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-bot"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">تصميم الوكلاء <span class="concept-en">Agents</span></h3>
+                        <p class="concept-tag">شخصية + حدود + أدوات قليلة</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الممارسة</span>
+                    <p>وكيل = موظف له job description. اكتب <code>instructions</code> واضحة: متى ينادي أداة، متى يرد من knowledge، ومتى يقول «مش عارف».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">حدود</span>
+                    <p class="good">اضبط <code>max_tool_calls</code> و <code>max_steps</code> — يمنع حلقات لا نهائية مع نماذج محلية.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">مثال</span>
+                    <pre data-lang="php"><code>'app_assistant' => [
+    'tools' => [],                    // FAQ فقط
+    'knowledge' => ['store_faq'],
+    'authorization' => ['guest_allowed' => true],
+    'limits' => ['max_tool_calls' => 4, 'max_steps' => 10],
+],</code></pre>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-wrench"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">تصميم الأدوات <span class="concept-en">Tools</span></h3>
+                        <p class="concept-tag">description + authorize + handle</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الوصف</span>
+                    <p>الـ LLM يقرأ <code>description</code> فقط ليقرر الاستدعاء. اكتبه كأمر للموظف: «استدعِ هذه الأداة عندما يذكر المستخدم رقم الطلب».</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الصلاحيات</span>
+                    <p class="good"><code>authorize()</code> دائماً — guest vs auth vs role. لا تفترض أن النموذج «فاهم» مين المستخدم.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الإرجاع</span>
+                    <p>ارجع arrays صغيرة وواضحة. تجنّب dump ضخم — يستهلك context ويلخبط الخطوة التالية.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-target"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">Skills &amp; Knowledge <span class="concept-en">Skills &amp; RAG</span></h3>
+                        <p class="concept-tag">متى Skill · متى KB · التقاطع</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">Knowledge</span>
+                    <p>قطع 2–4 جمل، حقائق ثابتة (شحن، إرجاع، ساعات). لا تلصق PDF كامل في config.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">Skill</span>
+                    <p>حزمة تعليمات + أدوات مشتركة. مفيد لما نفس السلوك يتكرر على أكثر من agent.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">تحذير</span>
+                    <p class="warn">الأداة لازم في <code>agent.tools</code> <strong>و</strong> <code>skill.tools</code> — وإلا مش هتشتغل والرد هيبان عام.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-shield"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">أمان وإنتاج <span class="concept-en">Security &amp; ops</span></h3>
+                        <p class="concept-tag">simple mode · approvals · queue</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">الافتراضي</span>
+                    <p><code>LIMEN_AI_AUTHORIZATION_MODE=simple</code> — Gates اختيارية. منطق الصلاحية في كل Tool.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">خطير</span>
+                    <p class="warn">refund · إرسال رسالة · حذف — <code>confirmation: true</code> + workflow approval للعمليات الحساسة.</p>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">إنتاج</span>
+                    <p>فعّل queue للruns الطويلة · راقب <code>limen_ai_runs</code> · استخدم <code>FakeLlmProvider</code> في CI.</p>
+                </div>
+            </div>
+
+            <div class="concept">
+                <div class="concept-head">
+                    <span class="concept-icon"><svg class="ico"><use href="#i-cpu"/></svg></span>
+                    <div>
+                        <h3 class="concept-title">Ollama &amp; نماذج محلية <span class="concept-en">Local LLM</span></h3>
+                        <p class="concept-tag">qwen3 · timeout · أدوات قليلة</p>
+                    </div>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">إعداد</span>
+                    <pre data-lang="env"><code>OPENAI_TIMEOUT=120
+LIMEN_AI_QUEUE_AGENT_RUNS=false
+LIMEN_AI_BROADCAST_DRIVER=null</code></pre>
+                </div>
+                <div class="concept-row">
+                    <span class="concept-label">سلوك</span>
+                    <p>كل schema أداة = tokens في كل turn. كلما زادت الأدوات، زادت الأخطاء والبطء — قسّم الوكلاء.</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-mini">تحقق بعد كل تغيير</h3>
+        <div class="cli-block"><code>php artisan limen-ai:doctor
+php artisan limen-ai:validate
+php artisan limen-ai:agent:test app_assistant --message="ما سياسة الإرجاع؟"
+php artisan limen-ai:tool:test get_shipment_status --input='{"tracking_number":"LIMEN-SA-7845123"}'</code></div>
+
+        <div class="alert" style="margin-top: 1rem;">
+            <svg class="ico"><use href="#i-book"/></svg>
+            مرجع EN موسّع:
+            <a href="{{ route('demo.limen-ai.docs.hub') }}#troubleshooting">Troubleshooting</a> ·
+            <a href="{{ url('/demo/limen-ai/docs/'.rawurlencode('scaling-agents-and-tools.md')) }}">Scaling agents &amp; tools</a>
+        </div>
+    </section>
+
+    <section id="file-reference">
+        <span id="paths" aria-hidden="true"></span>
+        <div class="section-head">
+            <div>
+                <h2>مرجع الملفات والكلاسات</h2>
+                <p class="section-sub">
+                    {{ $fileCount }}+ مسار في هذا المشروع · {{ count($packageNamespaces) }} مجلدات في الحزمة · {{ count($publishTags) }} publish tags
+                    <span class="en">Every host file, stub, test, route, and package namespace you extend.</span>
+                </p>
+            </div>
+        </div>
+
+        <h3 class="section-mini">Publish tags — <code>php artisan limen-ai:install</code></h3>
+        <div class="table-wrap" style="margin-bottom: 1rem;">
+            <table class="env-table">
+                <thead><tr><th>Tag</th><th>ينشر</th></tr></thead>
+                <tbody>
+                    @foreach($publishTags as [$tag, $target])
+                        <tr><td><code>--tag={{ $tag }}</code></td><td><code>{{ $target }}</code></td></tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tabs file-tabs" role="tablist">
+            @foreach($fileGroups as $index => $group)
+                <button class="tab {{ $index === 0 ? 'active' : '' }}" type="button" data-tab="{{ $group['id'] }}">{{ $group['label'] }}</button>
+            @endforeach
+            <button class="tab" type="button" data-tab="files-package">Package</button>
+        </div>
+
+        @foreach($fileGroups as $index => $group)
+            <div class="tab-panel {{ $index === 0 ? 'active' : '' }}" id="panel-{{ $group['id'] }}">
+                <div class="table-wrap">
+                    <table class="env-table">
+                        <thead><tr><th>المسار</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            @foreach($group['rows'] as [$path, $desc])
+                                <tr><td><code>{{ $path }}</code></td><td>{{ $desc }}</td></tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endforeach
+
+        <div class="tab-panel" id="panel-files-package">
+            <p style="margin: 0 0 0.85rem; color: var(--muted); font-size: 0.9rem;">
+                مجلدات <code>limen-ai/limen-ai/src/</code> — الكلاسات التي توسّعها عند الحاجة (لا تعدّل vendor مباشرة).
+            </p>
+            <div class="table-wrap">
+                <table class="env-table">
+                    <thead><tr><th>Namespace</th><th>كلاسات رئيسية</th></tr></thead>
+                    <tbody>
+                        @foreach($packageNamespaces as [$ns, $classes])
+                            <tr>
+                                <td><code>LimenAi\{{ $ns }}</code></td>
+                                <td>{{ $classes }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="section-mini" style="margin-top: 1rem;">Migrations (package)</h3>
+            <pre data-lang="text"><code>limen_ai_conversations · limen_ai_messages · limen_ai_runs
+limen_ai_run_checkpoints · limen_ai_approvals · limen_ai_memories · limen_ai_attachments
+→ php artisan migrate (after limen-ai:install)</code></pre>
+            <h3 class="section-mini">Facade &amp; Provider</h3>
+            <pre data-lang="php"><code>LimenAi\Facades\LimenAi
+LimenAi\LimenAiServiceProvider
+LimenAi\Support\LimenAiManager</code></pre>
+        </div>
+
+        <h3 class="section-mini" style="margin-top: 1.25rem;">شجرة المشروع (ملخص)</h3>
+        <pre data-lang="text"><code>limen-ai/
+├── app/LimenAi/Agents/          ← 4 agent configs
+├── app/LimenAi/Tools/           ← 16 tool classes
+├── app/Services/                ← ThreePlService · ShipmentService
+├── app/Models/                  ← Merchant · Order · Shipment · …
+├── app/Http/Middleware/         ← ExtendLimenAiExecutionTime
+├── app/Listeners/               ← RestoreLimenAiQueueAuthentication
+├── config/limen-ai*.php         ← 4 config files
+├── stubs/limen-ai/              ← generator stubs
+├── resources/views/vendor/limen-ai/
+├── public/vendor/limen-ai/
+├── tests/Feature/               ← Ollama + 3PL + LimenAi/*
+└── resources/views/demo/capabilities.blade.php</code></pre>
+    </section>
+
+    <section id="recommendations">
+        <div class="section-head">
+            <div>
+                <h2>توصيات 3PL</h2>
+                <p class="section-sub">تقسيم الوكلاء والأدوات</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>الدور</th><th>Agent</th><th>أدوات</th><th>جمهور</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ويدجت عام</td>
+                        <td><code>app_assistant</code></td>
+                        <td>2 (تتبع فقط)</td>
+                        <td>guest</td>
+                    </tr>
+                    <tr>
+                        <td>موظفين</td>
+                        <td><code>three_pl_agent</code></td>
+                        <td>15</td>
+                        <td>auth</td>
+                    </tr>
+                    <tr>
+                        <td>أدمن</td>
+                        <td><code>admin_agent</code></td>
+                        <td>mutations + approval</td>
+                        <td>admin</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="alert" style="margin-top: 1rem;">
+            قواعد: 5–10 أدوات max لكل agent مع Ollama · أدوات التعديل <code>confirmation: true</code> ·
+            <code>guest_safe: true</code> للأدوات العامة فقط · Knowledge لا يتعارض مع Tools
+        </div>
+    </section>
+
+    <section id="not-needed">
+        <div class="section-head">
+            <div>
+                <h2>إيه اللي مش محتاج تضيفه؟</h2>
+                <p class="section-sub">في simple mode (الافتراضي)</p>
+            </div>
+        </div>
+        <div class="grid grid-2">
+            <div class="card"><h3><svg class="ico"><use href="#i-x"/></svg> Gates/Policies</h3><p><code>authorize()</code> في كل Tool كافي</p></div>
+            <div class="card"><h3><svg class="ico"><use href="#i-x"/></svg> Service Provider مخصص</h3><p>الحزمة مسجّلة تلقائياً</p></div>
+            <div class="card"><h3><svg class="ico"><use href="#i-x"/></svg> Runtime loop</h3><p>الباكدج بيعمله</p></div>
+            <div class="card"><h3><svg class="ico"><use href="#i-x"/></svg> Vector DB</h3><p>config RAG يكفي للبداية</p></div>
+        </div>
+    </section>
+
+    <section id="cli">
+        <div class="section-head">
+            <div>
+                <h2>سطر الأوامر — CLI</h2>
+                <p class="section-sub">
+                    {{ $commandCount }} أمر Artisan — كل أوامر <code>limen-ai:*</code> بدون نقص
+                    <span class="en">Run <code>php artisan list limen-ai</code> to verify locally.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="table-wrap" style="margin-bottom: 1rem;">
+            <table class="env-table">
+                <thead>
+                    <tr>
+                        <th>الأمر</th>
+                        <th>Options</th>
+                        <th>الوصف</th>
+                        <th>الفئة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($artisanCommands as [$cmd, $opts, $desc, $cat])
+                        <tr>
+                            <td><code>{{ $cmd }}</code></td>
+                            <td class="val">{{ $opts }}</td>
+                            <td>{{ $desc }}</td>
+                            <td class="def">{{ $cat }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3 class="section-mini">أمثلة سريعة — هذا المشروع</h3>
+            <div class="cli-block"><code>php artisan limen-ai:checklist</code><span>قائمة خطوات أول تشغيل</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:install --migrate</code><span>نشر + migrate في خطوة</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:list</code><span>كل المسجّل: agents, tools, skills, workflows</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:doctor --json</code><span>فحص CI-friendly JSON</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:validate --strict</code><span>تحذيرات tool-count حرجة = fail</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:import:knowledge storage/faq.json --collection=product_help</code><span>استيراد FAQ</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:skill:test public_shipment_tracking --agent=app_assistant</code><span>معاينة skill + composition</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:logs --limit=30</code><span>audit log buffer</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:run app_assistant --message="ما حالة SHP-1001؟" --user=1</code><span>محادثة CLI</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:agent:test three_pl_agent --message="أي SKU ناقص؟"</code><span>تشغيل وكيل مرة واحدة</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:tool:test get_shipment_status --input='{"shipment_id":"SHP-1001"}'</code><span>اختبار أداة بدون LLM</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:workflow:test shipment_notify --input='{}'</code><span>dry-run workflow</span></div>
+            <h3 class="section-mini">توليد ملفات</h3>
+            <div class="cli-block"><code>php artisan limen-ai:make:agent store_assistant --tools=get_order_status</code><span>وكيل → app/LimenAi/Agents/store_assistant.php</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status --test</code><span>أداة + test stub</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:skill order_support --tools=get_order_status</code><span>مهارة → app/LimenAi/Skills/</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:workflow order_flow --agent=app_assistant</code><span>workflow stub</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:connector carrier_api</code><span>HTTP connector</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:provider CustomLlm</code><span>مزود LLM مخصص</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:knowledge CustomRetriever</code><span>Knowledge retriever</span></div>
+            <div class="cli-block"><code>php artisan limen-ai:make:memory RedisMemoryStore</code><span>Memory store</span></div>
+            <div class="cli-block"><code>php artisan test tests/Feature/ThreePlAllToolsTest.php</code><span>اختبار 15 أداة 3PL</span></div>
+        </div>
+    </section>
+
+    @php
+        $maskSecret = static function (?string $value): string {
+            if ($value === null || $value === '') {
+                return '— (فارغ)';
+            }
+            if (strlen($value) <= 6) {
+                return '••••••';
+            }
+
+            return substr($value, 0, 3).'••••'.substr($value, -2);
+        };
+
+        $envLive = [
+            'LIMEN_AI_DEFAULT_AGENT' => config('limen-ai.default_agent'),
+            'LIMEN_AI_PROVIDER' => config('limen-ai.providers.default'),
+            'LIMEN_AI_PERSISTENCE_DRIVER' => config('limen-ai.persistence.driver') ?: 'auto-detect',
+            'LIMEN_AI_QUEUE_AGENT_RUNS' => config('limen-ai.queue.agent_runs') ? 'true' : 'false',
+            'LIMEN_AI_BROADCAST_DRIVER' => config('limen-ai.broadcasting.driver') ?: 'null',
+            'LIMEN_AI_STREAMING_ENABLED' => config('limen-ai.streaming.enabled') ? 'true' : 'false',
+            'OPENAI_BASE_URL' => config('limen-ai.providers.openai.base_url'),
+            'OPENAI_TIMEOUT' => (string) config('limen-ai.providers.openai.timeout'),
+            'LIMEN_AI_APP_ASSISTANT_MODEL' => config('limen-ai.agents.app_assistant.model'),
+        ];
+
+        $envGroups = [
+            [
+                'id' => 'env-core',
+                'label' => 'أساسي',
+                'rows' => [
+                    ['LIMEN_AI_DEFAULT_AGENT', 'مفتاح وكيل مسجّل', 'app_assistant', 'الوكيل الافتراضي للويدجت و REST API'],
+                    ['LIMEN_AI_PROVIDER', 'fake | openai | anthropic | gemini | openrouter', 'fake', 'مزوّد LLM الافتراضي'],
+                    ['LIMEN_AI_DEFAULT_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'النموذج الافتراضي العام للوكلاء'],
+                    ['LIMEN_AI_AUTHORIZATION_MODE', 'simple | gates', 'simple', 'simple = authorize() على الأدوات بدون Gates'],
+                    ['LIMEN_AI_REQUIRE_AUTH', 'true | false', 'false', 'هل يتطلب تسجيل الدخول لاستخدام API/UI'],
+                ],
+            ],
+            [
+                'id' => 'env-providers',
+                'label' => 'مزوّدون',
+                'rows' => [
+                    ['OPENAI_API_KEY', 'sk-… | ollama', '—', 'مفتاح OpenAI أو ollama للمحلي'],
+                    ['OPENAI_ORGANIZATION', 'org-…', '—', 'اختياري — منظمة OpenAI'],
+                    ['OPENAI_BASE_URL', 'URL', 'https://api.openai.com/v1', 'Ollama: http://localhost:11434/v1'],
+                    ['OPENAI_TIMEOUT', 'ثوانٍ', '120', 'مهم مع Ollama — ارفعه لو الطلبات بتقطع'],
+                    ['ANTHROPIC_API_KEY', 'sk-ant-…', '—', 'مفتاح Anthropic'],
+                    ['ANTHROPIC_API_VERSION', 'تاريخ API', '2023-06-01', 'إصدار Anthropic API'],
+                    ['ANTHROPIC_MAX_TOKENS', 'عدد', '4096', 'حد أقصى tokens للرد'],
+                    ['GEMINI_API_KEY', 'مفتاح', '—', 'Google Gemini'],
+                    ['GEMINI_BASE_URL', 'URL', 'generativelanguage.googleapis.com/…', 'نادراً تحتاج تغييره'],
+                    ['OPENROUTER_API_KEY', 'sk-or-…', '—', 'OpenRouter'],
+                    ['OPENROUTER_BASE_URL', 'URL', 'openrouter.ai/api/v1', '—'],
+                    ['OPENROUTER_HTTP_REFERER', 'URL', 'APP_URL', 'مطلوب لبعض نماذج OpenRouter'],
+                    ['OPENROUTER_APP_NAME', 'نص', 'APP_NAME', 'يظهر في لوحة OpenRouter'],
+                ],
+            ],
+            [
+                'id' => 'env-models',
+                'label' => 'نماذج الوكلاء',
+                'rows' => [
+                    ['LIMEN_AI_APP_ASSISTANT_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'نموذج وكيل الويدجت العام'],
+                    ['LIMEN_AI_SUPPORT_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'وكيل الدعم'],
+                    ['LIMEN_AI_ADMIN_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'وكيل الأدمن'],
+                    ['LIMEN_AI_THREE_PL_MODEL', 'اسم نموذج', '—', 'وكيل 3PL (مخصص لهذا المشروع)'],
+                    ['LIMEN_AI_EXAMPLE_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'وكيل example'],
+                    ['LIMEN_AI_OPENAI_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'مثال provider OpenAI'],
+                    ['LIMEN_AI_ANTHROPIC_MODEL', 'اسم نموذج', 'claude-sonnet-4-…', 'مثال Anthropic'],
+                    ['LIMEN_AI_GEMINI_MODEL', 'اسم نموذج', 'gemini-2.0-flash', 'مثال Gemini'],
+                    ['LIMEN_AI_OPENROUTER_MODEL', 'slug', 'anthropic/claude-3.5-sonnet', 'مثال OpenRouter'],
+                    ['LIMEN_AI_LIMEN_MODEL', 'اسم نموذج', 'gpt-4.1-mini', 'وكيل Limen الداخلي'],
+                ],
+            ],
+            [
+                'id' => 'env-persona',
+                'label' => 'شخصية',
+                'rows' => [
+                    ['LIMEN_AI_DEFAULT_TONE', 'professional | friendly | …', 'professional', 'نبرة الرد الافتراضية'],
+                    ['LIMEN_AI_DEFAULT_LANGUAGE', 'en | ar | auto', 'en', 'auto = يتبع لغة المستخدم'],
+                    ['LIMEN_AI_DEFAULT_GENDER', 'male | female | neutral', 'neutral', 'توجيه أسلوب الرد'],
+                    ['LIMEN_AI_DEFAULT_REGION', 'eg | sa | ae | …', 'international', 'لهجة/سياق إقليمي'],
+                    ['LIMEN_AI_DEFAULT_FORMALITY', 'casual | neutral | formal', 'neutral', 'رسمية الرد'],
+                    ['LIMEN_AI_DEFAULT_VOICE', 'نص', '—', 'وصف أسلوب صوتي للتعليمات'],
+                    ['LIMEN_AI_EXAMPLE_LANGUAGE', 'auto | en | ar', 'auto', 'شخصية وكيل example'],
+                    ['LIMEN_AI_EXAMPLE_GENDER', 'male | female | neutral', 'neutral', '—'],
+                    ['LIMEN_AI_EXAMPLE_REGION', 'eg | sa | …', 'international', '—'],
+                    ['LIMEN_AI_EXAMPLE_FORMALITY', 'casual | formal | …', 'casual', '—'],
+                    ['LIMEN_AI_EXAMPLE_VOICE', 'نص', 'warm and helpful', '—'],
+                    ['LIMEN_AI_LIMEN_LANGUAGE', 'auto | en | ar', 'auto', 'شخصية وكيل Limen'],
+                    ['LIMEN_AI_LIMEN_GENDER', 'male | female | neutral', 'female', '—'],
+                    ['LIMEN_AI_LIMEN_REGION', 'eg | sa | …', 'eg', '—'],
+                    ['LIMEN_AI_LIMEN_FORMALITY', 'casual | formal | …', 'formal', '—'],
+                    ['LIMEN_AI_LIMEN_VOICE', 'نص', 'clear operational support', '—'],
+                ],
+            ],
+            [
+                'id' => 'env-persist',
+                'label' => 'تخزين',
+                'rows' => [
+                    ['LIMEN_AI_PERSISTENCE_DRIVER', 'database | memory | —', 'auto-detect', 'database مطلوب للدردشة عبر HTTP'],
+                    ['LIMEN_AI_PERSISTENCE_AUTO_DETECT', 'true | false', 'true', 'يكتشف database بعد migrate'],
+                    ['LIMEN_AI_CONVERSATION_REPOSITORY', 'FQCN | —', '—', 'تجاوز مستودع المحادثات'],
+                    ['LIMEN_AI_MESSAGE_REPOSITORY', 'FQCN | —', '—', 'تجاوز مستودع الرسائل'],
+                    ['LIMEN_AI_RUN_REPOSITORY', 'FQCN | —', '—', 'تجاوز مستودع التشغيلات'],
+                    ['LIMEN_AI_CHECKPOINT_STORE', 'FQCN | —', '—', 'نقاط استئناف multi-step'],
+                    ['LIMEN_AI_APPROVAL_REPOSITORY', 'FQCN | —', '—', 'موافقات الأدوات'],
+                    ['LIMEN_AI_CONVERSATION_SUMMARIZER', 'FQCN | —', 'NullConversationSummarizer', 'تلخيص المحادثات الطويلة'],
+                    ['LIMEN_AI_SUMMARY_THRESHOLD', 'عدد رسائل', '24', 'متى يبدأ التلخيص'],
+                    ['LIMEN_AI_SUMMARY_KEEP_RECENT', 'عدد', '12', 'آخر رسائل تُحفظ بدون تلخيص'],
+                    ['LIMEN_AI_SUMMARY_REFRESH_MESSAGES', 'عدد', '8', 'تحديث التلخيص كل N رسالة'],
+                ],
+            ],
+            [
+                'id' => 'env-knowledge',
+                'label' => 'معرفة',
+                'rows' => [
+                    ['LIMEN_AI_KNOWLEDGE_DRIVER', 'config | vector', 'config', 'config = FAQ في الإعدادات بدون vector DB'],
+                    ['LIMEN_AI_EMBEDDING_PROVIDER', 'fake | openai', 'fake', 'fake للتطوير، openai للـ vector RAG'],
+                    ['OPENAI_EMBEDDING_MODEL', 'اسم نموذج', 'text-embedding-3-small', 'نموذج التضمين'],
+                    ['LIMEN_AI_MEMORY_STRICT', 'true | false', 'true', 'يرفض مفاتيح ذاكرة غير مسموحة'],
+                    ['LIMEN_AI_ATTACHMENT_RAG_ENABLED', 'true | false', 'true', 'RAG على المرفقات المرفوعة'],
+                ],
+            ],
+            [
+                'id' => 'env-attachments',
+                'label' => 'مرفقات',
+                'rows' => [
+                    ['LIMEN_AI_ATTACHMENTS_ENABLED', 'true | false', 'true', 'رفع ملفات في المحادثة'],
+                    ['LIMEN_AI_ATTACHMENTS_DISK', 'local | s3 | …', 'local', 'قرص Laravel'],
+                    ['LIMEN_AI_ATTACHMENTS_PATH', 'مسار', 'limen-ai/attachments', '—'],
+                    ['LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB', 'KB', '10240', '10 MB'],
+                    ['LIMEN_AI_ATTACHMENTS_MAX_COUNT', 'عدد', '5', 'أقصى ملفات لكل رسالة'],
+                ],
+            ],
+            [
+                'id' => 'env-quality',
+                'label' => 'جودة',
+                'rows' => [
+                    ['LIMEN_AI_SAVE_TOKENS', 'true | false', 'true', 'ضغط السياق لتوفير tokens'],
+                    ['LIMEN_AI_HEURISTIC_VALIDATION', 'true | false', 'true (prod)', 'يرفض ردود فارغة/تسريبات'],
+                    ['LIMEN_AI_HEURISTIC_CONCISE_MAX_SENTENCES', 'عدد', '12', 'حد الجمل في concise mode'],
+                    ['LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS', 'true | false', 'false', 'يمنع persona.forbidden'],
+                    ['LIMEN_AI_SEMANTIC_VALIDATION', 'true | false', 'false', 'تقييم جودة بـ LLM ثانٍ'],
+                    ['LIMEN_AI_SEMANTIC_MIN_SCORE', '0.0–1.0', '0.65', 'حد قبول التقييم الدلالي'],
+                    ['LIMEN_AI_SEMANTIC_VALIDATION_STRICT', 'true | false', 'false', 'يرفض بدل تحذير'],
+                    ['LIMEN_AI_SKILL_ADHERENCE_CHECK', 'true | false', 'false', 'يفحص التزام المهارة'],
+                    ['LIMEN_AI_OUTPUT_MODERATION', 'true | false', 'false', 'تعديل/حجب أنماط حساسة'],
+                    ['LIMEN_AI_OUTPUT_VALIDATOR', 'FQCN | —', '—', 'Validator مخصص بعد LLM'],
+                    ['LIMEN_AI_OUTPUT_MODERATOR', 'FQCN | —', '—', 'Moderator مخصص'],
+                    ['LIMEN_AI_TOOL_COUNT_WARN', 'عدد', '15', 'تحذير validate فوق هذا العدد'],
+                    ['LIMEN_AI_TOOL_COUNT_CRITICAL', 'عدد', '25', 'تحذير حرج'],
+                    ['LIMEN_AI_ROUTER_DELEGATES', 'agent1,agent2', '—', 'وكلاء تفويض للـ router'],
+                ],
+            ],
+            [
+                'id' => 'env-realtime',
+                'label' => 'Realtime',
+                'rows' => [
+                    ['LIMEN_AI_STREAMING_ENABLED', 'true | false', 'true', 'SSE streaming للردود (backend)'],
+                    ['LIMEN_AI_UI_STREAMING_ENABLED', 'true | false', 'true', 'عرض streaming في الواجهة'],
+                    ['LIMEN_AI_STREAM_POLL_MS', 'ms', '400', 'Polling عند queue mode'],
+                    ['LIMEN_AI_STREAM_MAX_WAIT', 'ثوانٍ', '120', 'أقصى انتظار للرد'],
+                    ['LIMEN_AI_STREAM_CHUNK_FINAL', 'true | false', 'true', 'تجزئة الرسالة النهائية'],
+                    ['LIMEN_AI_STREAM_CHUNK_CHARS', 'عدد', '24', 'حجم كل chunk'],
+                    ['LIMEN_AI_BROADCASTING_ENABLED', 'true | false', 'true', 'تفعيل broadcasting'],
+                    ['LIMEN_AI_BROADCAST_DRIVER', 'null | pusher | reverb | log', 'null', 'null = بدون websocket (آمن للـ demo)'],
+                    ['LIMEN_AI_BROADCAST_CONNECTION', 'اسم connection', '—', 'reverb عند Laravel Reverb'],
+                    ['LIMEN_AI_BROADCAST_CHANNEL_PREFIX', 'نص', 'limen-ai.conversation', 'بادئة قنوات Echo'],
+                    ['LIMEN_AI_QUEUE_CONNECTION', 'redis | database | sync', '—', 'اتصال الطابور'],
+                    ['LIMEN_AI_QUEUE', 'اسم queue', 'default', '—'],
+                    ['LIMEN_AI_QUEUE_AGENT_RUNS', 'true | false', 'false', 'true = agent في background (محتاج worker)'],
+                ],
+            ],
+            [
+                'id' => 'env-ui',
+                'label' => 'واجهة',
+                'rows' => [
+                    ['LIMEN_AI_UI_ENABLED', 'true | false', 'true', 'تفعيل routes و UI'],
+                    ['LIMEN_AI_ROUTE_PREFIX', 'مسار', 'limen-ai', 'بادئة URL'],
+                    ['LIMEN_AI_UI_REQUIRE_AUTH', 'true | false', 'true', 'middleware auth على routes'],
+                    ['LIMEN_AI_THEME_PRESET', 'default | arabic | …', 'default', 'preset جاهز'],
+                    ['LIMEN_AI_THEME_MODE', 'light | dark', 'light', '—'],
+                    ['LIMEN_AI_THEME_TOGGLE', 'true | false', 'false', 'زر تبديل light/dark'],
+                    ['LIMEN_AI_THEME_PRIMARY', '#hex', '—', 'لون أساسي — ضع بين quotes'],
+                    ['LIMEN_AI_THEME_TITLE', 'نص', '—', 'alias: LIMEN_AI_UI_TITLE في configs منشورة'],
+                    ['LIMEN_AI_THEME_SUBTITLE', 'نص', '—', 'alias: LIMEN_AI_UI_SUBTITLE'],
+                    ['LIMEN_AI_THEME_WELCOME_MESSAGE', 'نص', '—', 'alias: LIMEN_AI_UI_WELCOME_MESSAGE'],
+                    ['LIMEN_AI_THEME_AVATAR_URL', 'URL | مسار', '—', 'alias: LIMEN_AI_UI_AVATAR_URL'],
+                    ['LIMEN_AI_UI_TITLE', 'نص', '—', 'عنوان الويدجت'],
+                    ['LIMEN_AI_UI_SUBTITLE', 'نص', '—', '—'],
+                    ['LIMEN_AI_UI_WELCOME_MESSAGE', 'نص', '—', 'رسالة الترحيب'],
+                    ['LIMEN_AI_UI_DIRECTION', 'ltr | rtl', 'ltr', 'اتجاه الواجهة'],
+                    ['LIMEN_AI_UI_POSITION', 'bottom-right | …', 'bottom-right', 'موضع launcher'],
+                    ['LIMEN_AI_UI_RADIUS', 'CSS', '12px', 'انحناء الزوايا'],
+                    ['LIMEN_AI_UI_AVATAR_URL', 'URL | مسار', '—', 'صورة البوت'],
+                    ['LIMEN_AI_UI_USER_AVATAR_URL', 'URL', '—', 'صورة المستخدم الافتراضية'],
+                    ['LIMEN_AI_UI_FONT_FAMILY', 'CSS font', '—', 'مثال: Cairo, sans-serif'],
+                    ['LIMEN_AI_UI_LAUNCHER_LABEL', 'نص', '—', 'نص بجانب launcher'],
+                    ['LIMEN_AI_UI_GUEST_ENABLED', 'true | false', 'false', 'جلسات ضيف للويدجت'],
+                    ['LIMEN_AI_UI_GUEST_SESSION_TTL', 'دقائق', '10080', '7 أيام'],
+                    ['LIMEN_AI_UI_RATE_LIMIT_ENABLED', 'true | false', 'false', 'حد طلبات (يُفعّل تلقائياً للضيوف)'],
+                    ['LIMEN_AI_UI_RATE_LIMIT_MAX', 'عدد', '60', 'طلبات لكل نافذة'],
+                    ['LIMEN_AI_UI_RATE_LIMIT_DECAY', 'دقائق', '1', 'نافذة rate limit'],
+                    ['LIMEN_AI_UI_HISTORY_ENABLED', 'true | false', 'true', 'قائمة المحادثات'],
+                    ['LIMEN_AI_UI_HISTORY_PREVIEW', 'true | false', 'true', 'معاينة آخر رسالة'],
+                    ['LIMEN_AI_UI_RESUME_CONVERSATION', 'true | false', 'true', 'استئناف آخر محادثة'],
+                    ['LIMEN_AI_UI_DEFER_UNTIL_OPEN', 'true | false', 'true', 'لا تحمّل history قبل فتح الويدجت'],
+                    ['LIMEN_AI_UI_I18N_ENABLED', 'true | false', 'true', 'ترجمة واجهة'],
+                    ['LIMEN_AI_UI_DEFAULT_LOCALE', 'en | ar', 'en', 'لغة UI (مستقلة عن direction)'],
+                    ['LIMEN_AI_UI_SOUNDS_ENABLED', 'true | false', 'true', 'أصوات'],
+                    ['LIMEN_AI_UI_SOUND_VOLUME', '0.0–1.0', '0.35', '—'],
+                    ['LIMEN_AI_UI_SOUND_SEND', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_SOUND_RECEIVE', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_SOUND_OPEN', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_SOUND_NOTIFICATION', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_ANIMATIONS_ENABLED', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_ANIMATION_MS', 'ms', '280', '—'],
+                    ['LIMEN_AI_UI_ANIMATE_MESSAGES', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_TYPING_INDICATOR', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_LAUNCHER_PULSE', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_PANEL_ENTRANCE', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_UNREAD_BADGE', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_CLOSE_ON_ESCAPE', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_COMPOSER_ROWS', 'عدد', '4', 'صفوف textarea'],
+                    ['LIMEN_AI_UI_CHAR_COUNT', 'true | false', 'false', 'عداد أحرف'],
+                    ['LIMEN_AI_UI_MAX_MESSAGE_LENGTH', 'عدد', '4000', '—'],
+                    ['LIMEN_AI_UI_TIMESTAMPS', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_AVATARS', 'true | false', 'true', '—'],
+                    ['LIMEN_AI_UI_ROLE_LABELS', 'true | false', 'false', 'تسميات user/assistant'],
+                    ['LIMEN_AI_UI_TIME_FORMAT', 'short | long', 'short', '—'],
+                ],
+            ],
+            [
+                'id' => 'env-ops',
+                'label' => 'تشغيل',
+                'rows' => [
+                    ['LIMEN_AI_CACHE_RESOLVED_AGENTS', 'true | false', 'true', 'كاش resolved agents'],
+                    ['LIMEN_AI_IDEMPOTENCY_DRIVER', 'cache | …', 'cache', 'منع تنفيذ أداة مرتين'],
+                    ['LIMEN_AI_AUDIT_ENABLED', 'true | false', 'true', 'سجل تدقيق'],
+                    ['LIMEN_AI_USAGE_TRACKING_ENABLED', 'true | false', 'true', 'تتبع tokens'],
+                    ['LIMEN_AI_TRACE_ENABLED', 'true | false', 'true', 'trace IDs'],
+                    ['LIMEN_EXAMPLE_API_URL', 'URL', 'https://api.example.com', 'connector تجريبي'],
+                    ['LIMEN_EXAMPLE_API_TOKEN', 'token', '—', 'توكن connector'],
+                ],
+            ],
+        ];
+
+        $envVarCount = array_sum(array_map(static fn (array $g): int => count($g['rows']), $envGroups));
+    @endphp
+
+    <section id="env-reference">
+        <div class="section-head">
+            <div>
+                <h2>مرجع متغيرات <code>.env</code> الكامل</h2>
+                <p class="section-sub">
+                    {{ $envVarCount }}+ متغير موثّق — كل القيم المتاحة، الافتراضيات، وRealtime
+                    <span class="en">Sourced from .env.limen-ai.example and config/limen-ai.php — nothing omitted.</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <svg class="ico"><use href="#i-info"/></svg>
+            بعد أي تعديل: <code>php artisan config:clear</code> ثم <code>php artisan limen-ai:doctor</code>.
+            انشر القالب الرسمي: <code>php artisan vendor:publish --tag=limen-ai-env</code>
+            → <code>.env.limen-ai.example</code>
+        </div>
+
+        <h3 class="section-mini">القيم الحية في هذا التثبيت (Live)</h3>
+        <div class="live-grid">
+            @foreach($envLive as $key => $value)
+                <div class="live-item">
+                    <kbd>{{ $key }}</kbd>
+                    <span>{{ Str::contains($key, 'KEY') ? $maskSecret((string) $value) : $value }}</span>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom: 1rem;">
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-zap"/></svg> Realtime — التوصية للـ Demo</h3>
+                <pre data-lang="env"><code>LIMEN_AI_QUEUE_AGENT_RUNS=false
+LIMEN_AI_BROADCAST_DRIVER=null
+LIMEN_AI_STREAMING_ENABLED=true
+LIMEN_AI_UI_STREAMING_ENABLED=true
+OPENAI_TIMEOUT=120</code></pre>
+                <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted);">
+                    sync + بدون websocket = أقل مشاكل locally. للإنتاج: queue + reverb/pusher.
+                </p>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-server"/></svg> Realtime — الإنتاج</h3>
+                <pre data-lang="env"><code>LIMEN_AI_QUEUE_AGENT_RUNS=true
+LIMEN_AI_QUEUE_CONNECTION=redis
+LIMEN_AI_BROADCAST_DRIVER=reverb
+LIMEN_AI_BROADCAST_CONNECTION=reverb
+BROADCAST_CONNECTION=reverb</code></pre>
+                <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted);">
+                    + <code>php artisan queue:work</code> + Laravel Reverb/Pusher + استعادة auth في worker.
+                </p>
+            </div>
+        </div>
+
+        <div class="tabs env-tabs" role="tablist">
+            @foreach($envGroups as $index => $group)
+                <button class="tab {{ $index === 0 ? 'active' : '' }}" type="button" data-tab="{{ $group['id'] }}">{{ $group['label'] }}</button>
+            @endforeach
+            <button class="tab" type="button" data-tab="env-full">ملف كامل</button>
+        </div>
+
+        @foreach($envGroups as $index => $group)
+            <div class="tab-panel {{ $index === 0 ? 'active' : '' }}" id="panel-{{ $group['id'] }}">
+                <div class="table-wrap">
+                    <table class="env-table">
+                        <thead>
+                            <tr>
+                                <th>المتغير</th>
+                                <th>القيم المتاحة</th>
+                                <th>الافتراضي</th>
+                                <th>الوصف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($group['rows'] as $row)
+                                <tr>
+                                    <td>{{ $row[0] }}</td>
+                                    <td class="val">{{ $row[1] }}</td>
+                                    <td class="def">{{ $row[2] }}</td>
+                                    <td>
+                                        {{ $row[3] }}
+                                        @if(isset($envLive[$row[0]]))
+                                            <br><span class="env-live">live: {{ Str::contains($row[0], 'KEY') ? $maskSecret((string) $envLive[$row[0]]) : $envLive[$row[0]] }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endforeach
+
+        <div class="tab-panel" id="panel-env-full">
+            <p style="margin: 0 0 0.85rem; color: var(--muted); font-size: 0.9rem;">
+                القالب الرسمي الكامل — انسخه إلى <code>.env</code> وعدّل القيم. المصدر:
+                <code>.env.limen-ai.example</code>
+            </p>
+            <pre data-lang="env"><code># =============================================================================
+# Limen AI — environment variables (complete template)
+# =============================================================================
+
+# --- Core ---
+LIMEN_AI_DEFAULT_AGENT=app_assistant
+LIMEN_AI_PROVIDER=openai
+LIMEN_AI_DEFAULT_MODEL=gpt-4.1-mini
+LIMEN_AI_APP_ASSISTANT_MODEL=gpt-4.1-mini
+LIMEN_AI_SUPPORT_MODEL=gpt-4.1-mini
+LIMEN_AI_ADMIN_MODEL=gpt-4.1-mini
+LIMEN_AI_AUTHORIZATION_MODE=simple
+LIMEN_AI_REQUIRE_AUTH=false
+LIMEN_AI_UI_GUEST_ENABLED=true
+
+# --- Ollama (local) ---
+# OPENAI_API_KEY=ollama
+# OPENAI_BASE_URL=http://localhost:11434/v1
+# OPENAI_TIMEOUT=120
+# LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+
+# --- Persistence ---
+LIMEN_AI_PERSISTENCE_DRIVER=database
+# LIMEN_AI_PERSISTENCE_AUTO_DETECT=true
+# LIMEN_AI_CONVERSATION_REPOSITORY=
+# LIMEN_AI_MESSAGE_REPOSITORY=
+# LIMEN_AI_RUN_REPOSITORY=
+# LIMEN_AI_CHECKPOINT_STORE=
+# LIMEN_AI_APPROVAL_REPOSITORY=
+
+# --- Provider keys ---
+OPENAI_API_KEY=
+OPENAI_ORGANIZATION=
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_TIMEOUT=120
+ANTHROPIC_API_KEY=
+ANTHROPIC_API_VERSION=2023-06-01
+ANTHROPIC_MAX_TOKENS=4096
+GEMINI_API_KEY=
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+OPENROUTER_API_KEY=
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_HTTP_REFERER=
+OPENROUTER_APP_NAME=
+
+# --- Per-agent models & persona ---
+LIMEN_AI_EXAMPLE_MODEL=gpt-4.1-mini
+LIMEN_AI_EXAMPLE_LANGUAGE=auto
+LIMEN_AI_EXAMPLE_GENDER=neutral
+LIMEN_AI_EXAMPLE_REGION=international
+LIMEN_AI_EXAMPLE_FORMALITY=casual
+LIMEN_AI_EXAMPLE_VOICE=warm and helpful
+LIMEN_AI_OPENAI_MODEL=gpt-4.1-mini
+LIMEN_AI_ANTHROPIC_MODEL=claude-sonnet-4-20250514
+LIMEN_AI_GEMINI_MODEL=gemini-2.0-flash
+LIMEN_AI_OPENROUTER_MODEL=anthropic/claude-3.5-sonnet
+LIMEN_AI_LIMEN_MODEL=gpt-4.1-mini
+LIMEN_AI_LIMEN_LANGUAGE=auto
+LIMEN_AI_LIMEN_GENDER=female
+LIMEN_AI_LIMEN_REGION=eg
+LIMEN_AI_LIMEN_FORMALITY=formal
+LIMEN_AI_LIMEN_VOICE=clear operational support
+
+# --- Embeddings & knowledge ---
+LIMEN_AI_EMBEDDING_PROVIDER=fake
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+LIMEN_AI_KNOWLEDGE_DRIVER=config
+LIMEN_AI_MEMORY_STRICT=true
+
+# --- Attachments ---
+LIMEN_AI_ATTACHMENTS_ENABLED=true
+LIMEN_AI_ATTACHMENTS_DISK=local
+LIMEN_AI_ATTACHMENTS_PATH=limen-ai/attachments
+LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB=10240
+LIMEN_AI_ATTACHMENTS_MAX_COUNT=5
+LIMEN_AI_ATTACHMENT_RAG_ENABLED=true
+
+# --- Quality & validation ---
+LIMEN_AI_DEFAULT_TONE=professional
+LIMEN_AI_DEFAULT_LANGUAGE=en
+LIMEN_AI_DEFAULT_GENDER=neutral
+LIMEN_AI_DEFAULT_REGION=international
+LIMEN_AI_DEFAULT_FORMALITY=neutral
+LIMEN_AI_DEFAULT_VOICE=
+LIMEN_AI_SAVE_TOKENS=true
+LIMEN_AI_OUTPUT_MODERATION=false
+LIMEN_AI_HEURISTIC_VALIDATION=true
+LIMEN_AI_HEURISTIC_CONCISE_MAX_SENTENCES=12
+LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS=false
+LIMEN_AI_SEMANTIC_VALIDATION=false
+LIMEN_AI_SEMANTIC_MIN_SCORE=0.65
+LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false
+LIMEN_AI_SKILL_ADHERENCE_CHECK=false
+LIMEN_AI_OUTPUT_VALIDATOR=
+LIMEN_AI_OUTPUT_MODERATOR=
+LIMEN_AI_TOOL_COUNT_WARN=15
+LIMEN_AI_TOOL_COUNT_CRITICAL=25
+# LIMEN_AI_ROUTER_DELEGATES=
+
+# --- Performance & tools ---
+LIMEN_AI_CACHE_RESOLVED_AGENTS=true
+LIMEN_AI_IDEMPOTENCY_DRIVER=cache
+LIMEN_EXAMPLE_API_URL=https://api.example.com
+LIMEN_EXAMPLE_API_TOKEN=
+
+# --- Streaming (SSE) ---
+LIMEN_AI_STREAMING_ENABLED=true
+LIMEN_AI_UI_STREAMING_ENABLED=true
+LIMEN_AI_STREAM_POLL_MS=400
+LIMEN_AI_STREAM_MAX_WAIT=120
+LIMEN_AI_STREAM_CHUNK_FINAL=true
+LIMEN_AI_STREAM_CHUNK_CHARS=24
+
+# --- Queue ---
+LIMEN_AI_QUEUE_CONNECTION=
+LIMEN_AI_QUEUE=default
+LIMEN_AI_QUEUE_AGENT_RUNS=false
+
+# --- Broadcasting (realtime websocket) ---
+LIMEN_AI_BROADCASTING_ENABLED=true
+LIMEN_AI_BROADCAST_DRIVER=null
+LIMEN_AI_BROADCAST_CONNECTION=
+LIMEN_AI_BROADCAST_CHANNEL_PREFIX=limen-ai.conversation
+
+# --- Conversation summarization ---
+# LIMEN_AI_CONVERSATION_SUMMARIZER=LimenAi\Conversations\LlmConversationSummarizer
+LIMEN_AI_SUMMARY_THRESHOLD=24
+LIMEN_AI_SUMMARY_KEEP_RECENT=12
+LIMEN_AI_SUMMARY_REFRESH_MESSAGES=8
+
+# --- Observability ---
+LIMEN_AI_AUDIT_ENABLED=true
+LIMEN_AI_USAGE_TRACKING_ENABLED=true
+LIMEN_AI_TRACE_ENABLED=true
+
+# --- Chat UI ---
+LIMEN_AI_UI_ENABLED=true
+LIMEN_AI_ROUTE_PREFIX=limen-ai
+LIMEN_AI_UI_REQUIRE_AUTH=true
+LIMEN_AI_THEME_PRESET=default
+LIMEN_AI_THEME_MODE=light
+LIMEN_AI_THEME_TOGGLE=false
+LIMEN_AI_UI_TITLE=
+LIMEN_AI_UI_SUBTITLE=
+LIMEN_AI_UI_WELCOME_MESSAGE=
+LIMEN_AI_UI_DIRECTION=
+LIMEN_AI_UI_POSITION=
+LIMEN_AI_UI_RADIUS=
+LIMEN_AI_UI_AVATAR_URL=
+LIMEN_AI_UI_USER_AVATAR_URL=
+LIMEN_AI_UI_FONT_FAMILY=
+LIMEN_AI_UI_LAUNCHER_LABEL=
+LIMEN_AI_UI_RATE_LIMIT_ENABLED=false
+LIMEN_AI_UI_RATE_LIMIT_MAX=60
+LIMEN_AI_UI_RATE_LIMIT_DECAY=1
+LIMEN_AI_UI_GUEST_SESSION_TTL=10080
+LIMEN_AI_UI_HISTORY_ENABLED=true
+LIMEN_AI_UI_HISTORY_PREVIEW=true
+LIMEN_AI_UI_RESUME_CONVERSATION=true
+LIMEN_AI_UI_DEFER_UNTIL_OPEN=true
+LIMEN_AI_UI_I18N_ENABLED=true
+LIMEN_AI_UI_DEFAULT_LOCALE=en
+LIMEN_AI_UI_SOUNDS_ENABLED=true
+LIMEN_AI_UI_SOUND_VOLUME=0.35
+LIMEN_AI_UI_SOUND_SEND=true
+LIMEN_AI_UI_SOUND_RECEIVE=true
+LIMEN_AI_UI_SOUND_OPEN=true
+LIMEN_AI_UI_SOUND_NOTIFICATION=true
+LIMEN_AI_UI_ANIMATIONS_ENABLED=true
+LIMEN_AI_UI_ANIMATION_MS=280
+LIMEN_AI_UI_ANIMATE_MESSAGES=true
+LIMEN_AI_UI_TYPING_INDICATOR=true
+LIMEN_AI_UI_LAUNCHER_PULSE=true
+LIMEN_AI_UI_PANEL_ENTRANCE=true
+LIMEN_AI_UI_UNREAD_BADGE=true
+LIMEN_AI_UI_CLOSE_ON_ESCAPE=true
+LIMEN_AI_UI_COMPOSER_ROWS=4
+LIMEN_AI_UI_CHAR_COUNT=false
+LIMEN_AI_UI_MAX_MESSAGE_LENGTH=4000
+LIMEN_AI_UI_TIMESTAMPS=true
+LIMEN_AI_UI_AVATARS=true
+LIMEN_AI_UI_ROLE_LABELS=false
+LIMEN_AI_UI_TIME_FORMAT=short</code></pre>
+        </div>
+
+        <h3 class="section-mini">Ollama — بلوك جاهز للنسخ</h3>
+        <pre data-lang="env"><code>LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434/v1
+OPENAI_TIMEOUT=120
+LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+LIMEN_AI_SUPPORT_MODEL=qwen3:8b
+LIMEN_AI_ADMIN_MODEL=qwen3:8b
+LIMEN_AI_PERSISTENCE_DRIVER=database
+LIMEN_AI_QUEUE_AGENT_RUNS=false
+LIMEN_AI_BROADCAST_DRIVER=null
+LIMEN_AI_AUTHORIZATION_MODE=simple
+LIMEN_AI_UI_GUEST_ENABLED=true</code></pre>
+    </section>
+
+    <section id="current-install">
+        <div class="section-head">
+            <div>
+                <h2>ملخص هذا التثبيت</h2>
+                <p class="section-sub">قيم فعلية من <code>config/limen-ai.php</code> بعد resolve</p>
+            </div>
+        </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-cpu"/></svg> نموذج اللغة</h3>
+                <p style="margin-top: 0.5rem;">
+                    المزود: <code>{{ config('limen-ai.providers.default') }}</code><br>
+                    النموذج: <code>{{ config('limen-ai.agents.app_assistant.model') }}</code><br>
+                    Base URL: <code>{{ config('limen-ai.providers.openai.base_url') }}</code><br>
+                    Timeout: <code>{{ config('limen-ai.providers.openai.timeout') }}s</code>
+                </p>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-database"/></svg> التخزين والطابور</h3>
+                <p style="margin-top: 0.5rem;">
+                    Persistence: <code>{{ config('limen-ai.persistence.driver') ?: 'auto-detect' }}</code><br>
+                    Queue runs: <code>{{ config('limen-ai.queue.agent_runs') ? 'true' : 'false' }}</code><br>
+                    Queue: <code>{{ config('limen-ai.queue.name', 'default') }}</code>
+                </p>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-zap"/></svg> Realtime</h3>
+                <p style="margin-top: 0.5rem;">
+                    SSE streaming: <code>{{ config('limen-ai.streaming.enabled') ? 'true' : 'false' }}</code><br>
+                    UI streaming: <code>{{ filter_var(env('LIMEN_AI_UI_STREAMING_ENABLED', true), FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false' }}</code><br>
+                    Broadcast: <code>{{ config('limen-ai.broadcasting.driver') ?: 'null' }}</code><br>
+                    Channel prefix: <code>{{ config('limen-ai.broadcasting.channel_prefix') }}</code>
+                </p>
+            </div>
+            <div class="card">
+                <h3><svg class="ico"><use href="#i-phone"/></svg> الواجهة والصلاحيات</h3>
+                <p style="margin-top: 0.5rem;">
+                    Auth mode: <code>{{ config('limen-ai.authorization.mode') }}</code><br>
+                    UI auth: <code>{{ config('limen-ai.ui.auth_middleware') ? 'true' : 'false' }}</code><br>
+                    Guest widget: <code>{{ config('limen-ai.ui.guest.enabled') ? 'true' : 'false' }}</code><br>
+                    Theme: <code>{{ config('limen-ai.ui.theme.mode') }}</code>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>
+            <strong>Limen AI</strong> — حزمة Laravel لوكلاء الذكاء الاصطناعي ·
+            <a href="https://github.com/hatem-isnaad/limen-ai" target="_blank" rel="noopener">المستودع على GitHub</a> ·
+            <a href="#" onclick="window.print(); return false;">طباعة الدليل</a>
+        </p>
+        <p style="margin-top: 0.75rem;">
+            دخول تجريبي: <a href="{{ route('login.demo') }}">/login/demo</a> —
+            <code>demo@limen.ai</code> / <code>password</code>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.82rem;">
+            تقرير المحادثات الكامل: <code>docs/CHAT-WIDGET-REPORT.md</code>
+        </p>
+    </footer>
+</div>
+
+<button class="to-top" id="toTop" type="button" aria-label="العودة للأعلى"><svg class="ico"><use href="#i-arrow-up"/></svg></button>
+
+<script>
+(function () {
+    'use strict';
+
+    const icon = (id, cls) => '<svg class="ico ' + cls + '"><use href="#' + id + '"/></svg>';
+
+    const COPY_MARKUP =
+        '<span class="ico-swap" aria-hidden="true">' +
+            icon('i-copy', 'ico-idle') +
+            icon('i-check', 'ico-done') +
+            icon('i-x', 'ico-fail') +
+        '</span>' +
+        '<span class="copy-label">نسخ</span>';
+
+    const initCopyButton = (btn) => {
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'نسخ');
+        btn.innerHTML = COPY_MARKUP;
+        return btn;
+    };
+
+    const copy = async (text, btn) => {
+        const label = btn.querySelector('.copy-label');
+        let state = 'copied';
+
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (e) {
+            state = 'failed';
+        }
+
+        btn.classList.remove('copied', 'failed');
+        btn.classList.add(state);
+        if (label) label.textContent = state === 'copied' ? 'تم' : 'فشل';
+
+        clearTimeout(btn._resetTimer);
+        btn._resetTimer = setTimeout(() => {
+            btn.classList.remove('copied', 'failed');
+            if (label) label.textContent = 'نسخ';
+        }, 1700);
+    };
+
+    /* Tabs — scoped to their own section */
+    document.querySelectorAll('.tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+            const scope = tab.closest('section') || document;
+            scope.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+            scope.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab)?.classList.add('active');
+        });
+    });
+
+    /* Accordion */
+    document.querySelectorAll('.acc-trigger').forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            trigger.closest('.acc-item')?.classList.toggle('open');
+        });
+    });
+
+    document.getElementById('accExpand')?.addEventListener('click', () => {
+        document.querySelectorAll('.acc-item').forEach((i) => i.classList.add('open'));
+    });
+
+    document.getElementById('accCollapse')?.addEventListener('click', () => {
+        document.querySelectorAll('.acc-item').forEach((i) => i.classList.remove('open'));
+    });
+
+    /* Prompt copy */
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+        initCopyButton(btn);
+        btn.addEventListener('click', () => {
+            const text = btn.closest('.prompt')?.querySelector('.prompt-text')?.textContent?.trim();
+            if (text) copy(text, btn);
+        });
+    });
+
+    /* ---------- Syntax highlighting ---------- */
+    const PHP_KEYWORDS = 'return|function|public|private|protected|class|interface|use|new|true|false|null|require|array|const|static|namespace|extends|implements|if|else|elseif|foreach|while|as|try|catch|throw|void|bool|string|int|float|fn|match|enum|readonly|declare|abstract|final';
+    const PHP_FUNCS = 'env|config|app_path|base_path|storage_path|route|url|data_get|auth|__|trans|collect|now';
+
+    const sniffLanguage = (text) => {
+        if (/^\s*(#|[A-Z][A-Z0-9_]*=)/m.test(text) && !/[{};]/.test(text)) return 'env';
+        if (/^\s*(composer|php artisan|npm|ollama|curl|open|git)\b/m.test(text)) return 'bash';
+        if (/&lt;x-|&lt;!--/.test(text) || /^\s*</.test(text)) return 'blade';
+        if (/[$'"]|=>|::/.test(text)) return 'php';
+        return 'text';
+    };
+
+    const escapeHtml = (s) => s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const wrap = (cls, text) => '<span class="tok-' + cls + '">' + text + '</span>';
+
+    const HIGHLIGHTERS = {
+        php: (src) => src.replace(
+            new RegExp(
+                '(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)' +
+                "|('(?:\\\\.|[^'\\\\])*'|\"(?:\\\\.|[^\"\\\\])*\")" +
+                '|(\\$[A-Za-z_]\\w*)' +
+                '|\\b(' + PHP_FUNCS + ')(?=\\s*\\()' +
+                '|\\b(' + PHP_KEYWORDS + ')\\b' +
+                '|\\b([A-Z]\\w*(?:\\\\[A-Z]\\w*)*)\\b' +
+                '|([A-Za-z_]\\w*)(?=\\s*\\()' +
+                '|(=&gt;|-&gt;|\\?-&gt;|::)' +
+                '|\\b(\\d+(?:\\.\\d+)?)\\b',
+                'g'
+            ),
+            (m, comment, str, variable, helper, keyword, cls, call, op, num) => {
+                if (comment) return wrap('comment', comment);
+                if (str) return wrap('string', str);
+                if (variable) return wrap('var', variable);
+                if (helper) return wrap('func', helper);
+                if (keyword) return wrap('keyword', keyword);
+                if (cls) return wrap('class', cls);
+                if (call) return wrap('func', call);
+                if (op) return wrap('op', op);
+                if (num) return wrap('number', num);
+                return m;
+            }
+        ),
+
+        bash: (src) => src.replace(
+            /(#[^\n]*)|('[^']*'|"[^"]*")|(^|\s)(--?[A-Za-z][\w-]*)|\b([\w-]+:[\w:-]+)|\b(composer|php|artisan|npm|ollama|curl|git|open|cd)\b/gm,
+            (m, comment, str, lead, flag, sub, cmd) => {
+                if (comment) return wrap('comment', comment);
+                if (str) return wrap('string', str);
+                if (flag) return lead + wrap('flag', flag);
+                if (sub) return wrap('func', sub);
+                if (cmd) return wrap('keyword', cmd);
+                return m;
+            }
+        ),
+
+        env: (src) => src.replace(
+            /(#[^\n]*)|^([A-Z][A-Z0-9_]*)(=)(.*)$/gm,
+            (m, comment, key, eq, value) => {
+                if (comment) return wrap('comment', comment);
+                return wrap('key', key) + wrap('op', eq) + wrap('string', value);
+            }
+        ),
+
+        blade: (src) => src.replace(
+            /(&lt;!--[\s\S]*?--&gt;)|(&lt;\/?[\w:.-]+)|([\w-]+)(=)("[^"]*")|(\/?&gt;)/g,
+            (m, comment, tag, attr, eq, val, close) => {
+                if (comment) return wrap('comment', comment);
+                if (tag) return wrap('tag', tag);
+                if (attr) return wrap('attr', attr) + wrap('op', eq) + wrap('string', val);
+                if (close) return wrap('tag', close);
+                return m;
+            }
+        ),
+
+        text: (src) => src,
+    };
+
+    const LANG_LABEL = { php: 'PHP', bash: 'Terminal', env: '.env', blade: 'Blade', text: 'Text' };
+
+    /* Highlight + wrap every block in editor chrome */
+    document.querySelectorAll('pre > code').forEach((code) => {
+        const pre = code.parentElement;
+        const raw = code.textContent.replace(/\s+$/, '');
+        const lang = pre.dataset.lang || sniffLanguage(escapeHtml(raw));
+        const lineCount = raw.split('\n').length;
+
+        code.innerHTML = (HIGHLIGHTERS[lang] || HIGHLIGHTERS.text)(escapeHtml(raw));
+
+        const block = document.createElement('div');
+        block.className = 'code-block';
+        pre.parentNode.insertBefore(block, pre);
+
+        block.innerHTML =
+            '<div class="code-head">' +
+                '<span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                '<span class="code-lang">' + (LANG_LABEL[lang] || lang) + '</span>' +
+            '</div>' +
+            '<div class="code-body">' +
+                (lineCount > 1
+                    ? '<div class="code-gutter" aria-hidden="true">' +
+                        Array.from({ length: lineCount }, (_, i) => i + 1).join('\n') +
+                      '</div>'
+                    : '') +
+            '</div>';
+
+        block.querySelector('.code-body').appendChild(pre);
+
+        const btn = initCopyButton(document.createElement('button'));
+        btn.className = 'code-copy';
+        block.querySelector('.code-head').prepend(btn);
+        btn.addEventListener('click', () => copy(raw, btn));
+    });
+
+    /* Highlight + copy on compact command rows */
+    document.querySelectorAll('.cli-block').forEach((block) => {
+        const code = block.querySelector('code');
+        if (!code) return;
+
+        const raw = code.textContent.trim();
+        code.innerHTML = HIGHLIGHTERS.bash(escapeHtml(raw));
+
+        const btn = initCopyButton(document.createElement('button'));
+        btn.className = 'code-copy';
+        block.appendChild(btn);
+        btn.addEventListener('click', () => copy(raw, btn));
+    });
+
+    /* Scroll progress */
+    const progress = document.getElementById('progressBar');
+    const toTop = document.getElementById('toTop');
+
+    const onScroll = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = max > 0 ? window.scrollY / max : 0;
+        if (progress) progress.style.transform = 'scaleX(' + ratio + ')';
+        if (toTop) toTop.classList.toggle('visible', window.scrollY > 600);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    toTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    const closeAllHostDrops = () => {
+        document.querySelectorAll('.host-topnav [data-nav-drop].open').forEach((drop) => {
+            drop.classList.remove('open');
+            drop.querySelector('.nav-drop-trigger')?.setAttribute('aria-expanded', 'false');
+            drop.querySelector('.nav-drop-panel')?.setAttribute('hidden', '');
+        });
+    };
+
+    document.querySelectorAll('.host-topnav [data-nav-drop]').forEach((drop) => {
+        const trigger = drop.querySelector('.nav-drop-trigger');
+        const panel = drop.querySelector('.nav-drop-panel');
+        trigger?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = drop.classList.contains('open');
+            closeAllHostDrops();
+            if (!isOpen) {
+                drop.classList.add('open');
+                trigger.setAttribute('aria-expanded', 'true');
+                panel?.removeAttribute('hidden');
+            }
+        });
+    });
+
+    document.addEventListener('click', closeAllHostDrops);
+
+    const hostPanel = document.getElementById('hostNavPanel');
+    const hostBackdrop = document.getElementById('hostNavBackdrop');
+    const hostToggle = document.getElementById('hostNavToggle');
+    const hostClose = document.getElementById('hostNavClose');
+
+    const openHostPanel = () => {
+        hostPanel?.removeAttribute('hidden');
+        hostBackdrop?.removeAttribute('hidden');
+        hostToggle?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeHostPanel = () => {
+        hostPanel?.setAttribute('hidden', '');
+        hostBackdrop?.setAttribute('hidden', '');
+        hostToggle?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    };
+
+    hostToggle?.addEventListener('click', openHostPanel);
+    hostClose?.addEventListener('click', closeHostPanel);
+    hostBackdrop?.addEventListener('click', closeHostPanel);
+    hostPanel?.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeHostPanel);
+    });
+
+    /* Scrollspy */
+    const navLinks = Array.from(document.querySelectorAll('.host-nav-link[href^="#"]'));
+    const sections = navLinks
+        .map((link) => document.querySelector(link.getAttribute('href')))
+        .filter(Boolean);
+
+    if (sections.length && 'IntersectionObserver' in window) {
+        const spy = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                navLinks.forEach((l) => l.classList.remove('active'));
+                const match = navLinks.find((l) => l.getAttribute('href') === '#' + entry.target.id);
+                match?.classList.add('active');
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+
+        sections.forEach((s) => spy.observe(s));
+    }
+
+    /* Reveal on scroll */
+    const revealTargets = document.querySelectorAll('section > .card, .grid > .card, .table-wrap, .acc-item, .decision, .tool-card');
+    revealTargets.forEach((el) => el.classList.add('reveal'));
+
+    if ('IntersectionObserver' in window) {
+        const revealer = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry, index) => {
+                if (!entry.isIntersecting) return;
+                setTimeout(() => entry.target.classList.add('shown'), Math.min(index * 45, 220));
+                observer.unobserve(entry.target);
+            });
+        }, { rootMargin: '0px 0px -8% 0px' });
+
+        revealTargets.forEach((el) => revealer.observe(el));
+    } else {
+        revealTargets.forEach((el) => el.classList.add('shown'));
+    }
+
+    /* Animated counters */
+    const counters = document.querySelectorAll('.stat-num[data-count]');
+
+    const runCounter = (el) => {
+        const target = parseInt(el.dataset.count, 10);
+        const suffix = el.dataset.suffix || '';
+        const duration = 900;
+        const start = performance.now();
+
+        const tick = (now) => {
+            const t = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = Math.round(target * eased) + suffix;
+            if (t < 1) requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+    };
+
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const counterObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                runCounter(entry.target);
+                observer.unobserve(entry.target);
+            });
+        });
+
+        counters.forEach((el) => counterObserver.observe(el));
+    }
+
+    /* Tool filters */
+    const toolGrid = document.getElementById('toolGrid');
+    const toolEmpty = document.getElementById('toolEmpty');
+
+    const applyToolFilter = () => {
+        const active = document.querySelector('#toolFilters .filter-chip.active');
+        const filter = active?.dataset.filter || 'all';
+        let visible = 0;
+
+        toolGrid?.querySelectorAll('.tool-card').forEach((card) => {
+            const match = filter === 'all' || (card.dataset.cat || '').split(' ').includes(filter);
+            card.hidden = !match;
+            if (match) visible++;
+        });
+
+        if (toolEmpty) toolEmpty.hidden = visible > 0;
+    };
+
+    document.querySelectorAll('#toolFilters .filter-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#toolFilters .filter-chip').forEach((c) => c.classList.remove('active'));
+            chip.classList.add('active');
+            applyToolFilter();
+        });
+    });
+
+    /* Site search */
+    const search = document.getElementById('siteSearch');
+    const searchables = Array.from(document.querySelectorAll('section'));
+
+    const clearHighlights = (root) => {
+        root.querySelectorAll('mark').forEach((m) => {
+            m.replaceWith(document.createTextNode(m.textContent));
+            m.parentNode?.normalize?.();
+        });
+    };
+
+    const runSearch = (raw) => {
+        const query = raw.trim().toLowerCase();
+
+        searchables.forEach((section) => {
+            clearHighlights(section);
+
+            if (!query) {
+                section.hidden = false;
+                section.querySelectorAll('.card, .tool-card, .decision, tbody tr, .acc-item, .prompt').forEach((el) => {
+                    el.hidden = false;
+                });
+                applyToolFilter();
+                return;
+            }
+
+            const rows = section.querySelectorAll('.card, .tool-card, .decision, tbody tr, .acc-item, .prompt');
+            let hits = 0;
+
+            if (rows.length) {
+                rows.forEach((el) => {
+                    const match = el.textContent.toLowerCase().includes(query);
+                    el.hidden = !match;
+                    if (match) hits++;
+                });
+            } else if (section.textContent.toLowerCase().includes(query)) {
+                hits = 1;
+            }
+
+            section.hidden = hits === 0;
+        });
+
+        document.querySelectorAll('.acc-item:not([hidden])').forEach((item) => {
+            if (query) item.classList.add('open');
+        });
+    };
+
+    let searchTimer;
+    search?.addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        const value = e.target.value;
+        searchTimer = setTimeout(() => runSearch(value), 140);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== search) {
+            e.preventDefault();
+            search?.focus();
+        }
+        if (e.key === 'Escape' && document.activeElement === search) {
+            search.value = '';
+            runSearch('');
+            search.blur();
+        }
+    });
+
+    /* Heading icons + anchors */
+    const SECTION_ICONS = {
+        concepts: 'i-book-open',
+        install: 'i-package',
+        example: 'i-layers',
+        integration: 'i-book',
+        principle: 'i-shield',
+        components: 'i-server',
+        'how-to-add': 'i-wrench',
+        registered: 'i-building',
+        capabilities: 'i-sparkles',
+        flow: 'i-branch',
+        agents: 'i-bot',
+        tools: 'i-package',
+        prompts: 'i-chat',
+        providers: 'i-server',
+        ui: 'i-phone',
+        decision: 'i-branch',
+        'best-practices': 'i-shield',
+        paths: 'i-folder',
+        recommendations: 'i-truck',
+        'not-needed': 'i-x',
+        'file-reference': 'i-folder',
+        cli: 'i-terminal',
+        'env-reference': 'i-server',
+        'current-install': 'i-cpu',
+    };
+
+    document.querySelectorAll('section[id] h2').forEach((h2) => {
+        const section = h2.closest('section');
+        if (!section?.id) return;
+
+        const symbol = SECTION_ICONS[section.id];
+        if (symbol) {
+            h2.insertAdjacentHTML('afterbegin', '<span class="h2-icon">' + icon(symbol, '') + '</span>');
+        }
+
+        const anchor = document.createElement('a');
+        anchor.className = 'anchor';
+        anchor.href = '#' + section.id;
+        anchor.textContent = '#';
+        anchor.setAttribute('aria-hidden', 'true');
+        h2.appendChild(anchor);
+    });
+})();
+</script>
+</body>
+</html>

@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `docs/host-guide-ar.html` — full Arabic host integration guide (from reference host `/demo/limen-ai`)
+- `docs/sources/` — Blade sources for both doc hubs (synced from reference host)
+- `docs/build-static-docs.py` — rebuild static HTML from running host demo
+
 ### Changed
 
-- `docs/index.html` — full interactive hub from host demo (learning paths, snippets, advanced tutorial, troubleshooting, reference)
-- `README.md` — learning paths, multi-agent layout, Ollama/qwen3, SSE stream, quality layer
+- `docs/index.html` — full interactive EN hub from host demo (learning paths, snippets, advanced tutorial, troubleshooting, reference)
+- `README.md` — learning paths, multi-agent layout, Ollama/qwen3, SSE stream, quality layer, AR guide link
 
 ## [1.2.2] - 2026-09-23
 

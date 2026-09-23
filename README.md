@@ -43,7 +43,8 @@ LIMEN_AI_AUTHORIZATION_MODE=simple
 | [docs/installation.md](docs/installation.md) | Packagist, VCS, path repo, private registry |
 | [AGENTS.md](AGENTS.md) | AI & contributor reference (architecture, conventions) |
 | [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) | Multi-agent layout and tool-count guidance |
-| [docs/index.html](docs/index.html) | **Interactive hub** — learning paths, snippets, tutorial, full reference |
+| [docs/index.html](docs/index.html) | **Interactive hub (EN)** — learning paths, snippets, tutorial, full reference |
+| [docs/host-guide-ar.html](docs/host-guide-ar.html) | **Host guide (AR)** — concepts, agents, tools, env reference, 3PL demo |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
 
 ```bash
@@ -508,7 +509,8 @@ CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12 / 13 (L13 requires PHP ^8.3). Detail
 |----------|-------------|
 | **[AGENTS.md](AGENTS.md)** | **AI agent & contributor reference (start here for coding)** |
 | **[docs/installation.md](docs/installation.md)** | **Install via Packagist, VCS, path repo, or private registry** |
-| [docs/index.html](docs/index.html) | **Interactive hub** — learning paths, snippets, tutorial, full reference |
+| [docs/index.html](docs/index.html) | **Interactive hub (EN)** — learning paths, snippets, tutorial, full reference |
+| [docs/host-guide-ar.html](docs/host-guide-ar.html) | **Host guide (AR)** — concepts, agents, tools, env reference, 3PL demo |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
 | [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | System architecture and module map |
 | [docs/project/AI_SPEC.md](docs/project/AI_SPEC.md) | Master specification |
