@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 18 — Observability & Audit** (Complete)
+**Phase 19 — Artisan Developer Tools** (Complete)
 
 ## Completed
 
@@ -79,6 +79,9 @@
 - Trace correlation IDs on runs and tool spans
 - Usage tracking for LLM tokens and tool durations
 - Audit buffer/export and run observability API endpoint
+- `limen-ai:doctor` environment validation command
+- Generator commands: `make:agent`, `make:tool`, `make:skill`, plus `limen-ai:list`
+- Publishable stubs under `stubs/` with `StubGenerator`
 
 ## In Progress
 
@@ -90,9 +93,9 @@
 
 ## Next Steps
 
-1. Begin Phase 19 — Artisan Developer Tools
-2. Add make:* command stubs and limen-ai:doctor
-3. Begin Phase 20 — Testing & Architecture Validation
+1. Begin Phase 20 — Testing & Architecture Validation
+2. Expand architecture test matrix and CI coverage gates
+3. Begin Phase 21 — Limen Integration
 
 ## Risks
 

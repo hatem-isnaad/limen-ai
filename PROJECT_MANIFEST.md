@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 19 — Artisan Developer Tools**
+Current: **Phase 20 — Testing & Architecture Validation**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -267,3 +267,13 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Agent audit | `AgentObservabilityListener` |
 | Run report | `RunObservabilityReporter`, observability API |
 | Docs | `docs/observability.md` |
+
+## Phase 19 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Doctor | `DoctorCommand` (`limen-ai:doctor`) |
+| Generators | `MakeAgentCommand`, `MakeToolCommand`, `MakeSkillCommand` |
+| Inspection | `ListCommand` (`limen-ai:list`) |
+| Stubs | `stubs/*.stub`, `StubGenerator` |
+| Publish tag | `limen-ai-stubs` |
