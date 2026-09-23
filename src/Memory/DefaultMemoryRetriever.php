@@ -13,6 +13,7 @@ class DefaultMemoryRetriever implements MemoryRetriever
         private readonly AgentRepository $agents,
         private readonly MemoryStore $store,
         private readonly MemoryFormatter $formatter,
+        private readonly StrictMemoryPolicy $memoryPolicy,
         private readonly ConfigRepository $config,
     ) {}
 
@@ -25,7 +26,7 @@ class DefaultMemoryRetriever implements MemoryRetriever
         }
 
         $memoryConfig = $agent->memoryConfig();
-        $limit = (int) $this->config->get('limen-ai.memory.limit', 20);
+        $limit = $this->memoryPolicy->resolveMemoryLimit($agentKey);
         $entries = [];
 
         if ($memoryConfig['user'] ?? false) {
@@ -40,6 +41,8 @@ class DefaultMemoryRetriever implements MemoryRetriever
             $entries = array_merge($entries, $this->entriesForScope(MemoryScope::AGENT, $context, $agentKey));
         }
 
+        $entries = $this->memoryPolicy->filterEntries($agentKey, $entries);
+
         if ($entries === []) {
             return [];
         }
@@ -47,6 +50,7 @@ class DefaultMemoryRetriever implements MemoryRetriever
         return $this->formatter->toAgentMessages(array_slice($entries, -$limit));
     }
 
+    /** @return list<array<string, mixed>> */
     protected function entriesForScope(string $scope, array $context, string $agentKey): array
     {
         $scopeId = $this->resolveScopeId($scope, $context);

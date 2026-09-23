@@ -119,11 +119,23 @@ class ModuleBoundaryTest extends TestCase
 
     public function test_pusher_sdk_is_not_used_outside_broadcasting_module(): void
     {
-        $this->assertForbiddenImportsOnlyInAllowedPaths(
-            $this->src,
-            'Pusher\\',
-            ['src/Broadcasting'],
-        );
+        $violations = [];
+
+        foreach ($this->phpFilesIn($this->src) as $file) {
+            $contents = file_get_contents($file);
+
+            if (! str_contains($contents, 'Pusher\\')) {
+                continue;
+            }
+
+            $relative = str_replace(dirname(__DIR__, 2).'/', '', $file);
+
+            if (! str_starts_with($relative, 'src/Broadcasting')) {
+                $violations[] = $relative;
+            }
+        }
+
+        $this->assertSame([], $violations, 'Pusher SDK must only be used inside src/Broadcasting.');
     }
 
     public function test_blade_facade_is_not_used_outside_service_provider(): void

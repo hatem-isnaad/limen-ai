@@ -8,6 +8,7 @@ class MemoryService
 {
     public function __construct(
         private readonly MemoryStore $store,
+        private readonly StrictMemoryPolicy $memoryPolicy,
     ) {}
 
     public function rememberUser(int|string $userId, string $key, mixed $value, ?string $agentKey = null): void
@@ -22,13 +23,20 @@ class MemoryService
 
     public function remember(string $scope, string $scopeId, string $key, mixed $value, ?string $agentKey = null): void
     {
+        $this->memoryPolicy->assertKeyAllowed($agentKey, $key);
+
         $context = ['scope_id' => $scopeId];
 
         if ($agentKey !== null) {
             $context['agent_key'] = $agentKey;
         }
 
-        $this->store->put($scope, $key, $value, $context);
+        $this->store->put(
+            $scope,
+            $key,
+            $this->memoryPolicy->normalizeValue($agentKey, $value),
+            $context,
+        );
     }
 
     public function recall(string $scope, string $scopeId, string $key, ?string $agentKey = null): mixed

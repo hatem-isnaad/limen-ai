@@ -169,9 +169,18 @@ class AgentRuntimeTest extends TestCase
         $calls = $fake->recordedCalls();
         $secondCallMessages = $calls[1]['messages'];
 
-        $this->assertSame('Hello', $secondCallMessages[0]['content']);
-        $this->assertSame('First reply.', $secondCallMessages[1]['content']);
-        $this->assertSame('Follow up', $secondCallMessages[2]['content']);
+        $userMessages = array_values(array_filter(
+            $secondCallMessages,
+            fn (array $message): bool => ($message['role'] ?? '') === 'user',
+        ));
+        $assistantMessages = array_values(array_filter(
+            $secondCallMessages,
+            fn (array $message): bool => ($message['role'] ?? '') === 'assistant',
+        ));
+
+        $this->assertSame('Hello', $userMessages[0]['content']);
+        $this->assertSame('First reply.', $assistantMessages[0]['content']);
+        $this->assertSame('Follow up', $userMessages[1]['content']);
 
         $stored = app(ConversationService::class)->storedMessages('conv-multi');
         $this->assertCount(4, $stored);

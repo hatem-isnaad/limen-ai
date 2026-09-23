@@ -3,6 +3,8 @@
 namespace LimenAi\Runtime;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use LimenAi\Agents\AgentPersonaComposer;
+use LimenAi\Agents\AgentResponseGuard;
 use LimenAi\Agents\ResolvedAgent;
 use LimenAi\Authorization\ApprovalStatus;
 use LimenAi\Conversations\ConversationService;
@@ -47,6 +49,8 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly ContentSanitizer $sanitizer,
         private readonly UsageTracker $usage,
         private readonly Dispatcher $events,
+        private readonly AgentPersonaComposer $personaComposer,
+        private readonly AgentResponseGuard $responseGuard,
     ) {}
 
     public function run(string $agentKey, string $conversationId, string $userMessage, RunContext $context): string
@@ -65,7 +69,7 @@ class DefaultAgentRuntime implements AgentRuntime
 
         $userMessage = $this->sanitizer->sanitize($userMessage);
 
-        $history = $this->conversations->historyForAgent($conversationId);
+        $history = $this->conversations->historyForAgent($conversationId, $agentKey);
         $this->conversations->appendUserMessage($conversationId, $userMessage);
 
         $baseMessages = array_merge($history, [
@@ -75,7 +79,13 @@ class DefaultAgentRuntime implements AgentRuntime
         $historyCount = count($baseMessages);
         $memoryMessages = $this->memory->retrieve($agentKey, $this->memoryContext($agentKey, $conversationId, $context));
         $knowledgeMessages = $this->knowledge->retrieve($agentKey, $userMessage);
-        $messages = array_merge($memoryMessages, $knowledgeMessages, $baseMessages);
+        $runtimePersona = $this->runtimePersonaMessage($agent, $context);
+        $messages = array_merge(
+            $memoryMessages,
+            $knowledgeMessages,
+            $runtimePersona !== null ? [$runtimePersona] : [],
+            $baseMessages,
+        );
 
         $runId = $this->runs->create([
             'agent_key' => $agentKey,
@@ -256,9 +266,6 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->conversations->markActive((string) $run['conversation_id']);
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $messages
-     */
     protected function executeLoop(
         ResolvedAgent $agent,
         string $runId,
@@ -280,7 +287,10 @@ class DefaultAgentRuntime implements AgentRuntime
             $toolCalls = $this->toolCallParser->parse($response);
 
             if ($toolCalls === []) {
-                $content = (string) ($response->content() ?? '');
+                $content = $this->responseGuard->apply(
+                    $agent->definition(),
+                    (string) ($response->content() ?? ''),
+                );
                 $messages[] = ['role' => 'assistant', 'content' => $content];
 
                 return $content;
@@ -317,9 +327,6 @@ class DefaultAgentRuntime implements AgentRuntime
         }
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $messages
-     */
     protected function saveApprovalCheckpoint(
         string $runId,
         RuntimeLimits $limits,
@@ -361,7 +368,6 @@ class DefaultAgentRuntime implements AgentRuntime
         return $approvalId;
     }
 
-    /** @return array<string, mixed> */
     protected function loadRunWaitingForApproval(string $runId): array
     {
         $run = $this->runs->find($runId);
@@ -377,7 +383,6 @@ class DefaultAgentRuntime implements AgentRuntime
         return $run;
     }
 
-    /** @return array<string, mixed> */
     protected function loadCheckpoint(string $runId): array
     {
         $checkpoint = $this->checkpoints->load($runId);
@@ -449,15 +454,11 @@ class DefaultAgentRuntime implements AgentRuntime
         ])->forToolExecution($runId, $conversationId, $agentKey);
     }
 
-    /** @param  array<string, mixed>  $attributes */
     protected function persistRun(string $runId, string $status, array $attributes): void
     {
         $this->runs->updateStatus($runId, $status, $attributes);
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $messages
-     */
     protected function syncConversationMessages(string $conversationId, array $messages, int $historyCount): void
     {
         $newMessages = array_slice($messages, $historyCount);
@@ -474,7 +475,6 @@ class DefaultAgentRuntime implements AgentRuntime
         return (bool) config('limen-ai.observability.trace_enabled', true);
     }
 
-    /** @return array<string, mixed> */
     protected function memoryContext(string $agentKey, string $conversationId, RunContext $context): array
     {
         return [
@@ -482,6 +482,20 @@ class DefaultAgentRuntime implements AgentRuntime
             'conversation_id' => $conversationId,
             'user_id' => $context->userId(),
             'guest_token' => $context->guestToken(),
+        ];
+    }
+
+    protected function runtimePersonaMessage(ResolvedAgent $agent, RunContext $context): ?array
+    {
+        $addendum = $this->personaComposer->composeRuntimeAddendum($agent->definition(), $context);
+
+        if ($addendum === null || trim($addendum) === '') {
+            return null;
+        }
+
+        return [
+            'role' => 'system',
+            'content' => $addendum,
         ];
     }
 }

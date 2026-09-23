@@ -4,7 +4,7 @@ namespace LimenAi\Integrations;
 
 use LimenAi\Contracts\Integrations\HttpConnector;
 use LimenAi\Contracts\Security\SecretResolver;
-use LimenAi\Knowledge\WorkflowVariableResolver;
+use LimenAi\Workflows\WorkflowVariableResolver;
 
 class HttpRequestBuilder
 {
