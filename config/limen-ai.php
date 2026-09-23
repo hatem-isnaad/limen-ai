@@ -82,6 +82,13 @@ return [
         'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
     ],
 
+    'conversations' => [
+        'repository' => LimenAi\Conversations\InMemoryConversationRepository::class,
+        'message_repository' => LimenAi\Conversations\InMemoryMessageRepository::class,
+        'history_limit' => 50,
+        'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
+    ],
+
     'tool_pipeline' => [
         'idempotency' => [
             'driver' => env('LIMEN_AI_IDEMPOTENCY_DRIVER', 'cache'),
