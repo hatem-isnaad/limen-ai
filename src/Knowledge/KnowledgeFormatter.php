@@ -2,8 +2,13 @@
 
 namespace LimenAi\Knowledge;
 
+use LimenAi\Contracts\Security\ContentSanitizer;
+
 class KnowledgeFormatter
 {
+    public function __construct(
+        private readonly ContentSanitizer $sanitizer,
+    ) {}
     /**
      * @param  list<array<string, mixed>>  $chunks
      * @return list<array<string, mixed>>
@@ -24,7 +29,7 @@ class KnowledgeFormatter
                 continue;
             }
 
-            $lines[] = "[{$collection}] {$content}";
+            $lines[] = "[{$collection}] ".$this->sanitizer->wrapUntrusted($content, 'knowledge');
         }
 
         if ($lines === []) {

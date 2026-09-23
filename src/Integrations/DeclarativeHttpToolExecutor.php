@@ -2,12 +2,14 @@
 
 namespace LimenAi\Integrations;
 
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Support\Facades\Http;
 use LimenAi\Contracts\Integrations\HttpConnectorRepository;
 use LimenAi\Contracts\Integrations\HttpToolExecutor;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Contracts\Security\UrlValidator;
 use LimenAi\Exceptions\HttpIntegrationException;
+use LimenAi\Exceptions\SecurityException;
 
 class DeclarativeHttpToolExecutor implements HttpToolExecutor
 {
@@ -15,6 +17,7 @@ class DeclarativeHttpToolExecutor implements HttpToolExecutor
         private readonly HttpConnectorRepository $connectors,
         private readonly HttpRequestBuilder $requests,
         private readonly UrlValidator $urlValidator,
+        private readonly ConfigRepository $config,
     ) {}
 
     /** @param  array<string, mixed>  $toolConfig  @param  array<string, mixed>  $input */
@@ -34,12 +37,16 @@ class DeclarativeHttpToolExecutor implements HttpToolExecutor
 
         $request = $this->requests->build($connector, $toolConfig, $input);
 
-        if (! $this->urlValidator->isAllowed($request['url'])) {
+        try {
+            $this->urlValidator->assertAllowed($request['url']);
+        } catch (SecurityException $exception) {
             throw HttpIntegrationException::urlNotAllowed($request['url']);
         }
 
         $timeout = (int) ($toolConfig['timeout'] ?? 30);
-        $client = Http::timeout($timeout)->withHeaders($request['headers']);
+        $client = Http::timeout($timeout)
+            ->withOptions(['allow_redirects' => $this->redirectOptions()])
+            ->withHeaders($request['headers']);
 
         $response = match ($request['method']) {
             'GET' => $client->get($request['url'], $request['query']),
@@ -67,6 +74,20 @@ class DeclarativeHttpToolExecutor implements HttpToolExecutor
         return [
             'status' => $response->status(),
             'body' => $body,
+        ];
+    }
+
+    /** @return array<string, mixed>|false */
+    protected function redirectOptions(): array|false
+    {
+        if (! (bool) $this->config->get('limen-ai.security.ssrf.allow_redirects', false)) {
+            return false;
+        }
+
+        return [
+            'max' => (int) $this->config->get('limen-ai.security.ssrf.max_redirects', 0),
+            'strict' => true,
+            'protocols' => ['http', 'https'],
         ];
     }
 }
