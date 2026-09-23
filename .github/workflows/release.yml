@@ -27,7 +27,16 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
+        env:
+          COMPOSER_NO_AUDIT: 1
+        run: |
+          if [ -f composer.lock ]; then
+            composer install --prefer-dist --no-interaction
+          else
+            composer require "illuminate/contracts:12.*" "illuminate/support:12.*" "illuminate/database:12.*" "illuminate/queue:12.*" "illuminate/broadcasting:12.*" "illuminate/http:12.*" "illuminate/validation:12.*" --no-update
+            composer require "orchestra/testbench:^10.0" --dev --no-update
+            composer update --prefer-dist --no-interaction -W
+          fi
 
       - name: Run full release test suite
         run: composer test:release
