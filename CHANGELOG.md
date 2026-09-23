@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 12 workflow engine with agent, tool, approval, and branch steps plus checkpoint resume
+- `DefaultWorkflowEngine`, `WorkflowStepRunner`, `WorkflowValidator`, and workflow lifecycle events
+- Workflow unit, integration, and feature tests
+
+### Added (Phase 11)
+
 - Phase 11 knowledge / RAG with config and vector retrievers, in-memory vector store, and runtime injection
 - `AgentKnowledgeRetriever`, `KnowledgeService`, `KnowledgeFormatter`, and driver-based knowledge bindings
 - Knowledge unit, integration, and feature tests

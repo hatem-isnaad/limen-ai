@@ -15,7 +15,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 09 | State & Checkpoints | Resume, cancel, approval wait states | Complete |
 | 10 | Memory | Scoped memory stores + retrieval | Complete |
 | 11 | Knowledge / RAG | Ingestion, embeddings, vector abstraction | Complete |
-| 12 | Workflow Engine | Branching, approval, resume | Pending |
+| 12 | Workflow Engine | Branching, approval, resume | Complete |
 | 13 | HTTP Integrations | Declarative external API tools | Pending |
 | 14 | Security Hardening | SSRF, redaction, injection defenses | Pending |
 | 15 | Queue & Broadcasting | Jobs, Pusher adapter, channels | Pending |

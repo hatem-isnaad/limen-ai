@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 11 — Knowledge / RAG** (Complete)
+**Phase 12 — Workflow Engine** (Complete)
 
 ## Completed
 
@@ -59,6 +59,9 @@
 - Config and vector knowledge retrievers with in-memory vector store
 - Knowledge injection into agent runtime (after memory, before history)
 - `KnowledgeService` for vector upserts and untrusted knowledge formatting
+- Workflow engine with agent, tool, approval, and branch step types
+- Workflow checkpoint resume/cancel/reject integrated with approval lifecycle
+- Example `example_flow` and `shipment_notify` workflows in config
 
 ## In Progress
 
@@ -70,9 +73,9 @@
 
 ## Next Steps
 
-1. Begin Phase 12 — Workflow Engine
+1. Begin Phase 13 — HTTP Integrations
 2. Add queue-dispatched runtime job skeleton
-3. Begin Phase 13 — HTTP Integrations
+3. Begin Phase 14 — Security Hardening
 
 ## Risks
 

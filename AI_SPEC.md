@@ -159,3 +159,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 10 — Scoped memory stores, retrieval hooks, runtime integration
 - [x] Begin Phase 11 — Knowledge / RAG
 - [x] Phase 11 — Config/vector retrievers, vector store abstraction, runtime integration
+- [x] Begin Phase 12 — Workflow Engine
+- [x] Phase 12 — Step runner, branching, approval pause/resume, checkpoint integration
