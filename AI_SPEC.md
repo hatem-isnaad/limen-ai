@@ -179,4 +179,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 20 — Architecture boundary tests, security gates, CI workflow
 - [x] Begin Phase 21 — Limen Integration
 - [x] Phase 21 — Host app shipment tools, approval demo, integration docs
-- [ ] Begin Phase 22 — Final Hardening
+- [x] Begin Phase 22 — Final Hardening
+- [x] Phase 22 — Performance cache, release docs, v1.0.0 changelog and tagging prep
