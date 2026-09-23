@@ -29,6 +29,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          tools: composer:2.10
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
@@ -46,6 +47,7 @@ jobs:
         env:
           COMPOSER_NO_AUDIT: 1
         run: |
+          composer config --no-ansi audit.block-insecure false
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
             composer require "orchestra/testbench:^9.0" --dev --no-update
@@ -55,13 +57,16 @@ jobs:
           composer update --prefer-dist --no-interaction -W --no-audit
 
       - name: Run unit, integration, and feature tests
-        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
+        run: |
+          vendor/bin/phpunit --testsuite Unit
+          vendor/bin/phpunit --testsuite Integration
+          vendor/bin/phpunit --testsuite Feature
 
       - name: Run architecture boundary gates
-        run: composer test:architecture
+        run: vendor/bin/phpunit --testsuite Architecture
 
       - name: Run security critical gates
-        run: composer test:security
+        run: vendor/bin/phpunit --testsuite Security
 
       - name: Upload coverage (PHP 8.3 / Laravel 12 only)
         if: matrix.coverage == true
