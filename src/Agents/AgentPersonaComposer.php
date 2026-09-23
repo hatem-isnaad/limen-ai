@@ -18,6 +18,9 @@ class AgentPersonaComposer
         private readonly ConfigRepository $config,
     ) {}
 
+    /**
+     * Static persona block merged into agent instructions at resolve time.
+     */
     public function composeStatic(AgentDefinition $agent): string
     {
         $persona = $agent->personaConfig();
@@ -79,6 +82,9 @@ class AgentPersonaComposer
         return implode("\n", $lines);
     }
 
+    /**
+     * Runtime addendum when persona language follows the request locale.
+     */
     public function composeRuntimeAddendum(AgentDefinition $agent, RunContext $context): ?string
     {
         $language = (string) ($agent->personaConfig()['language'] ?? '');
@@ -92,11 +98,13 @@ class AgentPersonaComposer
         return "Respond in the user's locale/language [{$locale}] unless they explicitly request another language.";
     }
 
+    /** @return list<string> */
     public static function allowedTones(): array
     {
         return self::TONES;
     }
 
+    /** @return list<string> */
     public static function allowedResponseStyles(): array
     {
         return self::RESPONSE_STYLES;
