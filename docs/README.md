@@ -2,6 +2,14 @@
 
 Package documentation is organized by topic. Start with the [interactive hub](index.html) or jump to a section below.
 
+## AI agents & contributors
+
+| Document | Description |
+|----------|-------------|
+| **[../AGENTS.md](../AGENTS.md)** | **Complete AI/contributor reference** — architecture, usage, conventions, cookbook |
+| [../.ai/REFERENCE.md](../.ai/REFERENCE.md) | Extended technical reference (bindings, events, test patterns) |
+| [../.ai/MASTER_PROMPT.md](../.ai/MASTER_PROMPT.md) | Short boot prompt for AI coding sessions |
+
 ## Getting started
 
 | Document | Description |

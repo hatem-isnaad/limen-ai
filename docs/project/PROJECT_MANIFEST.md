@@ -20,7 +20,9 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 
 | File | Purpose |
 |------|---------|
+| [AGENTS.md](../../AGENTS.md) | AI agent & contributor reference (primary for coding) |
 | [docs/README.md](../README.md) | Documentation hub (markdown index) |
+| [.ai/REFERENCE.md](../../.ai/REFERENCE.md) | Extended AI technical reference |
 | [docs/installation.md](../installation.md) | Install via Packagist, VCS, path repo, private registry |
 | project/AI_SPEC.md | Master product specification |
 | architecture/ARCHITECTURE.md | Architecture proposal |

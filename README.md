@@ -14,6 +14,7 @@
 
 | Resource | Description |
 |----------|-------------|
+| [AGENTS.md](AGENTS.md) | **AI & contributor reference** — architecture, usage, conventions, cookbook |
 | [docs/installation.md](docs/installation.md) | **Install guide** — Packagist, VCS, path repo, private registry, monorepo |
 | [docs/index.html](docs/index.html) | Interactive documentation hub |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
@@ -426,6 +427,7 @@ CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) �
 
 | Document | Description |
 |----------|-------------|
+| **[AGENTS.md](AGENTS.md)** | **AI agent & contributor reference (start here for coding)** |
 | **[docs/installation.md](docs/installation.md)** | **Install via Packagist, VCS, path repo, or private registry** |
 | [docs/index.html](docs/index.html) | Interactive documentation hub |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |

@@ -1,54 +1,55 @@
 # Limen AI — AI Coding Agent Master Prompt
 
-You are implementing **Limen AI**, a large Laravel AI Agent Framework package.
+You are working on **Limen AI** (`limen-ai/limen-ai`), a production Laravel AI agent framework package.
 
-## Before Writing Code
+## Read first (in order)
 
-1. Read `docs/project/AI_SPEC.md`
-2. Read `docs/architecture/ARCHITECTURE.md` and `docs/architecture/ARCHITECTURE_RULES.md`
-3. Check `docs/architecture/DECISIONS.md` for accepted patterns
-4. Check `docs/project/STATUS.md` and `docs/project/ROADMAP.md` for current phase
-5. Check `docs/project/IMPLEMENTATION.md` for phase scope
+1. **[`AGENTS.md`](../AGENTS.md)** — complete contributor + AI reference (architecture, usage, conventions)
+2. **[`.ai/REFERENCE.md`](REFERENCE.md)** — bindings, events, test patterns, checklists
+3. **`docs/project/AI_SPEC.md`** — product specification
+4. **`docs/architecture/ARCHITECTURE_RULES.md`** — enforced boundaries
 
-## Core Principle
+## Package status
 
-The LLM proposes actions. Laravel decides and executes safely.
+- **v1.0.0+** — all 22 roadmap phases complete
+- **415+ tests** — `composer test:release` must pass before finishing work
+- **Laravel 11 / 12 / 13** supported
+
+## Core principle
+
+> The LLM proposes actions. Laravel decides and executes safely.
 
 ## You MUST
 
-- Work phase-by-phase (see docs/project/ROADMAP.md)
-- Write tests for implemented functionality
-- Update docs/project/STATUS.md, docs/project/PROJECT_MANIFEST.md, docs/project/IMPLEMENTATION.md, CHANGELOG.md
-- Record deferred work explicitly
-- Use repository abstractions (not raw config in Runtime)
-- Keep business logic out of the generic package
-- Never expose secrets to LLM or clients
-- Never trust LLM output for auth context
+- Read `AGENTS.md` before making changes
+- Write tests for implemented behavior (use `FakeLlmProvider`, never real APIs)
+- Run `composer test:release` before claiming done
+- Use repository contracts — not raw config in Runtime
+- Keep business logic in the host app (`App\LimenAi\`)
+- Update `CHANGELOG.md` and relevant `docs/` files
+- Record deferrals in `docs/project/IMPLEMENTATION.md`
 
 ## You MUST NOT
 
-- Implement the entire package in one task
+- Import `App\` from package `src/`
+- Trust LLM output for `user_id` or permissions
+- Couple Runtime to Blade, Http, or Pusher
+- Skip tool authorization or SSRF validation
 - Mark incomplete features as done
-- Import `App\` from package code
-- Couple Runtime to Blade or Pusher
-- Skip authorization before tool execution
-- Execute arbitrary code from LLM output
+- Break architecture boundary tests
 
-## Definition of Done
+## Definition of done
 
-Code + Tests + Docs + Config + Error handling + Security + Events + Architecture validation + Checklist update
+```
+Code + Tests + Docs + Config + Security + Events + composer test:release green
+```
 
-## Current Phase
+## Quick commands
 
-**Phase 01 — Package Foundation**
+```bash
+composer test:release
+php artisan limen-ai:validate
+php artisan limen-ai:doctor
+```
 
-Architecture only. No full runtime yet.
-
-## After Each Phase
-
-1. Run tests
-2. Run architecture tests
-3. Update all status docs
-4. List deferred items
-
-See `.ai/checklists/phase-completion.md`
+See `.ai/checklists/phase-completion.md` for the full checklist.

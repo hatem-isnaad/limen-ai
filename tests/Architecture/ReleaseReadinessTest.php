@@ -46,5 +46,6 @@ class ReleaseReadinessTest extends TestCase
         $this->assertFileExists($root.'/docs/release.md');
         $this->assertFileExists($root.'/docs/performance.md');
         $this->assertFileExists($root.'/SECURITY.md');
+        $this->assertFileExists($root.'/AGENTS.md');
     }
 }
