@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 13 — HTTP Integrations** (Complete)
+**Phase 14 — Security Hardening** (Complete)
 
 ## Completed
 
@@ -64,6 +64,9 @@
 - Example `example_flow` and `shipment_notify` workflows in config
 - Declarative HTTP connectors and `example_http_status` integration tool
 - SSRF URL validation and env/config secret resolution for outbound requests
+- SSRF DNS resolution checks, `assertAllowed()` API, and redirect blocking on HTTP tools
+- `ContentSanitizer` with prompt-injection pattern filtering and untrusted content delimiters
+- Sanitization integrated into knowledge, memory formatters, and agent runtime user messages
 
 ## In Progress
 
@@ -75,9 +78,9 @@
 
 ## Next Steps
 
-1. Begin Phase 14 — Security Hardening
+1. Begin Phase 15 — Queue & Broadcasting
 2. Add queue-dispatched runtime job skeleton
-3. Begin Phase 15 — Queue & Broadcasting
+3. Add Pusher/broadcast channel adapter for agent events
 
 ## Risks
 
