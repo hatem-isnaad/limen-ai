@@ -9,6 +9,9 @@ return [
         'drivers' => [
             'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
             'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+            'openrouter' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+            'anthropic' => LimenAi\Providers\Anthropic\AnthropicProvider::class,
+            'gemini' => LimenAi\Providers\Gemini\GeminiProvider::class,
         ],
         'fake' => [
             'driver' => 'fake',
@@ -23,14 +26,25 @@ return [
         'anthropic' => [
             'driver' => 'anthropic',
             'api_key' => env('ANTHROPIC_API_KEY'),
+            'api_version' => env('ANTHROPIC_API_VERSION', '2023-06-01'),
+            'max_tokens' => (int) env('ANTHROPIC_MAX_TOKENS', 4096),
+            'timeout' => 60,
         ],
         'gemini' => [
             'driver' => 'gemini',
             'api_key' => env('GEMINI_API_KEY'),
+            'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+            'timeout' => 60,
         ],
         'openrouter' => [
             'driver' => 'openrouter',
             'api_key' => env('OPENROUTER_API_KEY'),
+            'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+            'headers' => array_filter([
+                'HTTP-Referer' => env('OPENROUTER_HTTP_REFERER', env('APP_URL')),
+                'X-Title' => env('OPENROUTER_APP_NAME', env('APP_NAME')),
+            ]),
+            'timeout' => 60,
         ],
     ],
 
@@ -38,10 +52,19 @@ return [
         'default' => env('LIMEN_AI_EMBEDDING_PROVIDER', 'fake'),
         'drivers' => [
             'fake' => LimenAi\Providers\Fake\FakeEmbeddingProvider::class,
+            'openai' => LimenAi\Providers\OpenAi\OpenAiEmbeddingProvider::class,
         ],
         'providers' => [
             'fake' => [
                 'driver' => 'fake',
+            ],
+            'openai' => [
+                'driver' => 'openai',
+                'api_key' => env('OPENAI_API_KEY'),
+                'organization' => env('OPENAI_ORGANIZATION'),
+                'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+                'model' => env('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+                'timeout' => 60,
             ],
         ],
     ],
