@@ -22,27 +22,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: composer:2.10
+          tools: composer:v2
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
         env:
@@ -57,10 +44,7 @@ jobs:
           composer update --prefer-dist --no-interaction -W --no-audit
 
       - name: Run unit, integration, and feature tests
-        run: |
-          vendor/bin/phpunit --testsuite Unit
-          vendor/bin/phpunit --testsuite Integration
-          vendor/bin/phpunit --testsuite Feature
+        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
 
       - name: Run architecture boundary gates
         run: vendor/bin/phpunit --testsuite Architecture
