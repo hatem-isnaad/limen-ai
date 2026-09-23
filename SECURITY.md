@@ -113,6 +113,25 @@ Log at minimum:
 
 When in doubt: **deny execution**, return safe user-facing message, log internally.
 
+## Guest mode (public widgets)
+
+When `LIMEN_AI_UI_GUEST_ENABLED=true` and `LIMEN_AI_UI_REQUIRE_AUTH=false`, unauthenticated visitors can start conversations. Treat this as a **public attack surface**.
+
+**Minimum hardening:**
+
+- Keep `guest_allowed` **false** on agents that can call privileged tools unless you add separate guest-safe agents
+- Use `CacheGuestSessionValidator` (default) so guest tokens expire and cannot be reused indefinitely
+- Rate-limit conversation and message endpoints at the web server or Laravel middleware layer
+- Disable tools that mutate data, send messages, or reach internal APIs for guest-facing agents
+- Run `php artisan limen-ai:doctor` — in-memory persistence with UI enabled is reported as a failure
+- Prefer database persistence (`LIMEN_AI_PERSISTENCE_DRIVER=database`) so guest sessions survive HTTP round-trips
+
+**Do not:**
+
+- Expose admin or internal agents on public pages
+- Pass tenant or user identifiers from the browser into run context
+- Disable authorization gates globally to “make the widget work”
+
 ## Pre-release security checklist (v1.0.0+)
 
 Before tagging a release, confirm:

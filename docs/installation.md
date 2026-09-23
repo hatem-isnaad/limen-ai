@@ -274,7 +274,7 @@ Drop the chat widget into a Blade view:
 | Provider not registered | Ensure `composer.json` has Laravel auto-discovery; run `php artisan package:discover` |
 | Config out of date | `php artisan vendor:publish --tag=limen-ai-config --force` |
 | Path repo not updating | `composer update limen-ai/limen-ai --prefer-source` |
-| `403 Conversation access denied` on second message | Set `LIMEN_AI_PERSISTENCE_DRIVER=database`, run `php artisan migrate`, then `php artisan config:clear` |
+| `403 Conversation access denied` on second message | Run `php artisan migrate` (auto-detects database) or set `LIMEN_AI_PERSISTENCE_DRIVER=database`, then `php artisan config:clear` |
 | Widget theme ignored | Use `LIMEN_AI_UI_*` env vars; omit hardcoded `:theme` props on `<x-limen-ai::widget />` |
 | Published views look outdated | `php artisan vendor:publish --tag=limen-ai-ui --force` or customize via config/env instead |
 

@@ -29,6 +29,7 @@ final class EnvironmentDoctor
         $warnings = [];
 
         $this->inspectPersistence($environment, $failures, $warnings);
+        $this->inspectAutoDetectedPersistence($warnings);
         $this->inspectMigrations($warnings);
         $this->inspectProviderCredentials($warnings);
         $this->inspectPublishedUiVersion($warnings);
@@ -53,9 +54,17 @@ final class EnvironmentDoctor
             || PersistenceConfig::isInMemoryClass($messageRepository);
 
         if ($usesInMemoryConversations) {
-            $message = 'Conversation persistence uses in-memory repositories. Web chat will fail on the second HTTP request. Set LIMEN_AI_PERSISTENCE_DRIVER=database (and run migrations).';
+            $message = 'Conversation persistence uses in-memory repositories. Web chat will fail on the second HTTP request. Run php artisan migrate (auto-detects database) or set LIMEN_AI_PERSISTENCE_DRIVER=database.';
 
-            if (in_array($environment, ['production', 'staging'], true)) {
+            $tableExists = false;
+
+            try {
+                $tableExists = $this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
+            } catch (\Throwable) {
+                $tableExists = false;
+            }
+
+            if (in_array($environment, ['production', 'staging'], true) || $tableExists) {
                 $failures[] = $message;
             } else {
                 $warnings[] = $message;
@@ -82,6 +91,30 @@ final class EnvironmentDoctor
     /**
      * @param  list<string>  $warnings
      */
+    protected function inspectAutoDetectedPersistence(array &$warnings): void
+    {
+        $configured = $this->config->get('limen-ai.persistence.driver');
+
+        if (is_string($configured) && $configured !== '') {
+            return;
+        }
+
+        if (! $this->usesDatabaseDriver()) {
+            return;
+        }
+
+        if (! (bool) $this->config->get('limen-ai.persistence.auto_detect', true)) {
+            return;
+        }
+
+        if ($this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations')) {
+            $warnings[] = 'Persistence driver auto-detected as database from limen_ai_conversations. Set LIMEN_AI_PERSISTENCE_DRIVER=database explicitly to silence this hint.';
+        }
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
     protected function inspectMigrations(array &$warnings): void
     {
         if ($this->usesDatabaseDriver()) {
@@ -89,7 +122,7 @@ final class EnvironmentDoctor
         }
 
         if ($this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations')) {
-            $warnings[] = 'limen_ai_conversations table exists but LIMEN_AI_PERSISTENCE_DRIVER is not database. Set LIMEN_AI_PERSISTENCE_DRIVER=database for web chat persistence.';
+            $warnings[] = 'limen_ai_conversations table exists but persistence is not database. Set LIMEN_AI_PERSISTENCE_DRIVER=database or enable auto_detect (default).';
         }
     }
 
@@ -162,31 +195,45 @@ final class EnvironmentDoctor
 
     protected function usesDatabaseDriver(): bool
     {
-        return (string) $this->config->get('limen-ai.persistence.driver', PersistenceConfig::driver())
-            === PersistenceConfig::DRIVER_DATABASE;
+        return $this->resolvedPersistenceDriver() === PersistenceConfig::DRIVER_DATABASE;
+    }
+
+    protected function resolvedPersistenceDriver(): string
+    {
+        $configured = $this->config->get('limen-ai.persistence.driver');
+        $autoDetect = (bool) $this->config->get('limen-ai.persistence.auto_detect', true);
+        $conversationsTableExists = false;
+
+        if ($autoDetect) {
+            try {
+                $conversationsTableExists = $this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
+            } catch (\Throwable) {
+                $conversationsTableExists = false;
+            }
+        }
+
+        return PersistenceConfig::resolveDriver(
+            is_string($configured) ? $configured : null,
+            $autoDetect,
+            $conversationsTableExists,
+        );
     }
 
     protected function resolvedConversationRepositoryClass(): string
     {
         return (string) ($this->config->get('limen-ai.conversations.repository')
-            ?: PersistenceConfig::conversationRepositoryClass(
-                (string) $this->config->get('limen-ai.persistence.driver', PersistenceConfig::driver()),
-            ));
+            ?: PersistenceConfig::conversationRepositoryClass($this->resolvedPersistenceDriver()));
     }
 
     protected function resolvedMessageRepositoryClass(): string
     {
         return (string) ($this->config->get('limen-ai.conversations.message_repository')
-            ?: PersistenceConfig::messageRepositoryClass(
-                (string) $this->config->get('limen-ai.persistence.driver', PersistenceConfig::driver()),
-            ));
+            ?: PersistenceConfig::messageRepositoryClass($this->resolvedPersistenceDriver()));
     }
 
     protected function resolvedRunRepositoryClass(): string
     {
         return (string) ($this->config->get('limen-ai.runtime.run_repository')
-            ?: PersistenceConfig::runRepositoryClass(
-                (string) $this->config->get('limen-ai.persistence.driver', PersistenceConfig::driver()),
-            ));
+            ?: PersistenceConfig::runRepositoryClass($this->resolvedPersistenceDriver()));
     }
 }

@@ -647,7 +647,25 @@ class LimenAiServiceProvider extends ServiceProvider
 
     protected function persistenceDriver($app): string
     {
-        return (string) $app['config']->get('limen-ai.persistence.driver', PersistenceConfig::driver());
+        $configured = $app['config']->get('limen-ai.persistence.driver');
+        $autoDetect = (bool) $app['config']->get('limen-ai.persistence.auto_detect', true);
+        $conversationsTableExists = false;
+
+        if ($autoDetect) {
+            try {
+                if ($app->bound('db')) {
+                    $conversationsTableExists = $app['db']->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
+                }
+            } catch (\Throwable) {
+                $conversationsTableExists = false;
+            }
+        }
+
+        return PersistenceConfig::resolveDriver(
+            is_string($configured) ? $configured : null,
+            $autoDetect,
+            $conversationsTableExists,
+        );
     }
 
     protected function resolvePersistenceClass(?string $configured, string $default): string

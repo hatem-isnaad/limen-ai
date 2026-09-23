@@ -130,6 +130,19 @@ Built-in behavior:
 - `StructuredOutputValidator` — when `output.format` is `json`, rejects invalid JSON before persisting
 - `BasicOutputModerator` — optional pattern redaction when `LIMEN_AI_OUTPUT_MODERATION=true`
 
+### Semantic quality scoring (host responsibility)
+
+Limen AI does **not** ship semantic reply scoring (correctness, hallucination risk, brand-tone fit, or task completion). That is intentional: scoring depends on your domain, models, and policies.
+
+Use the extension hooks instead:
+
+| Hook | Contract | Typical host use |
+|------|----------|------------------|
+| `quality.output_validator` | `OutputValidator` | JSON/schema checks, regex guards, custom brand rules |
+| `quality.output_moderation_enabled` | `OutputModerator` | Pattern redaction or wrapper around a moderation API |
+
+Example: call your own evaluator service inside `BrandOutputValidator::validate()` and throw `OutputValidationException` when a reply fails your score threshold.
+
 Smoke-test agent replies from CI:
 
 ```bash

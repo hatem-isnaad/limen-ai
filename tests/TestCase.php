@@ -32,6 +32,7 @@ abstract class TestCase extends Orchestra
 
     protected function defineEnvironment($app): void
     {
+        $app['config']->set('limen-ai.persistence.auto_detect', false);
         $app['config']->set('limen-ai.default_agent', 'example');
         $app['config']->set('limen-ai.tools.example_echo.class', \LimenAi\Tests\Stubs\EchoTool::class);
         $app['config']->set('limen-ai.tool_pipeline.idempotency.driver', 'cache');

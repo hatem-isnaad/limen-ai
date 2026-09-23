@@ -285,7 +285,9 @@ return [
     ],
 
     'persistence' => [
-        'driver' => env('LIMEN_AI_PERSISTENCE_DRIVER', 'memory'),
+        // Unset driver + auto_detect=true (default): use database when limen_ai_conversations exists.
+        'driver' => env('LIMEN_AI_PERSISTENCE_DRIVER'),
+        'auto_detect' => env('LIMEN_AI_PERSISTENCE_AUTO_DETECT', true),
     ],
 
     'runtime' => [

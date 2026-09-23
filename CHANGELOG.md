@@ -7,53 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-23
+
+Host integration release: production-ready web chat persistence, guest sessions, output validation hooks, and chat UI hardening.
+
 ### Fixed
 
-- Widget and chatbot now correctly apply `LIMEN_AI_UI_*` theme env vars over agent persona UI and theme presets (`ThemeResolver`, `WidgetThemeOptions`, `widget` Blade component)
-- Removed hardcoded example-agent `persona.ui` copy that masked env-driven widget titles and welcome messages
-- `LIMEN_AI_PERSISTENCE_DRIVER=database` switches conversation, message, run, checkpoint, and approval repos to database implementations (fixes web chat `403` on second request)
-- `limen-ai:doctor` warns on in-memory persistence (fails in production) and missing migrations when database driver is enabled
-- CLI `limen-ai:run` and `limen-ai:agent:test` authenticate via `Auth::loginUsingId()` before agent execution
-- Conversation sync after agent runs persists only final assistant text (not tool JSON or tool-call stubs) and accounts for runtime context prefixes (memory, knowledge, persona)
-- Chat API and widget filter internal `tool` role messages from user-visible history
-- Release test fixes: checkpoint FK seeding in `DatabaseCheckpointStoreTest`, guest validator binding/auth alignment, `AgentRuntimeTest` history persistence
+- Persistence auto-detects `database` when `limen_ai_conversations` exists (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`, default true)
+- `LIMEN_AI_PERSISTENCE_DRIVER=database` switches all repos to database implementations (fixes web chat `403` on second request)
+- Widget and chatbot apply `LIMEN_AI_UI_*` theme env vars over agent persona UI and presets
+- Conversation sync persists only final assistant text; tool JSON hidden from user-visible history
+- CLI `limen-ai:run` and `limen-ai:agent:test` authenticate via `Auth::loginUsingId()`
+- Release test blockers: checkpoint FK seeding, guest validator alignment, runtime history persistence
 
 ### Added
 
-- `OutputValidator` and `OutputModerator` contracts with `StructuredOutputValidator`, `BasicOutputModerator`, and chained validation in `AgentResponseGuard`
-- `limen-ai:skill:test` command and `limen-ai:agent:test --expect-contains` smoke assertion flag
-- Skill adherence metrics (`skill_keys`, `skill_count`) in audit logs for agent start/complete events
-- Published UI `VERSION` stamp and `limen-ai:doctor` warning when host views are stale
-- Host integration test template at `examples/limen-host/tests/Feature/LimenAiAgentTest.php`
-- Synced `.env.example` and `stubs/limen-ai.env.example` with all `LIMEN_AI_*` config keys
-- `DatabaseConversationRepository` and `DatabaseMessageRepository` tests; HTTP persistence feature test
-- `PersistenceConfig` and `EnvironmentDoctor` support classes
-- Ollama/local LLM setup guide in `docs/providers.md`
-- Installation guide section: web UI requires database persistence
-- Professional chat UI redesign: avatars, typing indicator, animations, sounds, unread badge, polished widget launcher
-- Configurable UI preferences (`ui.sounds`, `ui.animations`, `ui.widget`, `ui.messages`, `ui.composer`) via config and env
-- [`AGENTS.md`](AGENTS.md) — complete AI agent and contributor reference guide
-- [`.ai/REFERENCE.md`](.ai/REFERENCE.md) — extended technical reference for AI coding sessions
-- Laravel 13 support (`illuminate/* ^13.0`, `orchestra/testbench ^11.0`)
-- [docs/installation.md](docs/installation.md) — install via Packagist, VCS, path repo, private registry, or monorepo
-- Organized documentation into `docs/architecture/`, `docs/project/`, and `docs/development/`
-- Full attachment pipeline: upload API, validation, text extraction, runtime injection, optional vector RAG
-- `limen-ai:install` and full Artisan CLI surface (`run`, `agent:test`, `tool:test`, `workflow:test`, `logs`, inspection and generator commands)
-- `LimenAi` facade and `LimenAiManager` for programmatic agent/workflow execution
-- `DatabaseAttachmentStore` with `limen_ai_attachments` migration
-- Example agents for each built-in LLM provider: `example_openai`, `example_anthropic`, `example_gemini`, `example_openrouter` (plus `example` for fake)
-- `.env.example` and publishable `limen-ai-env` tag (`.env.limen-ai.example`) with all Limen AI configuration keys
-- Configurable agent persona: display name, tone, language (`auto` follows request locale), response style, custom rules, and forbidden topics
-- `AgentPersonaComposer` injects persona into system instructions; global `quality.save_tokens` adds concise-response guidance
-- `StrictMemoryPolicy` with key allowlists, regex validation, and value truncation; throws `MemoryPolicyException` on violations
-- `AgentResponseGuard` enforces per-agent `output.max_response_chars` on final assistant replies
-- Per-agent `limits.max_history_messages`, `limits.temperature`, and memory `allowed_keys` / `max_value_length`
-- `docs/agent-configuration.md` — full guide for persona, memory, token control, and security layers
-- First-class `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) LLM drivers
-- `OpenAiEmbeddingProvider` for production vector knowledge
-- Config-driven provider registry (`providers.drivers`) for adding custom LLM adapters without core changes
-- `docs/providers.md` and publishable `custom-llm-provider.stub`
-- Agent validation for registered provider drivers
+- `PersistenceConfig`, `EnvironmentDoctor`, and `limen-ai:doctor` persistence checks
+- Guest sessions API, `CacheGuestSessionValidator`, and guest hardening guide in `SECURITY.md`
+- `OutputValidator` / `OutputModerator` contracts with `StructuredOutputValidator` and `BasicOutputModerator`
+- `limen-ai:skill:test` and `limen-ai:agent:test --expect-contains`
+- Skill metrics in audit logs; published UI `VERSION` stamp and stale-view doctor warning
+- Host integration test template, Ollama guide, synced env templates, and `docs/HOST-INTEGRATION-AUDIT.md`
+- Chat UI: history drawer, bilingual AR/EN, resume-last-conversation, theme/i18n env controls
 
 ## [1.0.0] - 2026-09-23
 

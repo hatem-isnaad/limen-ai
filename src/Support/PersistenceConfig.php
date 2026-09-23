@@ -2,6 +2,7 @@
 
 namespace LimenAi\Support;
 
+use Illuminate\Contracts\Foundation\Application;
 use LimenAi\Authorization\DatabaseApprovalRepository;
 use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Conversations\DatabaseConversationRepository;
@@ -19,13 +20,43 @@ final class PersistenceConfig
 
     public const DRIVER_DATABASE = 'database';
 
-    public static function driver(): string
+    public static function driver(?Application $app = null): string
     {
-        $driver = (string) env('LIMEN_AI_PERSISTENCE_DRIVER', self::DRIVER_MEMORY);
+        return self::resolveDriver(null, true, null, $app);
+    }
 
-        return in_array($driver, [self::DRIVER_MEMORY, self::DRIVER_DATABASE], true)
-            ? $driver
-            : self::DRIVER_MEMORY;
+    public static function resolveDriver(
+        ?string $configured = null,
+        bool $autoDetect = true,
+        ?bool $conversationsTableExists = null,
+        ?Application $app = null,
+    ): string {
+        if (is_string($configured) && $configured !== '') {
+            return self::normalizeDriver($configured);
+        }
+
+        $explicit = env('LIMEN_AI_PERSISTENCE_DRIVER');
+
+        if (is_string($explicit) && $explicit !== '') {
+            return self::normalizeDriver($explicit);
+        }
+
+        if ($autoDetect) {
+            $tableExists = $conversationsTableExists ?? self::databaseTablesPresent($app);
+
+            if ($tableExists) {
+                return self::DRIVER_DATABASE;
+            }
+        }
+
+        return self::DRIVER_MEMORY;
+    }
+
+    public static function explicitDriverConfigured(): bool
+    {
+        $explicit = env('LIMEN_AI_PERSISTENCE_DRIVER');
+
+        return is_string($explicit) && $explicit !== '';
     }
 
     public static function conversationRepositoryClass(?string $driver = null): string
@@ -77,5 +108,27 @@ final class PersistenceConfig
     protected static function usesDatabase(?string $driver = null): bool
     {
         return ($driver ?? self::driver()) === self::DRIVER_DATABASE;
+    }
+
+    protected static function normalizeDriver(string $driver): string
+    {
+        return in_array($driver, [self::DRIVER_MEMORY, self::DRIVER_DATABASE], true)
+            ? $driver
+            : self::DRIVER_MEMORY;
+    }
+
+    protected static function databaseTablesPresent(?Application $app = null): bool
+    {
+        try {
+            $app ??= function_exists('app') ? app() : null;
+
+            if (! $app instanceof Application || ! $app->bound('db')) {
+                return false;
+            }
+
+            return $app->make('db')->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

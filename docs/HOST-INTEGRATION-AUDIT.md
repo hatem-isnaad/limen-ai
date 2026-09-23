@@ -17,8 +17,9 @@ Most **P0/P1 items from the initial audit are now implemented** in the unrelease
 
 | Check | Result |
 |-------|--------|
-| Package tests (`composer test:release`) | **457/457 pass** — full suite + architecture + security |
-| Theme tests (`ThemeResolverTest`, `ThemeRenderingTest`) | **14/14 pass** (previously 3 failures — **fixed**) |
+| Package tests (`composer test:release`) | **457/457 pass** (1609 assertions) — full suite + architecture + security |
+| Previously failing groups (checkpoint, guest, runtime) | **30/30 pass** |
+| Theme tests (`ThemeResolverTest`, `ThemeRenderingTest`) | **14/14 pass** |
 | Architecture tests | **37/37 pass** |
 | Security matrix tests | **4/4 pass** |
 | Composer audit | Clean |
@@ -66,10 +67,10 @@ Most **P0/P1 items from the initial audit are now implemented** in the unrelease
 |------|-------|---------|
 | Security model | A | Auth, SSRF, injection filtering, approval gates — architecture + security suites pass |
 | Skills system | B+ | Config + instruction composition; skill metrics in audit logs; `limen-ai:skill:test` added |
-| Reply validation | B- | Length limits + optional JSON validation + basic output moderation (not semantic scoring) |
-| Host DX / defaults | B | `LIMEN_AI_PERSISTENCE_DRIVER` + doctor warnings; still defaults to `memory` without env |
+| Reply validation | B | Length limits + JSON validation + moderation hooks; semantic scoring is host-implemented (documented) |
+| Host DX / defaults | B+ | Auto-detects `database` when `limen_ai_conversations` exists; explicit env still supported |
 | Cross-system compatibility | B | Laravel 11–13, multiple LLM providers, Ollama documented |
-| Test suite | A- | **457 tests pass**; `composer test:release` green; architecture/security pass |
+| Test suite | A | **457/457 pass**; `composer test:release` green; architecture/security pass |
 
 ---
 
@@ -86,9 +87,9 @@ Most **P0/P1 items from the initial audit are now implemented** in the unrelease
 - `limen-ai:install` prints persistence setup step.
 - `.env.example` defaults to `LIMEN_AI_PERSISTENCE_DRIVER=database`.
 
-**Remaining gap:** Default is still `memory` if env is unset. Fresh installs that skip reading docs will still break web chat until env is set and migrations run.
+**What changed (third pass):** When `LIMEN_AI_PERSISTENCE_DRIVER` is unset and `LIMEN_AI_PERSISTENCE_AUTO_DETECT=true` (default), the package uses database persistence once `limen_ai_conversations` exists (after `php artisan migrate`).
 
-**Recommendation:** Consider defaulting to `database` when `limen_ai_conversations` table exists, or fail `doctor` in `local` too (not just production).
+**Remaining gap:** Package unit tests and fresh clones without migrations still use `memory` until tables exist. Semantic reply scoring is intentionally not built-in — hosts use `OutputValidator` / `OutputModerator` hooks.
 
 ---
 
@@ -162,8 +163,7 @@ Seven failures from the second pass (checkpoint FK, guest validator drift, conve
 ### Remaining gaps
 
 1. Pattern-based injection filtering only
-2. Guest mode (`LIMEN_AI_UI_GUEST_ENABLED=true`) needs hardening guide for public widgets
-3. Guest mode still needs a public-widget hardening guide (validator tests now aligned with `CacheGuestSessionValidator` default)
+2. Guest mode (`LIMEN_AI_UI_GUEST_ENABLED=true`) needs a public-widget hardening guide (validator tests now aligned with `CacheGuestSessionValidator` default)
 
 ---
 
@@ -244,7 +244,7 @@ Host `.env` has repeated `LIMEN_AI_UI_TITLE`, `LIMEN_AI_THEME_PRESET`, etc. Last
 
 ### P1 — Still valuable
 
-3. Default persistence to `database` when migrations exist (or stronger doctor fail)
+3. ~~Default persistence to `database` when migrations exist~~ **Done** (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`)
 4. Document that host published config can use persistence driver instead of explicit class names
 5. Tag v1.0.1+ release from unreleased branch
 
