@@ -41,27 +41,60 @@ jobs:
     name: Semantic release
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: true
-
-      - name: Configure git for semantic-release
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
       - name: Install semantic-release
-        run: npm install --no-audit --no-fund
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
 
       - name: Run semantic-release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Detect release file changes
+        id: release_files
+        run: |
+          if git diff --quiet -- CHANGELOG.md composer.json README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open PR to sync release files
+        if: steps.release_files.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(release): sync version files [skip ci]"
+          title: "chore(release): sync version files"
+          body: |
+            Automated sync of version metadata after semantic-release.
+
+            Merges updated `CHANGELOG.md`, `composer.json`, and `README.md` into `main`.
+          branch: chore/release-sync-${{ github.run_id }}
+          base: main
+          delete-branch: true
+          add-paths: |
+            CHANGELOG.md
+            composer.json
+            README.md
