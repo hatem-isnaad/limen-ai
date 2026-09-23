@@ -9,6 +9,7 @@ use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Agents\AgentResolver;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
+use LimenAi\Contracts\Memory\MemoryRetriever;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunContext;
@@ -37,6 +38,7 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly CheckpointStore $checkpoints,
         private readonly ToolCallParser $toolCallParser,
         private readonly ConversationService $conversations,
+        private readonly MemoryRetriever $memory,
         private readonly Dispatcher $events,
     ) {}
 
@@ -51,11 +53,13 @@ class DefaultAgentRuntime implements AgentRuntime
         $history = $this->conversations->historyForAgent($conversationId);
         $this->conversations->appendUserMessage($conversationId, $userMessage);
 
-        $messages = array_merge($history, [
+        $baseMessages = array_merge($history, [
             ['role' => 'user', 'content' => $userMessage],
         ]);
 
-        $historyCount = count($messages);
+        $historyCount = count($baseMessages);
+        $memoryMessages = $this->memory->retrieve($agentKey, $this->memoryContext($agentKey, $conversationId, $context));
+        $messages = array_merge($memoryMessages, $baseMessages);
 
         $runId = $this->runs->create([
             'agent_key' => $agentKey,
@@ -439,5 +443,16 @@ class DefaultAgentRuntime implements AgentRuntime
         }
 
         $this->conversations->appendAgentMessages($conversationId, $newMessages);
+    }
+
+    /** @return array<string, mixed> */
+    protected function memoryContext(string $agentKey, string $conversationId, RunContext $context): array
+    {
+        return [
+            'agent_key' => $agentKey,
+            'conversation_id' => $conversationId,
+            'user_id' => $context->userId(),
+            'guest_token' => $context->guestToken(),
+        ];
     }
 }
