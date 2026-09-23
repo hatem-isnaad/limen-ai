@@ -48,8 +48,8 @@
           },
           {
             "files": ["README.md"],
-            "from": "\\*\\*Current release:\\*\\* v[0-9.]+",
-            "to": "**Current release:** v${nextRelease.version}"
+            "from": "> \\*\\*Current release:\\*\\* \\[v[0-9.]+\\]\\([^)]+\\)",
+            "to": "> **Current release:** [v${nextRelease.version}](https://github.com/hatem-isnaad/limen-ai/releases/tag/v${nextRelease.version})"
           }
         ]
       }
