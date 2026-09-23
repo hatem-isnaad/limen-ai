@@ -32,5 +32,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('limen-ai.tools.get_shipment_status.class', \LimenAi\Tests\Stubs\Limen\GetShipmentStatusTool::class);
         $app['config']->set('limen-ai.tools.send_customer_message.class', \LimenAi\Tests\Stubs\Limen\SendCustomerMessageTool::class);
         $app['config']->set('limen-ai.agents.example.memory.allowed_keys', ['preferred_language', 'timezone']);
+        $app['config']->set('limen-ai.attachments.enabled', true);
+        $app['config']->set('limen-ai.attachments.store', \LimenAi\Attachments\InMemoryAttachmentStore::class);
     }
 }

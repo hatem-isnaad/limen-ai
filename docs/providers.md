@@ -143,7 +143,7 @@ These are architectural preparations, not incomplete v1 features:
 | Database-backed agent repository | Contract ready; config repos used in v1 |
 | SaaS multi-tenancy | Future phase |
 | MCP tool integrations | Future phase |
-| Attachment RAG pipeline | Future phase |
+| Attachment RAG pipeline | Enabled when `knowledge.driver=vector` and `attachments.rag.enabled=true` |
 | OpenTelemetry export | Observability hooks exist; exporter deferred |
 
 See [IMPLEMENTATION.md](../IMPLEMENTATION.md) for the full deferral list.

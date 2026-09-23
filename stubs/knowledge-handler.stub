@@ -1,0 +1,32 @@
+<?php
+
+namespace {{ namespace }};
+
+use LimenAi\Contracts\Knowledge\KnowledgeRetriever;
+
+class {{ class }} implements KnowledgeRetriever
+{
+    public function retrieve(string $query, array $collections, int $limit = 5): array
+    {
+        $results = [];
+
+        foreach ($collections as $collection) {
+            foreach ($collection['documents'] ?? [] as $document) {
+                $content = (string) ($document['content'] ?? '');
+
+                if ($content === '') {
+                    continue;
+                }
+
+                $results[] = [
+                    'collection' => (string) ($collection['key'] ?? ''),
+                    'content' => $content,
+                    'score' => 1.0,
+                    'metadata' => $document['metadata'] ?? [],
+                ];
+            }
+        }
+
+        return array_slice($results, 0, $limit);
+    }
+}

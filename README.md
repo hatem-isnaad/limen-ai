@@ -258,6 +258,14 @@ $runId = app(AgentRuntime::class)->run(
 
 Always pass `user_id` from Laravel auth — never from LLM or client input.
 
+Or use the `LimenAi` facade (aliased in `composer.json`):
+
+```php
+use LimenAi\Facades\LimenAi;
+
+$runId = LimenAi::run('example', $conversationId, 'Hello', ['user_id' => $user->id]);
+```
+
 ---
 
 ## HTTP API
@@ -268,7 +276,10 @@ Default prefix: `/limen-ai` (configurable via `LIMEN_AI_ROUTE_PREFIX`).
 |--------|----------|-------------|
 | POST | `/conversations` | Start a conversation `{ "agent": "example" }` |
 | GET | `/conversations/{id}` | Fetch conversation with messages |
-| POST | `/conversations/{id}/messages` | Send a user message (starts agent run) |
+| POST | `/conversations/{id}/messages` | Send a user message `{ "message": "...", "attachment_ids": [] }` |
+| GET | `/conversations/{id}/attachments` | List uploaded attachments |
+| POST | `/conversations/{id}/attachments` | Upload a file (`multipart/form-data`, field `file`) |
+| DELETE | `/attachments/{id}` | Delete an attachment |
 | GET | `/runs/{id}` | Poll run status and output |
 | GET | `/runs/{id}/observability` | Audit trace and token usage |
 | POST | `/approvals/{id}/approve` | Approve a paused tool action |
@@ -284,8 +295,9 @@ Default prefix: `/limen-ai` (configurable via `LIMEN_AI_ROUTE_PREFIX`).
 4. **Approval-gated actions** — set `confirmation: true` on tools that send email, charge cards, or delete data.
 5. **Workflow playbooks** — agent drafts → approval step → tool executes (e.g. delay notifications).
 6. **Policy-aware RAG** — inject handbook documents; content is sanitized before reaching the LLM.
-7. **Custom SPA frontend** — call the HTTP API from React/Vue; subscribe to Pusher for live updates.
-8. **CI-safe tests** — queue responses on `FakeLlmProvider`; assert tool calls and authorization with zero API cost.
+7. **Document-aware chat** — upload `.txt`, `.md`, `.csv`, or `.json` files; extracted text is injected into the agent context (optional vector RAG when `knowledge.driver=vector`).
+8. **Custom SPA frontend** — call the HTTP API from React/Vue; subscribe to Pusher for live updates.
+9. **CI-safe tests** — queue responses on `FakeLlmProvider`; assert tool calls and authorization with zero API cost.
 
 Detailed examples: [docs/index.html#use-cases](docs/index.html#use-cases)
 
@@ -306,6 +318,7 @@ Primary file: `config/limen-ai.php`
 | `workflows` | Multi-step workflow definitions |
 | `knowledge` | RAG collections and vector store driver |
 | `memory` | Memory store, retriever, and strict policy |
+| `attachments` | Upload limits, storage driver, text extraction, optional vector RAG |
 | `security` | SSRF rules, injection patterns, redaction keys |
 | `observability` | Audit, usage tracking, trace toggles |
 | `ui` | Chat widget, themes, route prefix, middleware |
@@ -320,15 +333,23 @@ Full schema: [docs/configuration-schema.md](docs/configuration-schema.md)
 
 | Command | Description |
 |---------|-------------|
-| `limen-ai:install` | Publish config, views, assets, migrations |
+| `limen-ai:install` | Publish config, env example, views, assets, and stubs |
 | `limen-ai:doctor` | Health check: config, providers, queue, broadcasting |
 | `limen-ai:validate` | Validate all agent/tool/skill/workflow definitions |
 | `limen-ai:list` | Summary of registered components |
+| `limen-ai:agents` / `tools` / `skills` / `workflows` | List one component type |
+| `limen-ai:logs` | Show buffered audit log entries |
 | `limen-ai:make:agent` | Generate agent stub |
-| `limen-ai:make:tool` | Generate tool class + test |
+| `limen-ai:make:tool` | Generate tool class + optional test |
 | `limen-ai:make:skill` | Generate skill definition |
 | `limen-ai:make:workflow` | Generate workflow definition |
-| `limen-ai:agent:test {agent}` | Run agent against fake or live provider |
+| `limen-ai:make:connector` | Generate HTTP connector config |
+| `limen-ai:make:provider` | Generate custom LLM provider adapter |
+| `limen-ai:make:memory` | Generate custom memory store |
+| `limen-ai:make:knowledge` | Generate custom knowledge retriever |
+| `limen-ai:agent:test {agent}` | Run agent once against fake or live provider |
+| `limen-ai:tool:test {tool}` | Execute a tool with JSON input |
+| `limen-ai:workflow:test {workflow}` | Dry-run a workflow |
 | `limen-ai:run {agent}` | Interactive CLI chat session |
 
 Full command map: [docs/artisan-command-map.md](docs/artisan-command-map.md)

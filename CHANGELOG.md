@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Full attachment pipeline: upload API, validation, text extraction, runtime injection, optional vector RAG
+- `limen-ai:install` and full Artisan CLI surface (`run`, `agent:test`, `tool:test`, `workflow:test`, `logs`, inspection and generator commands)
+- `LimenAi` facade and `LimenAiManager` for programmatic agent/workflow execution
+- `DatabaseAttachmentStore` with `limen_ai_attachments` migration
 - Example agents for each built-in LLM provider: `example_openai`, `example_anthropic`, `example_gemini`, `example_openrouter` (plus `example` for fake)
 - `.env.example` and publishable `limen-ai-env` tag (`.env.limen-ai.example`) with all Limen AI configuration keys
 - Configurable agent persona: display name, tone, language (`auto` follows request locale), response style, custom rules, and forbidden topics

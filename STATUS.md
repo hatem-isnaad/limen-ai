@@ -83,8 +83,11 @@ All 22 implementation phases are complete. The package is ready for host app int
 - Trace correlation IDs on runs and tool spans
 - Usage tracking for LLM tokens and tool durations
 - Audit buffer/export and run observability API endpoint
-- `limen-ai:doctor` environment validation command
-- Generator commands: `make:agent`, `make:tool`, `make:skill`, plus `limen-ai:list`
+- `limen-ai:install` publish command and full Artisan CLI surface (`doctor`, `validate`, `list`, `run`, `agent:test`, `tool:test`, `workflow:test`, `logs`)
+- Generator commands: `make:agent`, `make:tool`, `make:skill`, `make:workflow`, `make:connector`, `make:provider`, `make:memory`, `make:knowledge`
+- Inspection commands: `agents`, `tools`, `skills`, `workflows`
+- Full attachment pipeline: upload API, validation, text extraction, runtime injection, optional vector RAG
+- `LimenAi` facade, `LimenAiManager`, and attachment store bindings (`InMemory` / `Database`)
 - Publishable stubs under `stubs/` with `StubGenerator`
 - Expanded architecture boundary tests (`ModuleBoundaryTest`, `CriticalCoverageGateTest`)
 - Security critical matrix suite and CI workflow with merge gates

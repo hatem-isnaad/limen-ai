@@ -1,0 +1,15 @@
+<?php
+
+return [
+    'key' => '{{ key }}',
+    'config' => [
+        'base_url' => env('{{ env_prefix }}_URL', 'https://api.example.com'),
+        'headers' => [
+            'Accept' => 'application/json',
+        ],
+        'authentication' => [
+            'type' => 'bearer',
+            'token' => env('{{ env_prefix }}_TOKEN'),
+        ],
+    ],
+];

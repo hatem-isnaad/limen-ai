@@ -79,7 +79,7 @@ These items are **out of v1 scope by design**. Contracts and extension points ex
 | Reverb broadcaster | Future adapter | `RealtimeBroadcaster` contract; Pusher + null shipped |
 | MCP integrations | Future | Tool pipeline supports class/HTTP tools today |
 | Multi-tenancy | SaaS | DB schema prepares for tenant columns |
-| Attachment RAG pipeline | Future | Security model defined; uploads not in v1 |
+| Attachment RAG pipeline | Complete | Upload, extraction, runtime injection, optional vector RAG |
 | OpenTelemetry export | Future | Trace/usage/audit hooks shipped; exporter optional |
 
 ## Provider coverage (v1.0.0+)
@@ -248,10 +248,12 @@ See [docs/providers.md](docs/providers.md).
 
 ## Phase 19 Completed
 
-1. `limen-ai:doctor` for config, bindings, queue, and broadcasting checks
-2. `limen-ai:make:agent`, `make:tool`, and `make:skill` generator commands
-3. `limen-ai:list` inspection command and publishable `stubs/` directory
-4. `StubGenerator` helper and developer tooling unit/feature tests
+1. `limen-ai:install` for publishing config, env example, views, assets, and stubs
+2. `limen-ai:doctor` for config, bindings, queue, and broadcasting checks
+3. Generator commands: `make:agent`, `make:tool`, `make:skill`, `make:workflow`, `make:connector`, `make:provider`, `make:memory`, `make:knowledge`
+4. Inspection commands: `list`, `agents`, `tools`, `skills`, `workflows`, `logs`
+5. Execution helpers: `run`, `agent:test`, `tool:test`, `workflow:test`
+6. `StubGenerator`, `LimenAiManager` facade, and publishable `stubs/` directory
 
 ## Phase 20 Completed
 

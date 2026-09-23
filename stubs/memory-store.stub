@@ -1,0 +1,44 @@
+<?php
+
+namespace {{ namespace }};
+
+use LimenAi\Contracts\Memory\MemoryStore;
+
+class {{ class }} implements MemoryStore
+{
+    /** @var array<string, array<string, array<string, mixed>>> */
+    private array $memories = [];
+
+    public function put(string $scope, string $key, mixed $value, array $context = []): void
+    {
+        $bucket = $this->bucketKey($scope, $context);
+        $this->memories[$bucket][$key] = [
+            'scope' => $scope,
+            'key' => $key,
+            'value' => $value,
+            'updated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    public function get(string $scope, string $key, array $context = []): mixed
+    {
+        return $this->memories[$this->bucketKey($scope, $context)][$key]['value'] ?? null;
+    }
+
+    public function forget(string $scope, string $key, array $context = []): void
+    {
+        unset($this->memories[$this->bucketKey($scope, $context)][$key]);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function all(string $scope, array $context = []): array
+    {
+        return array_values($this->memories[$this->bucketKey($scope, $context)] ?? []);
+    }
+
+    /** @param  array<string, mixed>  $context */
+    private function bucketKey(string $scope, array $context): string
+    {
+        return $scope.':'.($context['user_id'] ?? $context['conversation_id'] ?? 'default');
+    }
+}

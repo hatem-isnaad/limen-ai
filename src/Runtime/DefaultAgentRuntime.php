@@ -11,6 +11,7 @@ use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Agents\AgentResolver;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
+use LimenAi\Contracts\Attachments\AgentAttachmentRetriever;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
 use LimenAi\Contracts\Memory\MemoryRetriever;
 use LimenAi\Contracts\Observability\UsageTracker;
@@ -46,6 +47,7 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly ConversationService $conversations,
         private readonly MemoryRetriever $memory,
         private readonly AgentKnowledgeRetriever $knowledge,
+        private readonly AgentAttachmentRetriever $attachments,
         private readonly ContentSanitizer $sanitizer,
         private readonly UsageTracker $usage,
         private readonly Dispatcher $events,
@@ -79,10 +81,13 @@ class DefaultAgentRuntime implements AgentRuntime
         $historyCount = count($baseMessages);
         $memoryMessages = $this->memory->retrieve($agentKey, $this->memoryContext($agentKey, $conversationId, $context));
         $knowledgeMessages = $this->knowledge->retrieve($agentKey, $userMessage);
+        $attachmentIds = array_values(array_filter((array) ($context->metadata()['attachment_ids'] ?? [])));
+        $attachmentMessages = $this->attachments->retrieve($conversationId, $userMessage, $attachmentIds);
         $runtimePersona = $this->runtimePersonaMessage($agent, $context);
         $messages = array_merge(
             $memoryMessages,
             $knowledgeMessages,
+            $attachmentMessages,
             $runtimePersona !== null ? [$runtimePersona] : [],
             $baseMessages,
         );

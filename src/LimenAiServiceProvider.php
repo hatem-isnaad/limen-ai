@@ -14,13 +14,41 @@ use LimenAi\Authorization\DatabaseApprovalRepository;
 use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
+use LimenAi\Attachments\AttachmentFormatter;
+use LimenAi\Attachments\AttachmentService;
+use LimenAi\Attachments\AttachmentValidator;
+use LimenAi\Attachments\AttachmentVectorIndexer;
+use LimenAi\Attachments\DatabaseAttachmentStore;
+use LimenAi\Attachments\DefaultAgentAttachmentRetriever;
+use LimenAi\Attachments\DefaultAttachmentTextExtractor;
+use LimenAi\Attachments\InMemoryAttachmentStore;
+use LimenAi\Attachments\NullAttachmentStore;
+use LimenAi\Console\AgentTestCommand;
+use LimenAi\Console\AgentsCommand;
 use LimenAi\Console\DoctorCommand;
+use LimenAi\Console\InstallCommand;
 use LimenAi\Console\ListCommand;
+use LimenAi\Console\LogsCommand;
 use LimenAi\Console\MakeAgentCommand;
+use LimenAi\Console\MakeConnectorCommand;
+use LimenAi\Console\MakeKnowledgeCommand;
+use LimenAi\Console\MakeMemoryCommand;
+use LimenAi\Console\MakeProviderCommand;
 use LimenAi\Console\MakeSkillCommand;
 use LimenAi\Console\MakeToolCommand;
+use LimenAi\Console\MakeWorkflowCommand;
+use LimenAi\Console\RunCommand;
+use LimenAi\Console\SkillsCommand;
 use LimenAi\Console\StubGenerator;
+use LimenAi\Console\ToolTestCommand;
+use LimenAi\Console\ToolsCommand;
 use LimenAi\Console\ValidateCommand;
+use LimenAi\Console\WorkflowTestCommand;
+use LimenAi\Console\WorkflowsCommand;
+use LimenAi\Contracts\Attachments\AgentAttachmentRetriever;
+use LimenAi\Contracts\Attachments\AttachmentStore;
+use LimenAi\Contracts\Attachments\AttachmentTextExtractor;
+use LimenAi\Support\LimenAiManager;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
 use LimenAi\Broadcasting\AgentEventBroadcaster;
@@ -152,6 +180,8 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerQueue();
         $this->registerBroadcasting();
         $this->registerUi();
+        $this->registerAttachments();
+        $this->registerManager();
         $this->registerConsole();
     }
 
@@ -162,6 +192,7 @@ class LimenAiServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/limen-ai.php' => config_path('limen-ai.php'),
+                __DIR__.'/../config/limen-ai-provider-agents.php' => config_path('limen-ai-provider-agents.php'),
             ], 'limen-ai-config');
 
             $this->publishes([
@@ -449,6 +480,41 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(ThemeResolver::class);
     }
 
+    protected function registerAttachments(): void
+    {
+        $this->app->singleton(AttachmentTextExtractor::class, DefaultAttachmentTextExtractor::class);
+        $this->app->singleton(AttachmentValidator::class);
+        $this->app->singleton(AttachmentFormatter::class);
+        $this->app->singleton(AttachmentVectorIndexer::class);
+        $this->app->singleton(AttachmentService::class);
+        $this->app->singleton(AgentAttachmentRetriever::class, DefaultAgentAttachmentRetriever::class);
+
+        $this->app->singleton(AttachmentStore::class, function ($app): AttachmentStore {
+            $attachments = $app['config']->get('limen-ai.attachments', []);
+
+            if (! ($attachments['enabled'] ?? true)) {
+                return new NullAttachmentStore();
+            }
+
+            $implementation = $attachments['store'] ?? InMemoryAttachmentStore::class;
+
+            if ($implementation === DatabaseAttachmentStore::class) {
+                return new DatabaseAttachmentStore(
+                    $app['db']->connection(),
+                    (string) ($attachments['disk'] ?? 'local'),
+                    (string) ($attachments['path'] ?? 'limen-ai/attachments'),
+                );
+            }
+
+            return $app->make($implementation);
+        });
+    }
+
+    protected function registerManager(): void
+    {
+        $this->app->singleton(LimenAiManager::class);
+    }
+
     protected function registerConsole(): void
     {
         $this->app->singleton(StubGenerator::class, fn ($app): StubGenerator => new StubGenerator(
@@ -458,12 +524,27 @@ class LimenAiServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                InstallCommand::class,
                 ValidateCommand::class,
                 DoctorCommand::class,
                 ListCommand::class,
+                AgentsCommand::class,
+                ToolsCommand::class,
+                SkillsCommand::class,
+                WorkflowsCommand::class,
+                LogsCommand::class,
+                RunCommand::class,
+                AgentTestCommand::class,
+                ToolTestCommand::class,
+                WorkflowTestCommand::class,
                 MakeAgentCommand::class,
                 MakeSkillCommand::class,
                 MakeToolCommand::class,
+                MakeWorkflowCommand::class,
+                MakeConnectorCommand::class,
+                MakeProviderCommand::class,
+                MakeMemoryCommand::class,
+                MakeKnowledgeCommand::class,
             ]);
         }
     }

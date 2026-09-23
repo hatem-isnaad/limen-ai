@@ -28,13 +28,20 @@ class MessageController
     public function store(Request $request, string $conversationId): JsonResponse
     {
         abort_unless($this->accessGuard->canAccess($request->user(), $conversationId), 403, 'Conversation access denied.');
-        $validated = $request->validate(['message' => ['required', 'string', 'max:10000']]);
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:10000'],
+            'attachment_ids' => ['sometimes', 'array'],
+            'attachment_ids.*' => ['string'],
+        ]);
         $conversation = $this->conversations->find($conversationId);
         abort_if($conversation === null, 404, 'Conversation not found.');
         $agentKey = (string) ($conversation['agent_key'] ?? $this->config->get('limen-ai.default_agent', 'example'));
         $agent = $this->agents->find($agentKey);
         $this->authorization->authorizeAgent($agent);
-        $context = $this->runContextFromRequest($request, $this->authorization);
+        $context = $this->runContextFromRequest($request, $this->authorization)
+            ->withMetadata([
+                'attachment_ids' => array_values($validated['attachment_ids'] ?? []),
+            ]);
         $result = $this->dispatcher->dispatchRun($agentKey, $conversationId, (string) $validated['message'], $context);
         return response()->json(['queued' => $result->queued, 'run_id' => $result->runId, 'status' => $result->queued ? 'queued' : 'running'], $result->queued ? 202 : 200);
     }

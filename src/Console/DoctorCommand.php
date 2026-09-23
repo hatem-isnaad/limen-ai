@@ -5,7 +5,9 @@ namespace LimenAi\Console;
 use Illuminate\Console\Command;
 use LimenAi\Agents\AgentValidator;
 use LimenAi\Contracts\Agents\AgentRepository;
+use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
+use LimenAi\Support\LimenAiManager;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
@@ -51,6 +53,8 @@ class DoctorCommand extends Command
             'Audit logger' => AuditLogger::class,
             'Broadcaster' => RealtimeBroadcaster::class,
             'Agent repository' => AgentRepository::class,
+            'Attachment store' => AttachmentStore::class,
+            'Limen AI manager' => LimenAiManager::class,
         ] as $label => $contract) {
             if (! app()->bound($contract)) {
                 $failures[] = "Binding missing for {$contract}.";

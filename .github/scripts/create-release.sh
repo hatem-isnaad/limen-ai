@@ -3,16 +3,32 @@ set -euo pipefail
 
 OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 
+collect_commit_subjects() {
+  local range="${1:-}"
+
+  SUBJECTS=()
+
+  if [[ -n "$range" ]]; then
+    while IFS= read -r subject || [[ -n "$subject" ]]; do
+      [[ -n "$subject" ]] && SUBJECTS+=("$subject")
+    done < <(git log "${range}" --no-merges --pretty=format:%s)
+  else
+    while IFS= read -r subject || [[ -n "$subject" ]]; do
+      [[ -n "$subject" ]] && SUBJECTS+=("$subject")
+    done < <(git log --no-merges --pretty=format:%s)
+  fi
+}
+
 git fetch --tags --force || echo "Warning: unable to fetch tags; using local tag refs"
 
 LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
 echo "Latest release tag: ${LAST_TAG:-<none>}"
 if [[ -n "$LAST_TAG" ]]; then
   RANGE="${LAST_TAG}..HEAD"
-  mapfile -t SUBJECTS < <(git log "${RANGE}" --no-merges --pretty=format:%s)
+  collect_commit_subjects "${RANGE}"
 else
   RANGE=""
-  mapfile -t SUBJECTS < <(git log --no-merges --pretty=format:%s)
+  collect_commit_subjects
 fi
 
 if [[ ${#SUBJECTS[@]} -eq 0 ]]; then
@@ -59,29 +75,41 @@ echo "Release bump: ${BUMP}"
 
 if [[ -n "$LAST_TAG" ]]; then
   CURRENT="${LAST_TAG#v}"
+  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+  case "$BUMP" in
+    major)
+      MAJOR=$((MAJOR + 1))
+      MINOR=0
+      PATCH=0
+      ;;
+    minor)
+      MINOR=$((MINOR + 1))
+      PATCH=0
+      ;;
+    patch)
+      PATCH=$((PATCH + 1))
+      ;;
+  esac
+
+  VERSION="${MAJOR}.${MINOR}.${PATCH}"
 else
-  CURRENT="0.0.0"
+  VERSION="$(python3 - <<'PY'
+import json
+import pathlib
+
+composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
+print(composer.get("version", "0.0.0"))
+PY
+)"
 fi
-
-IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-case "$BUMP" in
-  major)
-    MAJOR=$((MAJOR + 1))
-    MINOR=0
-    PATCH=0
-    ;;
-  minor)
-    MINOR=$((MINOR + 1))
-    PATCH=0
-    ;;
-  patch)
-    PATCH=$((PATCH + 1))
-    ;;
-esac
-
-VERSION="${MAJOR}.${MINOR}.${PATCH}"
 TAG="v${VERSION}"
 DATE="$(date -u +%Y-%m-%d)"
+
+if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null || gh release view "$TAG" >/dev/null 2>&1; then
+  echo "Release tag ${TAG} already exists; skipping publish"
+  echo "published=false" >> "$OUTPUT"
+  exit 0
+fi
 
 NOTES_FILE="$(mktemp)"
 {
@@ -142,14 +170,19 @@ marker = "## [Unreleased]"
 if marker not in content:
     raise SystemExit("CHANGELOG.md is missing an [Unreleased] section")
 
-updated = content.replace(
-    marker,
-    "\n".join(section_lines) + marker,
-    1,
-)
-updated += f"\n[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
-changelog_path.write_text(updated, encoding="utf-8")
-print(f"Updated CHANGELOG.md for {version}")
+if f"## [{version}]" in content:
+    print(f"CHANGELOG.md already documents {version}; leaving file unchanged")
+else:
+    updated = content.replace(
+        marker,
+        "\n".join(section_lines) + marker,
+        1,
+    )
+    link = f"[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
+    if link.strip() not in updated:
+        updated += f"\n{link}"
+    changelog_path.write_text(updated, encoding="utf-8")
+    print(f"Updated CHANGELOG.md for {version}")
 PY
 
 rm -f "$NOTES_FILE"

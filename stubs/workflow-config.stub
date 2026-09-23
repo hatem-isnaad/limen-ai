@@ -1,0 +1,17 @@
+<?php
+
+return [
+    'key' => '{{ key }}',
+    'config' => [
+        'name' => '{{ title }}',
+        'version' => '1.0.0',
+        'start' => '{{ start_step }}',
+        'steps' => [
+            '{{ start_step }}' => [
+                'type' => 'agent',
+                'agent' => '{{ agent }}',
+                'message' => 'Describe the first workflow step.',
+            ],
+        ],
+    ],
+];

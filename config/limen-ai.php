@@ -433,6 +433,28 @@ return [
         'error' => 'limen-ai::responses.error',
     ],
 
+    'attachments' => [
+        'enabled' => env('LIMEN_AI_ATTACHMENTS_ENABLED', true),
+        'store' => LimenAi\Attachments\InMemoryAttachmentStore::class,
+        'disk' => env('LIMEN_AI_ATTACHMENTS_DISK', 'local'),
+        'path' => env('LIMEN_AI_ATTACHMENTS_PATH', 'limen-ai/attachments'),
+        'max_size_kb' => (int) env('LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB', 10240),
+        'max_count' => (int) env('LIMEN_AI_ATTACHMENTS_MAX_COUNT', 5),
+        'allowed_mime_types' => [
+            'text/plain',
+            'text/markdown',
+            'text/csv',
+            'application/json',
+            'application/xml',
+            'text/xml',
+        ],
+        'rag' => [
+            'enabled' => env('LIMEN_AI_ATTACHMENT_RAG_ENABLED', true),
+            'chunk_size' => 1000,
+            'collection_prefix' => 'attachment',
+        ],
+    ],
+
     'limits' => [
         'requests_per_minute' => 60,
         'max_tool_calls' => 10,
@@ -546,6 +568,10 @@ return [
         'tools' => app_path('LimenAi/Tools'),
         'skills' => app_path('LimenAi/Skills'),
         'workflows' => app_path('LimenAi/Workflows'),
+        'providers' => app_path('LimenAi/Providers'),
+        'memory' => app_path('LimenAi/Memory'),
+        'knowledge' => app_path('LimenAi/Knowledge'),
+        'connectors' => app_path('LimenAi/Connectors'),
     ],
 
 ];

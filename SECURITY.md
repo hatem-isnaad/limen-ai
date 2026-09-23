@@ -73,10 +73,18 @@ Never trust from LLM output:
 - Never pass credentials to LLM
 - Store secrets in env/config, resolved at runtime
 
+## Attachments
+
+- Upload size, mime type, and per-conversation count limits are enforced server-side
+- Extracted attachment text is treated as untrusted and wrapped before LLM injection
+- Optional vector RAG over attachments uses the same sanitization rules as knowledge retrieval
+- Files are stored on the configured disk (`attachments.disk`) or in-memory for development
+- Use `DatabaseAttachmentStore` in production with the `limen_ai_attachments` migration
+
 ## Prompt Injection Mitigation
 
 - Separate system/instruction from untrusted content
-- Mark retrieved knowledge and user content as untrusted
+- Mark retrieved knowledge, attachments, and user content as untrusted
 - Optional sanitization filters
 - Tool allowlists per agent (LLM cannot invoke undeclared tools)
 

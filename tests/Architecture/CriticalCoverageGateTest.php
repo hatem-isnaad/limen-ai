@@ -3,14 +3,10 @@
 namespace LimenAi\Tests\Architecture;
 
 use LimenAi\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CriticalCoverageGateTest extends TestCase
 {
-    /**
-     * Security-critical production classes that must have dedicated tests.
-     *
-     * @return array<string, list<string>>
-     */
     public static function criticalCoverageMatrix(): array
     {
         return [
@@ -70,14 +66,24 @@ class CriticalCoverageGateTest extends TestCase
                     'tests/Unit/Http/ConversationAccessGuardTest.php',
                 ],
             ],
+            'Attachment upload validation' => [
+                'Attachment upload validation',
+                [
+                    'src/Attachments/AttachmentValidator.php',
+                    'tests/Unit/Attachments/AttachmentValidatorTest.php',
+                ],
+            ],
+            'Attachment text extraction' => [
+                'Attachment text extraction',
+                [
+                    'src/Attachments/DefaultAttachmentTextExtractor.php',
+                    'tests/Unit/Attachments/DefaultAttachmentTextExtractorTest.php',
+                ],
+            ],
         ];
     }
 
-    /**
-     * @dataProvider criticalCoverageMatrix
-     *
-     * @param  list<string>  $paths
-     */
+    #[DataProvider('criticalCoverageMatrix')]
     public function test_security_critical_paths_have_test_coverage(string $scenario, array $paths): void
     {
         $root = dirname(__DIR__, 2);
@@ -90,9 +96,6 @@ class CriticalCoverageGateTest extends TestCase
         }
     }
 
-    /**
-     * @return array<string, list<string>>
-     */
     public static function criticalFeatureScenarioMatrix(): array
     {
         return [
@@ -116,14 +119,18 @@ class CriticalCoverageGateTest extends TestCase
                 'Queued agent run dispatch',
                 ['tests/Feature/QueuedAgentRunTest.php'],
             ],
+            'Attachment upload API' => [
+                'Attachment upload API',
+                ['tests/Feature/AttachmentApiTest.php'],
+            ],
+            'Attachment runtime injection' => [
+                'Attachment runtime injection',
+                ['tests/Feature/AttachmentRuntimeTest.php'],
+            ],
         ];
     }
 
-    /**
-     * @dataProvider criticalFeatureScenarioMatrix
-     *
-     * @param  list<string>  $paths
-     */
+    #[DataProvider('criticalFeatureScenarioMatrix')]
     public function test_security_critical_feature_scenarios_have_tests(string $scenario, array $paths): void
     {
         $root = dirname(__DIR__, 2);
