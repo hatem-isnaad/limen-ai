@@ -27,7 +27,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: composer:v2
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
@@ -41,7 +40,7 @@ jobs:
           else
             composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction -W --no-audit
+          composer update --prefer-dist --no-interaction -W
 
       - name: Run unit, integration, and feature tests
         run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
