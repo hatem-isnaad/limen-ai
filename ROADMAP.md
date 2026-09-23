@@ -4,9 +4,9 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 
 | Phase | Name | Goal | Status |
 |-------|------|------|--------|
-| 01 | Package Foundation | Repo, docs, contracts, config schema | In Progress |
-| 02 | Contracts & Architecture | DTOs, value objects, binding map | Pending |
-| 03 | Provider System | LLM + embedding adapters, fakes | Pending |
+| 01 | Package Foundation | Repo, docs, contracts, config schema | Complete |
+| 02 | Contracts & Architecture | DTOs, value objects, binding map | Complete |
+| 03 | Provider System | LLM + embedding adapters, fakes | Complete |
 | 04 | Agent System | Agent definitions + config repository | Pending |
 | 05 | Tool System | Tool pipeline, validation, audit | Pending |
 | 06 | Runtime | Core execution loop + limits | Pending |

@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 01 — Package Foundation**
+**Phase 04 — Agent System**
 
 ## Phase 01 Scope
 
@@ -79,10 +79,26 @@ At the end of each phase:
 | Multi-tenancy | SaaS phase | DB design prepares for it |
 | Attachment RAG pipeline | Phase 11+ | Security first |
 
-## Next Implementation Tasks (Phase 02)
+## Phase 02 Completed
 
-1. Add DTO/value objects for AgentDefinition, ToolDefinition, etc.
-2. Register contract bindings in service provider
-3. Implement config repository stubs (read-only)
-4. Add architecture tests for namespace boundaries
-5. Add ExampleAgent + ExampleTool config entries
+1. DTO/value objects: `ConfigAgentDefinition`, `ConfigToolDefinition`, `ConfigSkillDefinition`, `ConfigWorkflowDefinition`
+2. Config repositories bound in `LimenAiServiceProvider`
+3. `RunContextData` for execution context
+4. Example skill + knowledge collection wired to example agent
+5. Repository unit/integration tests added
+
+## Phase 03 Completed
+
+1. `LlmProviderManager` and `EmbeddingProviderManager`
+2. `FakeLlmProvider` with queued responses and call recording
+3. `FakeEmbeddingProvider` with deterministic vectors
+4. `OpenAiProvider` skeleton using Laravel HTTP client + `Http::fake()` tests
+5. Default provider switched to `fake` for safe local/test usage
+
+## Next Implementation Tasks (Phase 04)
+
+1. Add agent resolution service (agent + provider + model)
+2. Add tool schema builder for LLM function calling format
+3. Add agent-level provider override handling
+4. Add agent configuration validation command skeleton
+5. Add agent resolution tests
