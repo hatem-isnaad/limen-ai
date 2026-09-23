@@ -298,8 +298,9 @@ return [
     ],
 
     'observability' => [
-        'audit_enabled' => true,
-        'usage_tracking_enabled' => true,
+        'audit_enabled' => env('LIMEN_AI_AUDIT_ENABLED', true),
+        'usage_tracking_enabled' => env('LIMEN_AI_USAGE_TRACKING_ENABLED', true),
+        'trace_enabled' => env('LIMEN_AI_TRACE_ENABLED', true),
     ],
 
     'security' => [
