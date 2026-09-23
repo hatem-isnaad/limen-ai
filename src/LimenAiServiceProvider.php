@@ -164,6 +164,11 @@ class LimenAiServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../stubs' => base_path('stubs/limen-ai'),
             ], 'limen-ai-stubs');
+
+            $this->publishes([
+                __DIR__.'/../stubs/limen' => base_path('stubs/limen-ai/limen'),
+                __DIR__.'/../examples/limen-host' => base_path('examples/limen-host'),
+            ], 'limen-ai-limen-demo');
         }
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'limen-ai');
