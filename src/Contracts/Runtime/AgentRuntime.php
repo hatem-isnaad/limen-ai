@@ -9,4 +9,6 @@ interface AgentRuntime
     public function resume(string $runId, RunContext $context): void;
 
     public function cancel(string $runId, RunContext $context): void;
+
+    public function reject(string $runId, RunContext $context): void;
 }

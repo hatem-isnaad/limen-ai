@@ -102,6 +102,15 @@ class ConversationService
         $this->events->dispatch(new ConversationUpdated($conversationId, ConversationState::WAITING_APPROVAL));
     }
 
+    public function markActive(string $conversationId): void
+    {
+        $this->conversations->update($conversationId, [
+            'state' => ConversationState::ACTIVE,
+        ]);
+
+        $this->events->dispatch(new ConversationUpdated($conversationId, ConversationState::ACTIVE));
+    }
+
     /** @return list<array<string, mixed>> */
     public function storedMessages(string $conversationId): array
     {
