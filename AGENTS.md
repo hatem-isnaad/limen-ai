@@ -466,6 +466,8 @@ Full schema: `docs/configuration-schema.md`
 |----------|------|
 | **This guide** | `AGENTS.md` |
 | Install (all methods) | `docs/installation.md` |
+| **Black-box host guide** | `docs/black-box-host-guide.md` |
+| **Knowledge base setup** | `docs/knowledge-base-setup.md` |
 | Host quickstart | `docs/host-quickstart.md` |
 | Scaling agents & tools | `docs/scaling-agents-and-tools.md` |
 | Host integration audit | `docs/HOST-INTEGRATION-AUDIT.md` |

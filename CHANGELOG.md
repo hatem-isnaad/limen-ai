@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+## [1.0.6] - 2026-09-23
 
-- CI: run tests on `main` pushes; release workflow is manual `workflow_dispatch` only
-- Release script now publishes `composer.json` version instead of auto-bumping from stray tags
+### Added
+
+- `limen-ai:doctor` Ollama probe — checks `/v1/models` reachability and warns when the configured model is not installed
+- Expanded [black-box-host-guide.md](docs/black-box-host-guide.md) — full env → agent → KB → tools → widget path
+- New [knowledge-base-setup.md](docs/knowledge-base-setup.md) — FAQ/RAG collections cookbook for developers
+- Updated [README.md](README.md), [docs/index.html](docs/index.html), and [host-quickstart.md](docs/host-quickstart.md) for black-box developer onboarding
 
 ## [1.0.5] - 2026-09-23
 

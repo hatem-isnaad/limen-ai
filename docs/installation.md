@@ -2,6 +2,8 @@
 
 Limen AI is a **Laravel package** — install it into an existing Laravel 11, 12, or 13 application. You do **not** need to publish to Packagist to use it.
 
+> **After install:** [black-box host guide](black-box-host-guide.md) — set `.env`, add [knowledge collections](knowledge-base-setup.md), embed `<x-limen-ai::widget />`. No Gates in default mode.
+
 ## Requirements
 
 | Requirement | Version |

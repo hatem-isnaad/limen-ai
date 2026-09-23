@@ -1,6 +1,8 @@
 # Limen AI — Documentation
 
-Package documentation is organized by topic. Start with the [interactive hub](index.html) or jump to a section below.
+Package documentation is organized by topic.
+
+**New developer?** Start with the [black-box host guide](black-box-host-guide.md) — change env, add agents/tools/KB, embed the widget. Or open the [interactive hub](index.html).
 
 ## AI agents & contributors
 
@@ -14,9 +16,10 @@ Package documentation is organized by topic. Start with the [interactive hub](in
 
 | Document | Description |
 |----------|-------------|
-| [installation.md](installation.md) | **Install the package** — Packagist, path repo, VCS, private registry, monorepo |
-| [black-box-host-guide.md](black-box-host-guide.md) | **Black-box install** — env + tools only, no Gates |
-| [host-quickstart.md](host-quickstart.md) | **15-minute path** — install → agent → tool → widget |
+| [black-box-host-guide.md](black-box-host-guide.md) | **Start here** — env, agents, tools, KB, widget (no Gates) |
+| [knowledge-base-setup.md](knowledge-base-setup.md) | **Knowledge base** — FAQ collections so chat answers from real data |
+| [host-quickstart.md](host-quickstart.md) | **15-minute path** — install → KB → widget |
+| [installation.md](installation.md) | Packagist, path repo, VCS, private registry, monorepo |
 | [scaling-agents-and-tools.md](scaling-agents-and-tools.md) | Multi-agent layout, tool limits, when to split |
 | [HOST-INTEGRATION-AUDIT.md](HOST-INTEGRATION-AUDIT.md) | Host integration quality audit (maintainers) |
 | [providers.md](providers.md) | LLM and embedding provider setup |

@@ -4,6 +4,8 @@ namespace LimenAi\Support;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\ConnectionResolverInterface;
+use Illuminate\Support\Facades\Http;
+
 final class EnvironmentDoctor
 {
     /** @var list<string> */
@@ -32,6 +34,7 @@ final class EnvironmentDoctor
         $this->inspectAutoDetectedPersistence($warnings);
         $this->inspectMigrations($warnings);
         $this->inspectProviderCredentials($warnings);
+        $this->inspectOllamaEndpoint($warnings);
         $this->inspectPublishedUiVersion($warnings);
 
         return [
@@ -160,6 +163,85 @@ final class EnvironmentDoctor
                 return;
             }
         }
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
+    protected function inspectOllamaEndpoint(array &$warnings): void
+    {
+        $defaultAgent = (string) $this->config->get('limen-ai.default_agent', '');
+        $agent = is_array($this->config->get("limen-ai.agents.{$defaultAgent}"))
+            ? $this->config->get("limen-ai.agents.{$defaultAgent}")
+            : [];
+        $provider = (string) ($agent['provider'] ?? $this->config->get('limen-ai.providers.default', 'fake'));
+
+        if ($provider !== 'openai') {
+            return;
+        }
+
+        $baseUrl = rtrim((string) ($this->config->get('limen-ai.providers.openai.base_url') ?? ''), '/');
+        $apiKey = (string) ($this->config->get('limen-ai.providers.openai.api_key') ?? '');
+
+        if (! $this->looksLikeOllamaEndpoint($baseUrl, $apiKey)) {
+            return;
+        }
+
+        if ($baseUrl === '') {
+            $warnings[] = 'Ollama-style API key detected but OPENAI_BASE_URL is empty. Set OPENAI_BASE_URL=http://localhost:11434/v1';
+
+            return;
+        }
+
+        $model = (string) ($agent['model'] ?? $this->config->get('limen-ai.agent_defaults.model', ''));
+
+        try {
+            $response = Http::timeout(3)
+                ->withToken($apiKey !== '' ? $apiKey : 'ollama')
+                ->acceptJson()
+                ->get($baseUrl.'/models');
+        } catch (\Throwable $exception) {
+            $warnings[] = "Ollama endpoint [{$baseUrl}] is not reachable: {$exception->getMessage()}";
+
+            return;
+        }
+
+        if (! $response->successful()) {
+            $warnings[] = "Ollama endpoint [{$baseUrl}] returned HTTP {$response->status()}. Ensure Ollama is running (ollama serve).";
+
+            return;
+        }
+
+        if ($model === '') {
+            return;
+        }
+
+        $listedModels = collect($response->json('data', []))
+            ->pluck('id')
+            ->filter(fn (mixed $id): bool => is_string($id) && $id !== '')
+            ->values()
+            ->all();
+
+        if ($listedModels === []) {
+            return;
+        }
+
+        if (! in_array($model, $listedModels, true)) {
+            $warnings[] = "Ollama is reachable but model [{$model}] is not installed. Run: ollama pull {$model}";
+        }
+    }
+
+    protected function looksLikeOllamaEndpoint(string $baseUrl, string $apiKey): bool
+    {
+        if (strtolower($apiKey) === 'ollama') {
+            return true;
+        }
+
+        $normalized = strtolower($baseUrl);
+
+        return str_contains($normalized, ':11434')
+            || str_contains($normalized, 'ollama')
+            || str_contains($normalized, 'localhost:11434');
     }
 
     /**

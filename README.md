@@ -2,7 +2,30 @@
 
 **Limen AI** is a production-ready Laravel package for building AI agents — with tools, skills, workflows, memory, knowledge retrieval (RAG), approvals, chat UI, and observability built in.
 
-> **Current release:** [v1.0.5](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.5)
+> **Current release:** [v1.0.6](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.6)
+
+## Black-box for developers
+
+**Install → set `.env` → add agents, tools, and knowledge in config → embed the widget → chat works.**
+
+No Laravel Gates required in default mode. No custom service providers. No framework internals.
+
+```bash
+composer require limen-ai/limen-ai && php artisan limen-ai:install && php artisan migrate
+```
+
+```env
+LIMEN_AI_DEFAULT_AGENT=app_assistant
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=your-key
+LIMEN_AI_AUTHORIZATION_MODE=simple
+```
+
+```blade
+<x-limen-ai::widget />
+```
+
+**Start here:** [docs/black-box-host-guide.md](docs/black-box-host-guide.md) · [docs/knowledge-base-setup.md](docs/knowledge-base-setup.md) · [docs/index.html](docs/index.html)
 
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
@@ -14,10 +37,11 @@
 
 | Resource | Description |
 |----------|-------------|
-| [AGENTS.md](AGENTS.md) | **AI & contributor reference** — architecture, usage, conventions, cookbook |
-| [docs/installation.md](docs/installation.md) | **Install guide** — Packagist, VCS, path repo, private registry, monorepo |
-| [docs/black-box-host-guide.md](docs/black-box-host-guide.md) | **Black-box setup** — env + tools only, no Gates |
-| [docs/host-quickstart.md](docs/host-quickstart.md) | **Quickstart** — install to working widget in ~15 minutes |
+| [docs/black-box-host-guide.md](docs/black-box-host-guide.md) | **Start here** — env, agents, tools, KB, widget (no Gates) |
+| [docs/knowledge-base-setup.md](docs/knowledge-base-setup.md) | **Knowledge base** — FAQ/RAG collections cookbook |
+| [docs/host-quickstart.md](docs/host-quickstart.md) | **15-minute path** — install to working chat |
+| [docs/installation.md](docs/installation.md) | Packagist, VCS, path repo, private registry |
+| [AGENTS.md](AGENTS.md) | AI & contributor reference (architecture, conventions) |
 | [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) | Multi-agent layout and tool-count guidance |
 | [docs/index.html](docs/index.html) | Interactive documentation hub |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |

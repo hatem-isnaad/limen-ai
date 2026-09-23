@@ -1,6 +1,9 @@
-# Host Quickstart — Zero to Working Widget
+# Host Quickstart — Zero to Working Chat
 
-Get Limen AI running in a Laravel host app in ~15 minutes.
+**~15 minutes.** Install, set env, add knowledge, embed widget — chat replies automatically.
+
+> Full black-box guide: [black-box-host-guide.md](black-box-host-guide.md)  
+> Knowledge base cookbook: [knowledge-base-setup.md](knowledge-base-setup.md)
 
 ---
 
@@ -17,61 +20,92 @@ Persistence **auto-detects database** after migrate when `LIMEN_AI_PERSISTENCE_D
 
 ---
 
-## 2. Environment (minimum)
+## 2. Environment (copy & edit)
 
 ```env
 LIMEN_AI_DEFAULT_AGENT=app_assistant
 LIMEN_AI_PROVIDER=openai
 OPENAI_API_KEY=your-key
 
-# Local Ollama instead:
-# LIMEN_AI_PROVIDER=openai
-# OPENAI_API_KEY=ollama
-# OPENAI_BASE_URL=http://localhost:11434/v1
-# LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+# Black-box — no Gates required
+LIMEN_AI_AUTHORIZATION_MODE=simple
+LIMEN_AI_REQUIRE_AUTH=false
+
+# Widget
+LIMEN_AI_UI_TITLE="Support"
+LIMEN_AI_UI_GUEST_ENABLED=true
+LIMEN_AI_UI_HISTORY_ENABLED=true
 ```
 
-Copy the full template: `php artisan vendor:publish --tag=limen-ai-env`
+**Ollama locally:**
+
+```env
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434/v1
+LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+```
+
+Full template: `php artisan vendor:publish --tag=limen-ai-env`
 
 ---
 
-## 3. Define one agent
+## 3. Agent + knowledge (so chat has answers)
 
-In `config/limen-ai.php`:
+Edit `config/limen-ai.php`:
 
 ```php
 'agents' => [
     'app_assistant' => [
-        'name' => 'App Assistant',
+        'name' => 'Support',
         'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
         'model' => env('LIMEN_AI_APP_ASSISTANT_MODEL', 'gpt-4.1-mini'),
-        'instructions' => 'You are a helpful assistant. Use tools when needed.',
-        'tools' => ['example_echo'], // replace with your tools
+        'instructions' => 'Answer from your knowledge. Be helpful and concise.',
+        'tools' => [],
+        'knowledge' => ['product_help'],
         'authorization' => [
-            'required' => true,
-            'guest_allowed' => false,
+            'required' => false,
+            'guest_allowed' => true,
+            'abilities' => [],
         ],
-        'limits' => [
-            'max_tool_calls' => 8,
-            'max_steps' => 16,
+        'limits' => ['max_tool_calls' => 6, 'max_steps' => 12],
+    ],
+],
+
+'knowledge' => [
+    'driver' => 'config',
+    'limit' => 5,
+    'collections' => [
+        'product_help' => [
+            'name' => 'Product Help',
+            'documents' => [
+                ['content' => 'Shipping takes 3–5 business days.'],
+                ['content' => 'Returns accepted within 14 days.'],
+            ],
         ],
     ],
 ],
 ```
 
-Generate a custom tool:
-
-```bash
-php artisan limen-ai:make:tool GetShipmentStatus
-```
-
-Wire the class in `tools.get_shipment_status.class` and add the key to your agent's `tools` array.
+Add your real FAQ content — see [knowledge-base-setup.md](knowledge-base-setup.md).
 
 ---
 
-## 4. Authorize in the tool (no Gates required)
+## 4. Widget (one line)
 
-Default mode is **simple** (`LIMEN_AI_AUTHORIZATION_MODE=simple`). Put permission logic in your tool class:
+```blade
+<x-limen-ai::widget />
+```
+
+Uses `LIMEN_AI_DEFAULT_AGENT` and theme from `.env`.
+
+---
+
+## 5. Tools (optional — when Laravel must execute)
+
+```bash
+php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status
+```
 
 ```php
 public function authorize(array $input, ToolExecutionContext $context): bool
@@ -80,32 +114,7 @@ public function authorize(array $input, ToolExecutionContext $context): bool
 }
 ```
 
-Return `false` and the tool **will not execute**. See [black-box-host-guide.md](black-box-host-guide.md).
-
-Optional: use Laravel Gates with `LIMEN_AI_AUTHORIZATION_MODE=gates` and `authorization.abilities` in config.
-
----
-
-## 5. Add the widget
-
-```blade
-{{-- resources/views/layouts/app.blade.php --}}
-<x-limen-ai::widget agent="app_assistant" />
-```
-
-Publish UI assets if needed:
-
-```bash
-php artisan vendor:publish --tag=limen-ai-ui
-```
-
-Theme via env (no hardcoded `:theme` prop):
-
-```env
-LIMEN_AI_UI_TITLE="My App Support"
-LIMEN_AI_UI_DIRECTION=ltr
-LIMEN_AI_THEME_PRESET=default
-```
+Wire class in `tools.*.class` and add key to agent `tools` array. See [black-box-host-guide.md](black-box-host-guide.md).
 
 ---
 
@@ -114,23 +123,19 @@ LIMEN_AI_THEME_PRESET=default
 ```bash
 php artisan limen-ai:doctor
 php artisan limen-ai:validate
-php artisan limen-ai:agent:test app_assistant --message="Hello"
-php artisan limen-ai:run app_assistant --user=1 --message="Hello"
+php artisan limen-ai:agent:test app_assistant --message="What is your return policy?"
 ```
 
-Host integration test template: [examples/limen-host/tests/Feature/LimenAiAgentTest.php](../examples/limen-host/tests/Feature/LimenAiAgentTest.php)
+Open your site → chat widget → ask the same question.
 
 ---
 
-## 7. Scale safely
+## 7. Scale later
 
-Before adding more tools:
-
-1. Read [scaling-agents-and-tools.md](scaling-agents-and-tools.md)
+1. [scaling-agents-and-tools.md](scaling-agents-and-tools.md) — split `app_assistant` / `support_agent` / `admin_agent`
 2. Keep **5–15 tools per agent**
-3. Split into `app_assistant`, `support_agent`, `admin_agent` as you grow
-4. Use `confirmation: true` on sensitive tools
-5. Run `limen-ai:validate` after every config change
+3. `confirmation: true` on destructive tools
+4. Run `limen-ai:validate` after every config change
 
 ---
 
@@ -139,8 +144,9 @@ Before adding more tools:
 | Issue | Fix |
 |-------|-----|
 | Second message → 403 | `php artisan migrate` + `config:clear` |
+| Generic/wrong answers | Add KB documents; test with `agent:test` |
 | Theme ignored | Use `LIMEN_AI_UI_*` env; remove hardcoded Blade `:theme` |
-| CLI auth error | Use `--user=1` (CLI logs in via `Auth::loginUsingId`) |
-| Raw JSON in chat | Upgrade to v1.0.1+; start a fresh conversation |
+| Raw JSON in chat | Upgrade to v1.0.1+; start fresh conversation |
+| Tool blocked | Check `authorize()` returns `true` for that user |
 
-Full install guide: [installation.md](installation.md)
+Full install: [installation.md](installation.md)
