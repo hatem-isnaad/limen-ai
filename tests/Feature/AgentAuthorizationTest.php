@@ -20,6 +20,8 @@ class AgentAuthorizationTest extends TestCase
     {
         auth()->logout();
 
+        config()->set('limen-ai.agents.example.authorization.required', true);
+
         app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
             'content' => 'Should not run.',
             'finish_reason' => 'stop',

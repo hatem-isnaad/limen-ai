@@ -67,9 +67,6 @@ class MakeToolCommand extends Command
         'input_schema' => [
             'message' => ['type' => 'string', 'required' => true],
         ],
-        'authorization' => [
-            'abilities' => [],
-        ],
         'confirmation' => false,
         'timeout' => 10,
         'version' => '1.0.0',

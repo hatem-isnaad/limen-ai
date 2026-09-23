@@ -16,6 +16,7 @@
 |----------|-------------|
 | [AGENTS.md](AGENTS.md) | **AI & contributor reference** — architecture, usage, conventions, cookbook |
 | [docs/installation.md](docs/installation.md) | **Install guide** — Packagist, VCS, path repo, private registry, monorepo |
+| [docs/black-box-host-guide.md](docs/black-box-host-guide.md) | **Black-box setup** — env + tools only, no Gates |
 | [docs/host-quickstart.md](docs/host-quickstart.md) | **Quickstart** — install to working widget in ~15 minutes |
 | [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) | Multi-agent layout and tool-count guidance |
 | [docs/index.html](docs/index.html) | Interactive documentation hub |

@@ -380,10 +380,13 @@ Code + Tests + Docs + Config + Error handling + Security + Events + Architecture
 ### Add a new tool (package example)
 
 1. Add config entry in `config/limen-ai.php` under `tools`
-2. Create class in `tests/Stubs/` for package tests (or host `App\LimenAi\Tools\` in real apps)
-3. Add unit test for tool behavior
-4. Add feature test if it affects runtime/API
-5. Run `php artisan limen-ai:validate`
+2. Create class extending `LimenAi\Tools\BaseTool` (host: `App\LimenAi\Tools\*`) with `authorize()` + `handle()`
+3. In simple auth mode (default), no Laravel Gates — return `false` from `authorize()` to block execution
+4. Add unit test for tool behavior
+5. Add feature test if it affects runtime/API
+6. Run `php artisan limen-ai:validate`
+
+Host black-box guide: `docs/black-box-host-guide.md`
 
 ### Add a new LLM provider
 

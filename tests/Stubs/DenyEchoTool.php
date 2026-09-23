@@ -7,18 +7,18 @@ use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class EchoTool extends BaseTool
+class DenyEchoTool extends BaseTool
 {
     public function key(): string
     {
-        return 'example_echo';
+        return 'deny_echo';
     }
 
     public function definition(): ToolDefinition
     {
-        return ConfigToolDefinition::fromConfig('example_echo', [
-            'name' => 'Example Echo',
-            'description' => 'Echoes input back for testing.',
+        return ConfigToolDefinition::fromConfig('deny_echo', [
+            'name' => 'Deny Echo',
+            'description' => 'Denied for tests.',
             'class' => self::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
@@ -26,11 +26,13 @@ class EchoTool extends BaseTool
         ]);
     }
 
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return false;
+    }
+
     public function handle(array $input, ToolExecutionContext $context): array
     {
-        return [
-            'message' => $input['message'],
-            'user_id' => $context->userId(),
-        ];
+        return ['message' => 'should not run'];
     }
 }

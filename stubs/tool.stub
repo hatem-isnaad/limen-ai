@@ -3,18 +3,17 @@
 namespace {{ namespace }};
 
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
-use LimenAi\Contracts\Tools\Tool;
-use LimenAi\Contracts\Tools\ToolDefinition;
+use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class {{ class }} implements Tool
+class {{ class }} extends BaseTool
 {
     public function key(): string
     {
         return '{{ key }}';
     }
 
-    public function definition(): ToolDefinition
+    public function definition(): \LimenAi\Contracts\Tools\ToolDefinition
     {
         return ConfigToolDefinition::fromConfig($this->key(), [
             'name' => '{{ class }}',
@@ -24,6 +23,16 @@ class {{ class }} implements Tool
                 'message' => ['type' => 'string', 'required' => true],
             ],
         ]);
+    }
+
+    /**
+     * Return false to block execution (no Laravel Gate required).
+     *
+     * @param  array<string, mixed>  $input
+     */
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context->userId() !== null;
     }
 
     /**

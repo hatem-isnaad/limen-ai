@@ -12,6 +12,7 @@ class ToolPipelineAuthorizationTest extends TestCase
 {
     public function test_it_blocks_tools_when_gate_denies_ability(): void
     {
+        config()->set('limen-ai.authorization.mode', 'gates');
         config()->set('limen-ai.tools.example_echo.authorization.abilities', ['tools.use']);
 
         Gate::define('tools.use', fn (): bool => false);

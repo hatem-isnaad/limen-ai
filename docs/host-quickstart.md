@@ -69,16 +69,20 @@ Wire the class in `tools.get_shipment_status.class` and add the key to your agen
 
 ---
 
-## 4. Authorize (Gates)
+## 4. Authorize in the tool (no Gates required)
 
-In `AppServiceProvider` or a dedicated provider:
+Default mode is **simple** (`LIMEN_AI_AUTHORIZATION_MODE=simple`). Put permission logic in your tool class:
 
 ```php
-Gate::define('agents.app_assistant', fn ($user) => $user !== null);
-Gate::define('shipments.view', fn ($user) => true); // your policy logic
+public function authorize(array $input, ToolExecutionContext $context): bool
+{
+    return $context->userId() !== null;
+}
 ```
 
-Never trust `user_id` from LLM tool arguments — use `auth()` inside the tool via `ToolExecutionContext`.
+Return `false` and the tool **will not execute**. See [black-box-host-guide.md](black-box-host-guide.md).
+
+Optional: use Laravel Gates with `LIMEN_AI_AUTHORIZATION_MODE=gates` and `authorization.abilities` in config.
 
 ---
 

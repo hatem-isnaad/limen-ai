@@ -94,7 +94,7 @@ return [
             'max_history_messages' => 30,
         ],
         'authorization' => [
-            'required' => true,
+            'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
             'abilities' => [],
             'guest_allowed' => false,
         ],
@@ -205,9 +205,9 @@ return [
                 'max_value_length' => 256,
             ],
             'authorization' => [
-                'required' => true,
+                'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
                 'abilities' => [],
-                'guest_allowed' => false,
+                'guest_allowed' => env('LIMEN_AI_UI_GUEST_ENABLED', false),
             ],
             'output' => [
                 'format' => 'text',
@@ -264,7 +264,7 @@ return [
                 'max_value_length' => 512,
             ],
             'authorization' => [
-                'required' => true,
+                'required' => env('LIMEN_AI_REQUIRE_AUTH', true),
                 'abilities' => [],
                 'guest_allowed' => false,
             ],
@@ -518,6 +518,8 @@ return [
     ],
 
     'authorization' => [
+        // simple = no Gates required; use tool authorize() methods. gates = Laravel abilities/policies.
+        'mode' => env('LIMEN_AI_AUTHORIZATION_MODE', 'simple'),
         'enforce_context_user_match' => true,
         'guest' => [
             'validator' => LimenAi\Authorization\CacheGuestSessionValidator::class,

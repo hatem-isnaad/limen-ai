@@ -122,13 +122,20 @@ class LaravelAuthorizationService implements AuthorizationService
     /** @param  array<string, mixed>  $authorization */
     protected function passesAuthorization(array $authorization, object $subject): bool
     {
-        foreach ($authorization['abilities'] ?? [] as $ability) {
+        $abilities = array_values($authorization['abilities'] ?? []);
+        $hasPolicy = isset($authorization['policy'], $authorization['policy_method']);
+
+        if ($this->authorizationMode() === 'simple' && $abilities === [] && ! $hasPolicy) {
+            return true;
+        }
+
+        foreach ($abilities as $ability) {
             if (! Gate::check((string) $ability, $subject)) {
                 return false;
             }
         }
 
-        if (isset($authorization['policy'], $authorization['policy_method']) && $this->isAuthenticated()) {
+        if ($hasPolicy && $this->isAuthenticated()) {
             $user = $this->auth->user();
 
             if ($user === null || ! Gate::forUser($user)->allows((string) $authorization['policy_method'], $subject)) {
@@ -137,5 +144,12 @@ class LaravelAuthorizationService implements AuthorizationService
         }
 
         return true;
+    }
+
+    protected function authorizationMode(): string
+    {
+        $mode = (string) $this->config->get('limen-ai.authorization.mode', 'simple');
+
+        return in_array($mode, ['simple', 'gates'], true) ? $mode : 'simple';
     }
 }

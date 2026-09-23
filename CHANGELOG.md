@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-09-23
+
+### Added
+
+- **Black-box authorization mode** (`LIMEN_AI_AUTHORIZATION_MODE=simple`, default) — no Laravel Gates required for empty `authorization.abilities`
+- `AuthorizableTool` contract and `BaseTool` host base class with `authorize($input, $context): bool` — return `false` to block execution
+- `ToolInstanceAuthorizer` runs before tool `handle()` in the pipeline
+- [docs/black-box-host-guide.md](docs/black-box-host-guide.md) — env + tool-only setup for host developers
+- `LIMEN_AI_REQUIRE_AUTH` env (default `false`) for agent auth requirement
+
 ## [1.0.3] - 2026-09-23
 
 ### Added

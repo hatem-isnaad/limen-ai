@@ -27,6 +27,7 @@ class ToolPipeline
         private readonly ToolRepository $tools,
         private readonly AuthorizationService $authorization,
         private readonly ToolInputValidator $validator,
+        private readonly ToolInstanceAuthorizer $toolAuthorizer,
         private readonly ToolExecutor $executor,
         private readonly IdempotencyGuard $idempotency,
         private readonly AuditLogger $audit,
@@ -51,6 +52,8 @@ class ToolPipeline
         $this->authorization->authorizeTool($tool);
 
         $validatedInput = $this->validator->validate($tool, $input);
+
+        $this->toolAuthorizer->authorize($tool, $validatedInput, $context);
 
         if ($tool->requiresConfirmation() && ! ($context->metadata()['approval_granted'] ?? false)) {
             throw ApprovalRequiredException::forTool($tool, $validatedInput, $context);

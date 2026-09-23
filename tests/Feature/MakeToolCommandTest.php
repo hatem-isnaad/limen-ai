@@ -23,7 +23,8 @@ class MakeToolCommandTest extends TestCase
         $file = $path.'/FetchStatusTool.php';
 
         $this->assertFileExists($file);
-        $this->assertStringContainsString('class FetchStatusTool implements Tool', file_get_contents($file));
+        $this->assertStringContainsString('class FetchStatusTool extends BaseTool', file_get_contents($file));
+        $this->assertStringContainsString('function authorize(', file_get_contents($file));
         $this->assertStringContainsString("return 'fetch_status';", file_get_contents($file));
     }
 }

@@ -15,6 +15,7 @@ Package documentation is organized by topic. Start with the [interactive hub](in
 | Document | Description |
 |----------|-------------|
 | [installation.md](installation.md) | **Install the package** — Packagist, path repo, VCS, private registry, monorepo |
+| [black-box-host-guide.md](black-box-host-guide.md) | **Black-box install** — env + tools only, no Gates |
 | [host-quickstart.md](host-quickstart.md) | **15-minute path** — install → agent → tool → widget |
 | [scaling-agents-and-tools.md](scaling-agents-and-tools.md) | Multi-agent layout, tool limits, when to split |
 | [HOST-INTEGRATION-AUDIT.md](HOST-INTEGRATION-AUDIT.md) | Host integration quality audit (maintainers) |
