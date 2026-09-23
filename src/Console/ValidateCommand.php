@@ -4,6 +4,7 @@ namespace LimenAi\Console;
 
 use Illuminate\Console\Command;
 use LimenAi\Agents\AgentValidator;
+use LimenAi\Integrations\HttpIntegrationValidator;
 use LimenAi\Workflows\WorkflowValidator;
 
 class ValidateCommand extends Command
@@ -12,13 +13,20 @@ class ValidateCommand extends Command
 
     protected $description = 'Validate Limen AI agent, tool, and skill configuration';
 
-    public function handle(AgentValidator $validator, WorkflowValidator $workflows): int
-    {
+    public function handle(
+        AgentValidator $validator,
+        WorkflowValidator $workflows,
+        HttpIntegrationValidator $integrations,
+    ): int {
         $agentKey = $this->argument('agent');
 
         $errors = $agentKey
             ? $validator->validate((string) $agentKey)
-            : array_merge($validator->validateAll(), $workflows->validateAll());
+            : array_merge(
+                $validator->validateAll(),
+                $workflows->validateAll(),
+                $integrations->validateAll(),
+            );
 
         if ($errors === []) {
             $this->components->info($agentKey
