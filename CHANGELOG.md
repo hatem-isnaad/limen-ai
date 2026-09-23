@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CI: run tests on `main` pushes; release workflow is manual `workflow_dispatch` only
+- Release script now publishes `composer.json` version instead of auto-bumping from stray tags
+
 ## [1.0.5] - 2026-09-23
 
 ### Fixed

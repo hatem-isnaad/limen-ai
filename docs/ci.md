@@ -4,13 +4,13 @@ This document describes the continuous integration setup for the package and the
 
 ## Branch gate
 
-CI runs **only on the `stg` branch** (push and pull requests targeting `stg`). See [branching.md](branching.md).
+CI runs on **`main` and `stg`** (push and pull requests targeting either branch). See [branching.md](branching.md).
 
 | Event | Branch | CI |
 |-------|--------|-----|
-| Push | `stg` | Yes |
-| Pull request | → `stg` | Yes |
-| Push | `main`, `cursor/**`, features | No |
+| Push | `main`, `stg` | Yes |
+| Pull request | → `main`, → `stg` | Yes |
+| Push | `cursor/**`, feature branches | No (open a PR) |
 
 Validate on `stg` before merging to `main` for go-live.
 
@@ -23,8 +23,8 @@ GitHub Actions workflow: [`.github/workflows/tests.yml`](../.github/workflows/te
 | Dimension | Values |
 |-----------|--------|
 | PHP | 8.2, 8.3 |
-| Laravel | 11.x, 12.x |
-| Testbench | ^9.0 (L11), ^10.0 (L12) |
+| Laravel | 11.x, 12.x, 13.x |
+| Testbench | ^9.0 (L11), ^10.0 (L12), ^11.0 (L13) |
 
 Each matrix cell runs:
 
@@ -36,7 +36,7 @@ After the matrix completes, a **release-gate** job runs `composer test:release` 
 
 The PHP 8.3 / Laravel 12 cell optionally emits Clover coverage for downstream reporting.
 
-Manual release validation (optional, before tagging on `main`): [`.github/workflows/release.yml`](../.github/workflows/release.yml) via `workflow_dispatch`.
+Release publishing is **manual** via [`.github/workflows/release.yml`](../.github/workflows/release.yml) (`workflow_dispatch`). Bump `composer.json` + `CHANGELOG.md`, then run the workflow. It publishes the `composer.json` version — it does not auto-increment from stray tags.
 
 ## Local Commands
 

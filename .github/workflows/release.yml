@@ -1,9 +1,13 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      force:
+        description: Publish even when no conventional commits since the last tag
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -53,6 +57,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_RELEASE: ${{ inputs.force }}
         run: |
           chmod +x .github/scripts/create-release.sh
           .github/scripts/create-release.sh

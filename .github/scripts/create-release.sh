@@ -2,6 +2,20 @@
 set -euo pipefail
 
 OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
+FORCE="${FORCE_RELEASE:-false}"
+
+read_composer_version() {
+  python3 - <<'PY'
+import json
+import pathlib
+
+composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
+version = composer.get("version")
+if not isinstance(version, str) or not version:
+    raise SystemExit("composer.json is missing a string version field")
+print(version)
+PY
+}
 
 collect_commit_subjects() {
   local range="${1:-}"
@@ -21,10 +35,21 @@ collect_commit_subjects() {
 
 git fetch --tags --force || echo "Warning: unable to fetch tags; using local tag refs"
 
-LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
-echo "Latest release tag: ${LAST_TAG:-<none>}"
-if [[ -n "$LAST_TAG" ]]; then
-  RANGE="${LAST_TAG}..HEAD"
+VERSION="$(read_composer_version)"
+TAG="v${VERSION}"
+DATE="$(date -u +%Y-%m-%d)"
+
+echo "Target release from composer.json: ${TAG}"
+
+if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null 2>&1 || gh release view "$TAG" >/dev/null 2>&1; then
+  echo "Release tag ${TAG} already exists; skipping publish"
+  echo "published=false" >> "$OUTPUT"
+  exit 0
+fi
+
+PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+if [[ -n "$PREV_TAG" ]]; then
+  RANGE="${PREV_TAG}..HEAD"
   collect_commit_subjects "${RANGE}"
 else
   RANGE=""
@@ -41,72 +66,17 @@ RE_FEAT='^feat(\([^)]+\))?:'
 RE_PATCH='^(fix|perf|revert|refactor|build)(\([^)]+\))?:'
 RE_NOTES='^- (feat|fix|perf|revert|refactor|build)(\([^)]+\))?:'
 
-BUMP="none"
+RELEASABLE=false
 for subject in "${SUBJECTS[@]}"; do
-  commit_prefix="${subject%%:*}"
-
-  if [[ "$subject" == *"BREAKING CHANGE"* ]] || [[ "$commit_prefix" == *"!" ]]; then
-    BUMP="major"
+  if [[ "$subject" =~ $RE_FEAT ]] || [[ "$subject" =~ $RE_PATCH ]]; then
+    RELEASABLE=true
     break
-  fi
-
-  if [[ "$subject" =~ $RE_FEAT ]]; then
-    if [[ "$BUMP" != "major" ]]; then
-      BUMP="minor"
-    fi
-    continue
-  fi
-
-  if [[ "$subject" =~ $RE_PATCH ]]; then
-    if [[ "$BUMP" == "none" ]]; then
-      BUMP="patch"
-    fi
   fi
 done
 
-if [[ "$BUMP" == "none" ]]; then
-  echo "No releasable conventional commits since ${LAST_TAG:-<first release>}"
+if [[ "$RELEASABLE" != "true" && "$FORCE" != "true" ]]; then
+  echo "No releasable conventional commits since ${PREV_TAG:-<first release>}"
   echo "Analyzed ${#SUBJECTS[@]} commit subject(s)"
-  echo "published=false" >> "$OUTPUT"
-  exit 0
-fi
-
-echo "Release bump: ${BUMP}"
-
-if [[ -n "$LAST_TAG" ]]; then
-  CURRENT="${LAST_TAG#v}"
-  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-  case "$BUMP" in
-    major)
-      MAJOR=$((MAJOR + 1))
-      MINOR=0
-      PATCH=0
-      ;;
-    minor)
-      MINOR=$((MINOR + 1))
-      PATCH=0
-      ;;
-    patch)
-      PATCH=$((PATCH + 1))
-      ;;
-  esac
-
-  VERSION="${MAJOR}.${MINOR}.${PATCH}"
-else
-  VERSION="$(python3 - <<'PY'
-import json
-import pathlib
-
-composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
-print(composer.get("version", "0.0.0"))
-PY
-)"
-fi
-TAG="v${VERSION}"
-DATE="$(date -u +%Y-%m-%d)"
-
-if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null || gh release view "$TAG" >/dev/null 2>&1; then
-  echo "Release tag ${TAG} already exists; skipping publish"
   echo "published=false" >> "$OUTPUT"
   exit 0
 fi
@@ -130,7 +100,7 @@ if [[ ! -s "$NOTES_FILE" ]]; then
   fi
 fi
 
-echo "Creating GitHub release ${TAG} (${BUMP} bump)"
+echo "Creating GitHub release ${TAG}"
 gh release create "$TAG" \
   --title "Limen AI ${TAG}" \
   --notes-file "$NOTES_FILE" \
@@ -160,12 +130,6 @@ section_lines.extend(f"- {line}" for line in bullet_lines)
 section_lines.append("")
 
 content = changelog_path.read_text(encoding="utf-8")
-content = re.sub(
-    r"## \[Unreleased\]\n\n### Added\n\n",
-    "## [Unreleased]\n\n### Added\n\n",
-    content,
-    count=1,
-)
 marker = "## [Unreleased]"
 if marker not in content:
     raise SystemExit("CHANGELOG.md is missing an [Unreleased] section")
