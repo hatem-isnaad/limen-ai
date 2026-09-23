@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 10 — Memory**
+**Phase 11 — Knowledge / RAG**
 
 ## Phase 01 Scope
 
@@ -150,8 +150,17 @@ At the end of each phase:
 6. Tool pipeline bypass for `approval_granted` metadata on resume
 7. Database and run-state feature tests
 
-## Next Implementation Tasks (Phase 10)
+## Phase 10 Completed
 
-1. Scoped memory store contract and in-memory driver
-2. User/conversation memory retrieval hooks
-3. Memory feature tests
+1. `MemoryStore` contract with `InMemoryMemoryStore` and `DatabaseMemoryStore`
+2. `DefaultMemoryRetriever` with user/conversation/agent scope support
+3. `MemoryService` helper for host apps
+4. Runtime memory injection before conversation history
+5. Migration for `limen_ai_memories`
+6. Unit, integration, database, and feature memory tests
+
+## Next Implementation Tasks (Phase 11)
+
+1. Knowledge collection repository skeleton
+2. Null/placeholder vector retrieval hook
+3. Knowledge retrieval integration into runtime

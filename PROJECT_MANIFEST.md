@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 10 — Memory**
+Current: **Phase 11 — Knowledge / RAG**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -167,3 +167,13 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Runtime methods | `resume()`, `cancel()`, `reject()` |
 | Events | `ApprovalRequested`, `ApprovalGranted`, `ApprovalRejected` |
 | Migrations | `limen_ai_runs`, `limen_ai_run_checkpoints`, `limen_ai_approvals` |
+
+## Phase 10 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Memory store | `InMemoryMemoryStore`, `DatabaseMemoryStore` |
+| Memory retriever | `DefaultMemoryRetriever` |
+| Memory service | `MemoryService` |
+| Formatter | `MemoryFormatter` |
+| Migration | `limen_ai_memories` |
