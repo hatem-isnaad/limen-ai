@@ -77,6 +77,39 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 01**
+Current: **Phase 05 — Tool System**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
+
+## Phase 02 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Agent DTO | `ConfigAgentDefinition` |
+| Tool DTO | `ConfigToolDefinition` |
+| Skill DTO | `ConfigSkillDefinition` |
+| Workflow DTO | `ConfigWorkflowDefinition` |
+| Repositories | Config-backed, read-only |
+| Run context | `RunContextData` |
+
+## Phase 03 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| LLM manager | `LlmProviderManager` |
+| Embedding manager | `EmbeddingProviderManager` |
+| Fake LLM | `FakeLlmProvider` |
+| Fake embeddings | `FakeEmbeddingProvider` |
+| OpenAI adapter | `OpenAiProvider` |
+| LLM response DTO | `LlmResponseData` |
+
+## Phase 04 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Agent resolver | `DefaultAgentResolver` |
+| Resolved agent | `ResolvedAgent` |
+| Instruction composer | `InstructionComposer` |
+| Tool schema builder | `ToolSchemaBuilder` |
+| Agent validator | `AgentValidator` |
+| Validate command | `limen-ai:validate` |

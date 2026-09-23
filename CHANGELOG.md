@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 04 agent resolution with `DefaultAgentResolver`, `ResolvedAgent`, and `InstructionComposer`
+- `ToolSchemaBuilder` for LLM function calling schemas
+- `AgentValidator` and `limen-ai:validate` Artisan command
+- Agent resolution, validation, and feature tests
+
+### Added (Phase 03)
+
+- Phase 03 provider system with `LlmProviderManager` and `EmbeddingProviderManager`
+- `FakeLlmProvider`, `FakeEmbeddingProvider`, and `OpenAiProvider` skeleton
+- `LlmResponseData` value object and provider exceptions
+- Provider unit, integration, and architecture tests
+
+### Added (Phase 02)
+
+- Phase 02 config-backed DTOs and repositories for agents, tools, skills, workflows, and knowledge
+- `RunContextData` execution context value object
+- Service provider bindings for all definition repositories
+- Example skill (`general_assistance`) and knowledge collection (`getting_started`)
+- Repository unit, integration, and architecture tests
+
+### Added (Phase 01)
+
 - Initial repository bootstrap
 - Master specification and architecture documentation
 - Phase 01 contract interfaces (skeleton)
