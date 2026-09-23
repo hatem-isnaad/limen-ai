@@ -6,16 +6,6 @@ use LimenAi\Contracts\Agents\AgentDefinition;
 
 final class ConfigAgentDefinition implements AgentDefinition
 {
-    /**
-     * @param  list<string>  $skills
-     * @param  list<string>  $tools
-     * @param  list<string>  $knowledge
-     * @param  array<string, mixed>  $memoryConfig
-     * @param  array<string, mixed>  $personaConfig
-     * @param  array<string, mixed>  $authorizationConfig
-     * @param  array<string, mixed>  $outputConfig
-     * @param  array<string, mixed>  $limits
-     */
     public function __construct(
         private readonly string $key,
         private readonly string $name,
@@ -34,9 +24,6 @@ final class ConfigAgentDefinition implements AgentDefinition
         private readonly string $version,
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $config
-     */
     public static function fromConfig(string $key, array $config): self
     {
         return new self(
@@ -58,78 +45,19 @@ final class ConfigAgentDefinition implements AgentDefinition
         );
     }
 
-    public function key(): string
-    {
-        return $this->key;
-    }
-
-    public function name(): string
-    {
-        return $this->name;
-    }
-
-    public function description(): ?string
-    {
-        return $this->description;
-    }
-
-    public function model(): string
-    {
-        return $this->model;
-    }
-
-    public function provider(): string
-    {
-        return $this->provider;
-    }
-
-    public function instructions(): string
-    {
-        return $this->instructions;
-    }
-
-    public function skills(): array
-    {
-        return $this->skills;
-    }
-
-    public function tools(): array
-    {
-        return $this->tools;
-    }
-
-    public function knowledge(): array
-    {
-        return $this->knowledge;
-    }
-
-    public function memoryConfig(): array
-    {
-        return $this->memoryConfig;
-    }
-
-    public function personaConfig(): array
-    {
-        return $this->personaConfig;
-    }
-
-    public function authorizationConfig(): array
-    {
-        return $this->authorizationConfig;
-    }
-
-    public function outputConfig(): array
-    {
-        return $this->outputConfig;
-    }
-
-    public function limits(): array
-    {
-        return $this->limits;
-    }
-
-    public function version(): string
-    {
-        return $this->version;
-    }
+    public function key(): string { return $this->key; }
+    public function name(): string { return $this->name; }
+    public function description(): ?string { return $this->description; }
+    public function model(): string { return $this->model; }
+    public function provider(): string { return $this->provider; }
+    public function instructions(): string { return $this->instructions; }
+    public function skills(): array { return $this->skills; }
+    public function tools(): array { return $this->tools; }
+    public function knowledge(): array { return $this->knowledge; }
+    public function memoryConfig(): array { return $this->memoryConfig; }
+    public function personaConfig(): array { return $this->personaConfig; }
+    public function authorizationConfig(): array { return $this->authorizationConfig; }
+    public function outputConfig(): array { return $this->outputConfig; }
+    public function limits(): array { return $this->limits; }
+    public function version(): string { return $this->version; }
 }
