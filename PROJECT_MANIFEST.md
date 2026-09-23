@@ -29,6 +29,7 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 | DECISIONS.md | Architectural decisions log |
 | SECURITY.md | Security model |
 | TESTING.md | Testing strategy |
+| docs/ci.md | CI matrix and merge gates |
 | CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 
@@ -77,7 +78,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 20 — Testing & Architecture Validation**
+Current: **Phase 21 — Limen Integration**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -277,3 +278,13 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Inspection | `ListCommand` (`limen-ai:list`) |
 | Stubs | `stubs/*.stub`, `StubGenerator` |
 | Publish tag | `limen-ai-stubs` |
+
+## Phase 20 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Module boundaries | `ModuleBoundaryTest`, `ScansPhpSources` |
+| Coverage gates | `CriticalCoverageGateTest` |
+| Security matrix | `SecurityCriticalMatrixTest` |
+| CI workflow | `.github/workflows/tests.yml` |
+| Docs | `docs/ci.md`, `composer test:gates` |
