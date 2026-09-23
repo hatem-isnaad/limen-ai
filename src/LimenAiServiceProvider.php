@@ -13,7 +13,10 @@ use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
 use LimenAi\Console\ValidateCommand;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Broadcast;
 use LimenAi\Broadcasting\AgentEventBroadcaster;
+use LimenAi\Http\Services\ConversationAccessGuard;
 use LimenAi\Broadcasting\NullBroadcaster;
 use LimenAi\Broadcasting\PusherBroadcaster;
 use LimenAi\Contracts\Agents\AgentRepository;
@@ -127,6 +130,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerSecurity();
         $this->registerQueue();
         $this->registerBroadcasting();
+        $this->registerUi();
     }
 
     public function boot(): void
@@ -147,6 +151,24 @@ class LimenAiServiceProvider extends ServiceProvider
 
         if ((bool) $this->app['config']->get('limen-ai.broadcasting.enabled', true)) {
             $this->app->make(AgentEventBroadcaster::class)->subscribe($this->app['events']);
+        }
+
+        if ((bool) $this->app['config']->get('limen-ai.ui.enabled', true)) {
+            $this->loadViewsFrom(__DIR__.'/../resources/views', 'limen-ai');
+            Blade::anonymousComponentPath(__DIR__.'/../resources/views/components', 'limen-ai');
+            $this->loadRoutesFrom(__DIR__.'/../routes/limen-ai.php');
+
+            if ($this->app->runningInConsole()) {
+                $this->publishes([
+                    __DIR__.'/../resources/views' => resource_path('views/vendor/limen-ai'),
+                    __DIR__.'/../resources/css' => public_path('vendor/limen-ai/css'),
+                    __DIR__.'/../resources/js' => public_path('vendor/limen-ai/js'),
+                ], 'limen-ai-ui');
+            }
+        }
+
+        if (class_exists(Broadcast::class) && Broadcast::getFacadeRoot() !== null) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
         }
     }
 
@@ -377,5 +399,10 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(AgentEventBroadcaster::class);
+    }
+
+    protected function registerUi(): void
+    {
+        $this->app->singleton(ConversationAccessGuard::class);
     }
 }
