@@ -33,9 +33,9 @@ return [
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
             'provider' => env('LIMEN_AI_PROVIDER', 'openai'),
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
-            'skills' => [],
+            'skills' => ['general_assistance'],
             'tools' => ['example_echo'],
-            'knowledge' => [],
+            'knowledge' => ['getting_started'],
             'memory' => [
                 'conversation' => true,
                 'user' => false,
@@ -74,13 +74,34 @@ return [
         ],
     ],
 
-    'skills' => [],
+    'skills' => [
+        'general_assistance' => [
+            'name' => 'General Assistance',
+            'instructions' => 'Provide helpful, concise responses.',
+            'tools' => ['example_echo'],
+            'knowledge' => [],
+            'version' => '1.0.0',
+        ],
+    ],
 
     'workflows' => [],
 
     'knowledge' => [
         'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'null'),
-        'collections' => [],
+        'collections' => [
+            'getting_started' => [
+                'name' => 'Getting Started',
+                'description' => 'Introductory knowledge for the example agent.',
+            ],
+        ],
+    ],
+
+    'repositories' => [
+        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
+        'tool' => LimenAi\Tools\ConfigToolRepository::class,
+        'skill' => LimenAi\Skills\ConfigSkillRepository::class,
+        'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
+        'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
     ],
 
     'memory' => [
