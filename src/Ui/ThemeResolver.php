@@ -10,6 +10,9 @@ class ThemeResolver
         private readonly ConfigRepository $config,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $overrides
+     */
     public function resolve(array $overrides = []): ResolvedTheme
     {
         $themeConfig = $this->config->get('limen-ai.ui.theme', []);
@@ -23,6 +26,10 @@ class ThemeResolver
         $reserved = ['preset', 'mode', 'overrides', 'allow_mode_toggle'];
         $configOverrides = array_diff_key($themeConfig, array_flip($reserved));
         $explicitOverrides = is_array($themeConfig['overrides'] ?? null) ? $themeConfig['overrides'] : [];
+
+        if ($preset !== 'default' && $presetTokens !== []) {
+            $configOverrides = array_diff_key($configOverrides, $presetTokens);
+        }
 
         $resolved = array_merge(
             $palette,

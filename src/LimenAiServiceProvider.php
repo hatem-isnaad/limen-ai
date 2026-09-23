@@ -258,9 +258,8 @@ class LimenAiServiceProvider extends ServiceProvider
 
     protected function registerRuntime(): void
     {
-        $runtime = $this->app['config']->get('limen-ai.runtime', []);
-
-        $this->app->singleton(RunRepository::class, function ($app) use ($runtime): RunRepository {
+        $this->app->singleton(RunRepository::class, function ($app): RunRepository {
+            $runtime = $app['config']->get('limen-ai.runtime', []);
             $implementation = $runtime['run_repository'] ?? InMemoryRunRepository::class;
 
             if ($implementation === DatabaseRunRepository::class) {
@@ -270,7 +269,8 @@ class LimenAiServiceProvider extends ServiceProvider
             return $app->make($implementation);
         });
 
-        $this->app->singleton(CheckpointStore::class, function ($app) use ($runtime): CheckpointStore {
+        $this->app->singleton(CheckpointStore::class, function ($app): CheckpointStore {
+            $runtime = $app['config']->get('limen-ai.runtime', []);
             $implementation = $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class;
 
             if ($implementation === DatabaseCheckpointStore::class) {
@@ -280,7 +280,8 @@ class LimenAiServiceProvider extends ServiceProvider
             return $app->make($implementation);
         });
 
-        $this->app->singleton(ApprovalRepository::class, function ($app) use ($runtime): ApprovalRepository {
+        $this->app->singleton(ApprovalRepository::class, function ($app): ApprovalRepository {
+            $runtime = $app['config']->get('limen-ai.runtime', []);
             $implementation = $runtime['approval_repository'] ?? InMemoryApprovalRepository::class;
 
             if ($implementation === DatabaseApprovalRepository::class) {
@@ -327,9 +328,8 @@ class LimenAiServiceProvider extends ServiceProvider
 
     protected function registerMemory(): void
     {
-        $memory = $this->app['config']->get('limen-ai.memory', []);
-
-        $this->app->singleton(MemoryStore::class, function ($app) use ($memory): MemoryStore {
+        $this->app->singleton(MemoryStore::class, function ($app): MemoryStore {
+            $memory = $app['config']->get('limen-ai.memory', []);
             $implementation = $memory['store'] ?? InMemoryMemoryStore::class;
 
             if ($implementation === DatabaseMemoryStore::class) {
@@ -341,17 +341,20 @@ class LimenAiServiceProvider extends ServiceProvider
 
         $this->app->singleton(MemoryFormatter::class);
         $this->app->singleton(StrictMemoryPolicy::class);
-        $this->app->singleton(MemoryRetriever::class, $memory['retriever'] ?? DefaultMemoryRetriever::class);
+        $this->app->singleton(MemoryRetriever::class, function ($app): MemoryRetriever {
+            $memory = $app['config']->get('limen-ai.memory', []);
+
+            return $app->make($memory['retriever'] ?? DefaultMemoryRetriever::class);
+        });
         $this->app->singleton(MemoryService::class);
     }
 
     protected function registerKnowledge(): void
     {
-        $knowledge = $this->app['config']->get('limen-ai.knowledge', []);
-
         $this->app->singleton(KnowledgeFormatter::class);
 
-        $this->app->singleton(VectorStore::class, function ($app) use ($knowledge): VectorStore {
+        $this->app->singleton(VectorStore::class, function ($app): VectorStore {
+            $knowledge = $app['config']->get('limen-ai.knowledge', []);
             $driver = $knowledge['driver'] ?? 'null';
 
             if ($driver === 'vector') {
@@ -361,7 +364,9 @@ class LimenAiServiceProvider extends ServiceProvider
             return new NullVectorStore();
         });
 
-        $this->app->singleton(KnowledgeRetriever::class, function ($app) use ($knowledge): KnowledgeRetriever {
+        $this->app->singleton(KnowledgeRetriever::class, function ($app): KnowledgeRetriever {
+            $knowledge = $app['config']->get('limen-ai.knowledge', []);
+
             if (isset($knowledge['retriever'])) {
                 return $app->make($knowledge['retriever']);
             }
