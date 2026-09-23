@@ -10,22 +10,38 @@
 
 ---
 
-## Documentation hub
+## Documentation
 
-**Start here:** [docs/index.html](docs/index.html) — full interactive documentation with architecture diagrams, configuration reference, HTTP API, use cases, and copy-paste examples.
-
-Open it locally after cloning:
+| Resource | Description |
+|----------|-------------|
+| [docs/installation.md](docs/installation.md) | **Install guide** — Packagist, VCS, path repo, private registry, monorepo |
+| [docs/index.html](docs/index.html) | Interactive documentation hub |
+| [docs/README.md](docs/README.md) | Full markdown documentation index |
 
 ```bash
-# macOS / Linux
 open docs/index.html
-
-# or serve with any static file server
-php -S localhost:8080 -t docs
-# then visit http://localhost:8080/index.html
+# or: php -S localhost:8080 -t docs
 ```
 
-On GitHub, browse [docs/index.html](docs/index.html) and use **Raw** or clone the repo to view the rendered page in your browser.
+---
+
+## Package structure
+
+```
+limen-ai/
+├── config/limen-ai.php       # Default configuration
+├── database/migrations/      # Optional persistence tables
+├── docs/                     # All documentation
+├── routes/limen-ai.php       # HTTP API routes
+├── src/                      # Package source (LimenAi\ namespace)
+├── resources/                # Blade views, CSS, JS
+├── stubs/                    # Generator stubs + env template
+├── tests/                    # Package test suite
+├── examples/                 # Host app integration examples
+├── README.md                 # This file
+├── CHANGELOG.md
+└── SECURITY.md
+```
 
 ---
 
@@ -67,54 +83,77 @@ User identity, permissions, data scoping, and side effects never come from model
 
 ## Installation
 
-### 1. Require the package
+Install into an **existing Laravel 11 or 12 app**. You do not need Packagist — pick any method below.
+
+**Full guide:** [docs/installation.md](docs/installation.md)
+
+### Option A — Packagist (production)
 
 ```bash
 composer require limen-ai/limen-ai
+php artisan limen-ai:install
+php artisan migrate
+php artisan limen-ai:doctor
 ```
 
-### 2. Publish configuration and assets
+### Option B — Git repository (no Packagist)
 
-```bash
-php artisan vendor:publish --tag=limen-ai-config
-php artisan vendor:publish --tag=limen-ai-views
-php artisan vendor:publish --tag=limen-ai-assets
-php artisan vendor:publish --tag=limen-ai-migrations
-php artisan vendor:publish --tag=limen-ai-env   # .env.limen-ai.example — all config keys
+Add to your host app `composer.json`:
+
+```json
+{
+    "repositories": [
+        { "type": "vcs", "url": "https://github.com/hatem-isnaad/limen-ai.git" }
+    ],
+    "require": { "limen-ai/limen-ai": "^1.0" }
+}
 ```
 
-Or run the all-in-one installer:
-
 ```bash
+composer update limen-ai/limen-ai
 php artisan limen-ai:install
 ```
 
-### 3. Migrate and validate
+### Option C — Local path (development)
+
+Clone next to your Laravel app and symlink via Composer:
+
+```json
+{
+    "repositories": [
+        { "type": "path", "url": "../limen-ai", "options": { "symlink": true } }
+    ],
+    "require": { "limen-ai/limen-ai": "@dev" }
+}
+```
+
+### Option D — Private Composer registry
+
+Point at your Satis or private Packagist URL — see [docs/installation.md](docs/installation.md#method-4--private-composer-registry).
+
+### Post-install (all methods)
 
 ```bash
+php artisan limen-ai:install          # config, env template, views, stubs
 php artisan migrate
 php artisan limen-ai:doctor
 php artisan limen-ai:validate
 ```
 
-### 4. Configure environment
-
-Add to your `.env` (use `fake` locally — no API keys needed):
+Copy environment keys from `.env.limen-ai.example` (published) or [`.env.example`](.env.example):
 
 ```env
 LIMEN_AI_DEFAULT_AGENT=example
 LIMEN_AI_PROVIDER=fake
 
-# Production — pick one provider and set its key:
+# Production:
 # LIMEN_AI_PROVIDER=openai
 # OPENAI_API_KEY=sk-...
 
-# Optional — queue long runs and enable realtime UI updates:
-# LIMEN_AI_QUEUE_AGENT_RUNS=true
-# LIMEN_AI_BROADCASTING_ENABLED=true
+# Attachments, queue, broadcasting — see .env.example for all keys
 ```
 
-See [docs/providers.md](docs/providers.md) for OpenAI, Anthropic, Gemini, and OpenRouter setup.
+Provider setup: [docs/providers.md](docs/providers.md)
 
 ---
 
@@ -219,7 +258,7 @@ Final response → persist → broadcast (optional)
 
 **Your app owns:** Eloquent models, business rules, policies, and tool implementations under `App\LimenAi\`.
 
-Full architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
+Full architecture: [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)
 
 ---
 
@@ -379,7 +418,7 @@ $fake->queueResponse(LlmResponseData::fromArray([
 ]));
 ```
 
-CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) · [TESTING.md](TESTING.md)
+CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) · [docs/development/TESTING.md](docs/development/TESTING.md)
 
 ---
 
@@ -387,15 +426,16 @@ CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) �
 
 | Document | Description |
 |----------|-------------|
-| **[docs/index.html](docs/index.html)** | **Interactive documentation hub (start here)** |
-| [AI_SPEC.md](AI_SPEC.md) | Master specification |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture and module map |
+| **[docs/installation.md](docs/installation.md)** | **Install via Packagist, VCS, path repo, or private registry** |
+| [docs/index.html](docs/index.html) | Interactive documentation hub |
+| [docs/README.md](docs/README.md) | Full markdown documentation index |
+| [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | System architecture and module map |
+| [docs/project/AI_SPEC.md](docs/project/AI_SPEC.md) | Master specification |
 | [SECURITY.md](SECURITY.md) | Threat model and security controls |
-| [TESTING.md](TESTING.md) | Test strategy and patterns |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 | [docs/providers.md](docs/providers.md) | LLM and embedding providers |
 | [docs/agent-configuration.md](docs/agent-configuration.md) | Persona, tone, language, memory, and quality |
-| [docs/release.md](docs/release.md) | Install, publish, and release guide |
+| [docs/release.md](docs/release.md) | Publish and release workflow |
 | [docs/limen-integration.md](docs/limen-integration.md) | Limen 3PL host integration demo |
 | [docs/theming.md](docs/theming.md) | Chat UI themes and RTL support |
 | [docs/observability.md](docs/observability.md) | Traces, audit logs, usage metrics |
@@ -420,13 +460,16 @@ Guide: [docs/limen-integration.md](docs/limen-integration.md)
 
 ## Development
 
+Work on the package itself (not a host app):
+
 ```bash
 git clone https://github.com/hatem-isnaad/limen-ai.git
 cd limen-ai
 composer install
-composer test
-composer test:gates
+composer test:release
 ```
+
+Link into a Laravel app for integration testing — see [docs/installation.md](docs/installation.md#method-3--path-repository-local-development).
 
 **Branch flow:** feature branch → **`stg`** (CI runs full test matrix) → **`main`** (production release).
 

@@ -530,21 +530,28 @@
 
         <section id="installation">
           <h2 class="section-title">Installation</h2>
-          <p class="section-desc">Complete setup from zero to a working agent in your Laravel application.</p>
+          <p class="section-desc">Install into an existing Laravel 11 or 12 app. <strong>Packagist is optional</strong> — see <a href="installation.md">installation.md</a> for VCS, path repo, private registry, and monorepo methods.</p>
 
           <h3>1. Require the package</h3>
           <div class="code-block" data-lang="Shell">
             <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">composer require limen-ai/limen-ai</code></pre>
+            <pre><code class="language-bash"># Packagist
+composer require limen-ai/limen-ai
+
+# Or VCS (add repository to composer.json first)
+composer update limen-ai/limen-ai
+
+# Or local path repo for development
+# See installation.md</code></pre>
           </div>
 
           <h3>2. Publish assets</h3>
           <div class="code-block" data-lang="Shell">
             <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">php artisan vendor:publish --tag=limen-ai-config
-php artisan vendor:publish --tag=limen-ai-views
-php artisan vendor:publish --tag=limen-ai-assets
-php artisan vendor:publish --tag=limen-ai-migrations</code></pre>
+            <pre><code class="language-bash">php artisan limen-ai:install
+# Or publish individually:
+# php artisan vendor:publish --tag=limen-ai-config
+# php artisan vendor:publish --tag=limen-ai-env</code></pre>
           </div>
 
           <h3>3. Run migrations &amp; validate</h3>
@@ -568,6 +575,8 @@ php artisan limen-ai:validate</code></pre>
                 <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter API key</td></tr>
                 <tr><td><code>LIMEN_AI_QUEUE_AGENT_RUNS</code></td><td>Dispatch long runs to queue</td></tr>
                 <tr><td><code>LIMEN_AI_BROADCASTING_ENABLED</code></td><td>Enable realtime chat updates</td></tr>
+                <tr><td><code>LIMEN_AI_ATTACHMENTS_ENABLED</code></td><td>Enable file upload and attachment injection</td></tr>
+                <tr><td><code>LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB</code></td><td>Max upload size per file</td></tr>
               </tbody>
             </table>
           </div>
@@ -878,7 +887,7 @@ LIMEN_AI_BROADCAST_DRIVER=pusher</code></pre>
     ↓ Tool authorization + validation
     ↓ Approval gate for sensitive tools
     ↓ SSRF-safe HTTP + audit log</div>
-          <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model.</p>
+          <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model. Install guide: <a href="installation.md">installation.md</a>.</p>
         </section>
 
         <section id="observability">
@@ -969,7 +978,7 @@ $fake->queueResponse(LlmResponseData::fromArray([
 composer test:gates
 composer test:release</code></pre>
           </div>
-          <p>Details: <a href="../TESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
+          <p>Details: <a href="development/TESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
         </section>
 
         <section id="releases">
@@ -989,7 +998,7 @@ composer test:release</code></pre>
 
         <footer>
           <p><strong>Limen AI</strong> · MIT License · <a href="https://github.com/hatem-isnaad/limen-ai">github.com/hatem-isnaad/limen-ai</a></p>
-          <p><a href="../ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="../AI_SPEC.md">AI_SPEC.md</a> · <a href="providers.md">providers.md</a></p>
+          <p><a href="architecture/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="project/AI_SPEC.md">AI_SPEC.md</a> · <a href="installation.md">installation.md</a> · <a href="providers.md">providers.md</a></p>
         </footer>
       </div>
     </main>

@@ -77,7 +77,7 @@ These suites **must pass** before merging `stg` → `main`:
 | Observability | ✓ | ✓ | ✓ | ✓ | — |
 | Developer CLI | ✓ | — | ✓ | — | — |
 
-See [TESTING.md](../TESTING.md) for scenario-level detail.
+See [TESTING.md](development/TESTING.md) for scenario-level detail.
 
 ## Coverage Recommendations
 

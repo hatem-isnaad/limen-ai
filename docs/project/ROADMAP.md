@@ -63,7 +63,7 @@ Minimum for internal testing:
 
 Phase order may change only after updating:
 
-- ARCHITECTURE.md
-- DECISIONS.md
-- ROADMAP.md
-- STATUS.md
+- docs/architecture/ARCHITECTURE.md
+- docs/architecture/DECISIONS.md
+- docs/project/ROADMAP.md
+- docs/project/STATUS.md

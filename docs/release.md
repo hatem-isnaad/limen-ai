@@ -11,33 +11,25 @@ This document describes how to install, publish, and release **Limen AI** v1.x.
 
 ## Installation
 
-```bash
-composer require limen-ai/limen-ai
-```
+See **[installation.md](installation.md)** for all install methods:
 
-Publish configuration and assets:
+- Packagist (`composer require`)
+- VCS / Git repository (no Packagist needed)
+- Path repository (local development symlink)
+- Private Composer registry (Satis, Artifact)
+- Monorepo layout
 
-```bash
-php artisan vendor:publish --tag=limen-ai-config
-php artisan vendor:publish --tag=limen-ai-env
-php artisan vendor:publish --tag=limen-ai-views
-php artisan vendor:publish --tag=limen-ai-assets
-```
-
-Copy the variables you need from `.env.limen-ai.example` into your host app `.env`. Example agents for each LLM provider (`example_openai`, `example_anthropic`, etc.) are defined in the published config.
-
-Run migrations:
+Quick start:
 
 ```bash
+composer require limen-ai/limen-ai   # or use VCS/path repo — see installation.md
+php artisan limen-ai:install
 php artisan migrate
-```
-
-Validate the environment:
-
-```bash
 php artisan limen-ai:doctor
 php artisan limen-ai:validate
 ```
+
+Copy environment keys from `.env.limen-ai.example` (published) or [`.env.example`](../.env.example).
 
 ## Host app integration
 
@@ -109,5 +101,5 @@ The optional `.github/workflows/release.yml` workflow validates tags and runs th
 
 ## Support
 
-- Documentation index: [PROJECT_MANIFEST.md](../PROJECT_MANIFEST.md)
+- Documentation index: [PROJECT_MANIFEST.md](project/PROJECT_MANIFEST.md)
 - Issues: https://github.com/hatem-isnaad/limen-ai/issues

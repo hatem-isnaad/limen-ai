@@ -53,12 +53,12 @@ These rules are enforced by code review, documentation, and automated architectu
 ## Documentation Rules
 
 1. Every subsystem **must** have examples before being marked complete.
-2. Deferred work **must** be recorded in STATUS.md and IMPLEMENTATION.md.
-3. Architectural changes **must** be recorded in DECISIONS.md.
+2. Deferred work **must** be recorded in `docs/project/STATUS.md` and `docs/project/IMPLEMENTATION.md`.
+3. Architectural changes **must** be recorded in `docs/architecture/DECISIONS.md`.
 
 ## AI Agent Implementation Rules
 
-1. Read AI_SPEC.md and ARCHITECTURE.md before coding.
+1. Read `docs/project/AI_SPEC.md` and `docs/architecture/ARCHITECTURE.md` before coding.
 2. Work one phase at a time.
 3. Never mark incomplete work as complete.
-4. Update STATUS.md, PROJECT_MANIFEST.md, IMPLEMENTATION.md, and CHANGELOG.md after each phase.
+4. Update `docs/project/STATUS.md`, `docs/project/PROJECT_MANIFEST.md`, `docs/project/IMPLEMENTATION.md`, and `CHANGELOG.md` after each phase.

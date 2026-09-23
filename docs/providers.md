@@ -146,4 +146,4 @@ These are architectural preparations, not incomplete v1 features:
 | Attachment RAG pipeline | Enabled when `knowledge.driver=vector` and `attachments.rag.enabled=true` |
 | OpenTelemetry export | Observability hooks exist; exporter deferred |
 
-See [IMPLEMENTATION.md](../IMPLEMENTATION.md) for the full deferral list.
+See [IMPLEMENTATION.md](project/IMPLEMENTATION.md) for the full deferral list.

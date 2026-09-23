@@ -62,9 +62,9 @@ Exact paths configurable via `config/limen-ai.php`.
 
 At the end of each phase:
 
-1. Update STATUS.md
-2. Update PROJECT_MANIFEST.md
-3. Update AI_SPEC.md checklist
+1. Update docs/project/STATUS.md
+2. Update docs/project/PROJECT_MANIFEST.md
+3. Update docs/project/AI_SPEC.md checklist
 4. Update CHANGELOG.md
 5. Run tests + architecture validation
 6. Record deferred items explicitly
@@ -261,7 +261,7 @@ See [docs/providers.md](docs/providers.md).
 2. `CriticalCoverageGateTest` mapping security-critical classes to required tests
 3. `SecurityCriticalMatrixTest` smoke suite for SSRF, sanitization, and redaction
 4. GitHub Actions workflow (`.github/workflows/tests.yml`) with PHP/Laravel matrix
-5. `docs/ci.md`, updated `TESTING.md`, and `composer test:gates` scripts
+5. `docs/ci.md`, updated `docs/development/TESTING.md`, and `composer test:gates` scripts
 
 ## Phase 21 Completed
 

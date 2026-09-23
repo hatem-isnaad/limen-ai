@@ -20,22 +20,24 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 
 | File | Purpose |
 |------|---------|
-| AI_SPEC.md | Master product specification |
-| ARCHITECTURE.md | Architecture proposal |
-| ARCHITECTURE_RULES.md | Enforced boundaries |
-| ROADMAP.md | Phase plan |
-| IMPLEMENTATION.md | Build guide |
-| STATUS.md | Current progress |
-| DECISIONS.md | Architectural decisions log |
-| SECURITY.md | Security model |
-| TESTING.md | Testing strategy |
-| docs/ci.md | CI matrix and merge gates |
-| docs/limen-integration.md | Limen 3PL host app integration |
-| docs/release.md | Install, publish, and release guide |
-| docs/performance.md | Caching and profiling notes |
-| docs/providers.md | LLM/embedding providers and per-agent models |
-| docs/agent-configuration.md | Persona, tone, language, memory, quality controls |
-| CHANGELOG.md | Version history |
+| [docs/README.md](../README.md) | Documentation hub (markdown index) |
+| [docs/installation.md](../installation.md) | Install via Packagist, VCS, path repo, private registry |
+| project/AI_SPEC.md | Master product specification |
+| architecture/ARCHITECTURE.md | Architecture proposal |
+| architecture/ARCHITECTURE_RULES.md | Enforced boundaries |
+| project/ROADMAP.md | Phase plan |
+| project/IMPLEMENTATION.md | Build guide |
+| project/STATUS.md | Current progress |
+| architecture/DECISIONS.md | Architectural decisions log |
+| ../SECURITY.md | Security model |
+| development/TESTING.md | Testing strategy |
+| ci.md | CI matrix and merge gates |
+| limen-integration.md | Limen 3PL host app integration |
+| release.md | Publish and release workflow |
+| performance.md | Caching and profiling notes |
+| providers.md | LLM/embedding providers and per-agent models |
+| agent-configuration.md | Persona, tone, language, memory, quality controls |
+| ../CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 
 ## Technical Docs

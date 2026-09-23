@@ -4,11 +4,11 @@ You are implementing **Limen AI**, a large Laravel AI Agent Framework package.
 
 ## Before Writing Code
 
-1. Read `AI_SPEC.md`
-2. Read `ARCHITECTURE.md` and `ARCHITECTURE_RULES.md`
-3. Check `DECISIONS.md` for accepted patterns
-4. Check `STATUS.md` and `ROADMAP.md` for current phase
-5. Check `IMPLEMENTATION.md` for phase scope
+1. Read `docs/project/AI_SPEC.md`
+2. Read `docs/architecture/ARCHITECTURE.md` and `docs/architecture/ARCHITECTURE_RULES.md`
+3. Check `docs/architecture/DECISIONS.md` for accepted patterns
+4. Check `docs/project/STATUS.md` and `docs/project/ROADMAP.md` for current phase
+5. Check `docs/project/IMPLEMENTATION.md` for phase scope
 
 ## Core Principle
 
@@ -16,9 +16,9 @@ The LLM proposes actions. Laravel decides and executes safely.
 
 ## You MUST
 
-- Work phase-by-phase (see ROADMAP.md)
+- Work phase-by-phase (see docs/project/ROADMAP.md)
 - Write tests for implemented functionality
-- Update STATUS.md, PROJECT_MANIFEST.md, IMPLEMENTATION.md, CHANGELOG.md
+- Update docs/project/STATUS.md, docs/project/PROJECT_MANIFEST.md, docs/project/IMPLEMENTATION.md, CHANGELOG.md
 - Record deferred work explicitly
 - Use repository abstractions (not raw config in Runtime)
 - Keep business logic out of the generic package

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [docs/installation.md](docs/installation.md) — install via Packagist, VCS, path repo, private registry, or monorepo
+- Organized documentation into `docs/architecture/`, `docs/project/`, and `docs/development/`
 - Full attachment pipeline: upload API, validation, text extraction, runtime injection, optional vector RAG
 - `limen-ai:install` and full Artisan CLI surface (`run`, `agent:test`, `tool:test`, `workflow:test`, `logs`, inspection and generator commands)
 - `LimenAi` facade and `LimenAiManager` for programmatic agent/workflow execution
