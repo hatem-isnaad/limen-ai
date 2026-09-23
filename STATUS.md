@@ -17,11 +17,11 @@
 | Conversations | In-memory persistence complete |
 | Tool pipeline | Complete |
 | UI | Complete |
-| Limen integration | Not started |
+| Limen integration | Reference demo complete |
 
 ## Current Phase
 
-**Phase 20 — Testing & Architecture Validation** (Complete)
+**Phase 21 — Limen Integration** (Complete)
 
 ## Completed
 
@@ -85,6 +85,9 @@
 - Expanded architecture boundary tests (`ModuleBoundaryTest`, `CriticalCoverageGateTest`)
 - Security critical matrix suite and CI workflow with merge gates
 - Test matrix documentation in `docs/ci.md`
+- Limen host reference tools: `GetShipmentStatus`, `SendCustomerMessage`
+- `limen_3pl` agent, logistics skill/knowledge, and updated `shipment_notify` workflow
+- Publishable Limen demo stubs and `docs/limen-integration.md`
 
 ## In Progress
 
@@ -96,9 +99,9 @@
 
 ## Next Steps
 
-1. Begin Phase 21 — Limen Integration (host app tools for 3PL demo)
-2. Add `GetShipmentStatus` and approval-gated messaging tools in host app
-3. Wire chat UI with broadcasting in Limen demo
+1. Begin Phase 22 — Final Hardening
+2. Performance profiling and release prep
+3. Wire published Limen demo into production host app
 
 ## Risks
 

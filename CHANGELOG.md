@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 21 Limen host integration reference with shipment lookup and approval-gated messaging tools
+- `examples/limen-host/`, publishable `stubs/limen/`, and `limen_3pl` agent configuration
+- `LimenIntegrationTest` and in-memory `FakeShipmentService` test doubles
+- `docs/limen-integration.md` host wiring guide
+
+### Added (Phase 20)
+
 - Phase 20 testing architecture with expanded boundary tests, security gates, and CI workflow
 - `ModuleBoundaryTest`, `CriticalCoverageGateTest`, and `SecurityCriticalMatrixTest`
 - GitHub Actions test matrix (PHP 8.2/8.3, Laravel 11/12) and `docs/ci.md`

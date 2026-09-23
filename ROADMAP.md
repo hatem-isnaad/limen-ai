@@ -24,7 +24,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 18 | Observability & Audit | Usage, traces, audit logs | Complete |
 | 19 | Artisan Developer Tools | make:* commands, stubs, doctor | Complete |
 | 20 | Testing & Architecture Validation | Full test matrix + arch tests | Complete |
-| 21 | Limen Integration | Host app tools for 3PL demo | Pending |
+| 21 | Limen Integration | Host app tools for 3PL demo | Complete |
 | 22 | Final Hardening | Performance, docs, release prep | Pending |
 
 ## Phase 01 Deliverables

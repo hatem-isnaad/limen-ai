@@ -177,4 +177,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 19 — doctor, make:* generators, list command, publishable stubs
 - [x] Begin Phase 20 — Testing & Architecture Validation
 - [x] Phase 20 — Architecture boundary tests, security gates, CI workflow
-- [ ] Begin Phase 21 — Limen Integration
+- [x] Begin Phase 21 — Limen Integration
+- [x] Phase 21 — Host app shipment tools, approval demo, integration docs
+- [ ] Begin Phase 22 — Final Hardening

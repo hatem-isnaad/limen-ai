@@ -30,6 +30,7 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 | SECURITY.md | Security model |
 | TESTING.md | Testing strategy |
 | docs/ci.md | CI matrix and merge gates |
+| docs/limen-integration.md | Limen 3PL host app integration |
 | CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 
@@ -78,7 +79,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 21 — Limen Integration**
+Current: **Phase 22 — Final Hardening**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -288,3 +289,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Security matrix | `SecurityCriticalMatrixTest` |
 | CI workflow | `.github/workflows/tests.yml` |
 | Docs | `docs/ci.md`, `composer test:gates` |
+
+## Phase 21 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Host reference | `examples/limen-host/` tools + ShipmentService |
+| Demo stubs | `stubs/limen/*`, publish tag `limen-ai-limen-demo` |
+| Agent | `limen_3pl` with logistics skill/knowledge |
+| Tools | `get_shipment_status`, `send_customer_message` |
+| Tests | `LimenIntegrationTest`, `FakeShipmentService` |
+| Docs | `docs/limen-integration.md` |

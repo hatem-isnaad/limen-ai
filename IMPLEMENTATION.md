@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 21 — Limen Integration**
+**Phase 22 — Final Hardening**
 
 ## Phase 01 Scope
 
@@ -245,8 +245,15 @@ At the end of each phase:
 4. GitHub Actions workflow (`.github/workflows/tests.yml`) with PHP/Laravel matrix
 5. `docs/ci.md`, updated `TESTING.md`, and `composer test:gates` scripts
 
-## Next Implementation Tasks (Phase 21)
+## Phase 21 Completed
 
-1. Host app tools: `GetShipmentStatus`, approval-gated customer messaging
-2. Register Limen-specific agents/tools in host `config/limen-ai.php`
-3. End-to-end demo with chat UI and broadcasting in the Limen application
+1. Reference host integration under `examples/limen-host/` with `GetShipmentStatus` and `SendCustomerMessage` tools
+2. Publishable Limen demo stubs (`limen-ai-limen-demo` tag) and `limen_3pl` agent config
+3. In-memory test stubs (`FakeShipmentService`) and `LimenIntegrationTest` for shipment lookup + approval demos
+4. Updated `shipment_notify` workflow to use Limen tools and `docs/limen-integration.md`
+
+## Next Implementation Tasks (Phase 22)
+
+1. Performance profiling and optimization pass
+2. Release documentation and version tagging
+3. Final security review and changelog consolidation
