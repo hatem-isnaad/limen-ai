@@ -31,6 +31,8 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 | TESTING.md | Testing strategy |
 | docs/ci.md | CI matrix and merge gates |
 | docs/limen-integration.md | Limen 3PL host app integration |
+| docs/release.md | Install, publish, and release guide |
+| docs/performance.md | Caching and profiling notes |
 | CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 
@@ -79,7 +81,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 22 — Final Hardening**
+Current: **Complete — v1.0.0**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -300,3 +302,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Tools | `get_shipment_status`, `send_customer_message` |
 | Tests | `LimenIntegrationTest`, `FakeShipmentService` |
 | Docs | `docs/limen-integration.md` |
+
+## Phase 22 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Performance | Request-scoped `DefaultAgentResolver` cache, tool schema memoization |
+| Config | `performance.cache_resolved_agents` |
+| Release docs | `docs/release.md`, `docs/performance.md`, README v1.0.0 |
+| Version | `composer.json` 1.0.0, consolidated `CHANGELOG.md` |
+| CI | `.github/workflows/release.yml`, `composer test:release` |
+| Gates | `ReleaseReadinessTest`, security pre-release checklist |

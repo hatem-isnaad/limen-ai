@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 22 — Final Hardening**
+**Complete — v1.0.0 released**
 
 ## Phase 01 Scope
 
@@ -252,8 +252,10 @@ At the end of each phase:
 3. In-memory test stubs (`FakeShipmentService`) and `LimenIntegrationTest` for shipment lookup + approval demos
 4. Updated `shipment_notify` workflow to use Limen tools and `docs/limen-integration.md`
 
-## Next Implementation Tasks (Phase 22)
+## Phase 22 Completed
 
-1. Performance profiling and optimization pass
-2. Release documentation and version tagging
-3. Final security review and changelog consolidation
+1. Request-scoped agent resolution cache and tool schema memoization (`performance.cache_resolved_agents`)
+2. Release documentation (`docs/release.md`, `docs/performance.md`) and README v1.0.0 polish
+3. Consolidated `CHANGELOG.md` v1.0.0, `composer.json` version, and release CI workflow
+4. Pre-release security checklist in `SECURITY.md` and `ReleaseReadinessTest` architecture gate
+5. `composer test:release` script combining full test suite and merge gates
