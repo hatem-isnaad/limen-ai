@@ -5,12 +5,20 @@ return [
     'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'example'),
 
     'providers' => [
-        'default' => env('LIMEN_AI_PROVIDER', 'openai'),
+        'default' => env('LIMEN_AI_PROVIDER', 'fake'),
+        'drivers' => [
+            'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
+            'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+        ],
+        'fake' => [
+            'driver' => 'fake',
+        ],
         'openai' => [
             'driver' => 'openai',
             'api_key' => env('OPENAI_API_KEY'),
             'organization' => env('OPENAI_ORGANIZATION'),
             'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'timeout' => 60,
         ],
         'anthropic' => [
             'driver' => 'anthropic',
@@ -26,16 +34,28 @@ return [
         ],
     ],
 
+    'embeddings' => [
+        'default' => env('LIMEN_AI_EMBEDDING_PROVIDER', 'fake'),
+        'drivers' => [
+            'fake' => LimenAi\Providers\Fake\FakeEmbeddingProvider::class,
+        ],
+        'providers' => [
+            'fake' => [
+                'driver' => 'fake',
+            ],
+        ],
+    ],
+
     'agents' => [
         'example' => [
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
-            'provider' => env('LIMEN_AI_PROVIDER', 'openai'),
+            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
-            'skills' => [],
+            'skills' => ['general_assistance'],
             'tools' => ['example_echo'],
-            'knowledge' => [],
+            'knowledge' => ['getting_started'],
             'memory' => [
                 'conversation' => true,
                 'user' => false,
@@ -57,6 +77,18 @@ return [
         ],
     ],
 
+    'runtime' => [
+        'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
+        'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
+    ],
+
+    'tool_pipeline' => [
+        'idempotency' => [
+            'driver' => env('LIMEN_AI_IDEMPOTENCY_DRIVER', 'cache'),
+            'ttl' => 3600,
+        ],
+    ],
+
     'tools' => [
         'example_echo' => [
             'name' => 'Example Echo',
@@ -74,13 +106,34 @@ return [
         ],
     ],
 
-    'skills' => [],
+    'skills' => [
+        'general_assistance' => [
+            'name' => 'General Assistance',
+            'instructions' => 'Provide helpful, concise responses.',
+            'tools' => ['example_echo'],
+            'knowledge' => [],
+            'version' => '1.0.0',
+        ],
+    ],
 
     'workflows' => [],
 
     'knowledge' => [
         'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'null'),
-        'collections' => [],
+        'collections' => [
+            'getting_started' => [
+                'name' => 'Getting Started',
+                'description' => 'Introductory knowledge for the example agent.',
+            ],
+        ],
+    ],
+
+    'repositories' => [
+        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
+        'tool' => LimenAi\Tools\ConfigToolRepository::class,
+        'skill' => LimenAi\Skills\ConfigSkillRepository::class,
+        'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
+        'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
     ],
 
     'memory' => [
