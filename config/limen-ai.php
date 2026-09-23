@@ -116,7 +116,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
+            'class' => null,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -330,14 +330,48 @@ return [
         'enabled' => env('LIMEN_AI_UI_ENABLED', true),
         'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
         'middleware' => ['web', 'auth'],
+        'palettes' => [
+            'light' => [
+                'primary' => '#4F46E5',
+                'background' => '#FFFFFF',
+                'text' => '#111827',
+                'surface' => '#F9FAFB',
+                'border' => 'rgba(17, 24, 39, 0.08)',
+                'muted' => 'rgba(17, 24, 39, 0.65)',
+            ],
+            'dark' => [
+                'primary' => '#818CF8',
+                'background' => '#0F172A',
+                'text' => '#F8FAFC',
+                'surface' => '#1E293B',
+                'border' => 'rgba(148, 163, 184, 0.18)',
+                'muted' => 'rgba(148, 163, 184, 0.85)',
+            ],
+        ],
+        'presets' => [
+            'default' => [
+                'radius' => '12px',
+                'position' => 'bottom-right',
+                'direction' => 'ltr',
+                'font_family' => 'ui-sans-serif, system-ui, sans-serif',
+                'title' => 'Limen AI Assistant',
+                'welcome_message' => 'How can I help you today?',
+            ],
+            'arabic' => [
+                'direction' => 'rtl',
+                'font_family' => '"Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif',
+                'title' => 'مساعد Limen AI',
+                'welcome_message' => 'كيف يمكنني مساعدتك اليوم؟',
+            ],
+        ],
         'theme' => [
-            'primary' => '#4F46E5',
-            'background' => '#FFFFFF',
-            'text' => '#111827',
+            'preset' => env('LIMEN_AI_THEME_PRESET', 'default'),
+            'mode' => env('LIMEN_AI_THEME_MODE', 'light'),
+            'allow_mode_toggle' => env('LIMEN_AI_THEME_TOGGLE', false),
+            'overrides' => [],
             'radius' => '12px',
             'position' => 'bottom-right',
             'direction' => 'ltr',
-            'mode' => 'light',
             'title' => 'Limen AI Assistant',
             'welcome_message' => 'How can I help you today?',
         ],
