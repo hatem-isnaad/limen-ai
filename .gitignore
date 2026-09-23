@@ -2,7 +2,6 @@
 /node_modules/
 /.phpunit.cache/
 /.phpunit.result.cache
-composer.lock
 .phpactor.json
 .php-cs-fixer.cache
 .idea/
