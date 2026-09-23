@@ -4,8 +4,10 @@ namespace LimenAi\Runtime;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use LimenAi\Agents\ResolvedAgent;
+use LimenAi\Authorization\ApprovalStatus;
 use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Agents\AgentResolver;
+use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
@@ -15,7 +17,11 @@ use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentFailed;
 use LimenAi\Events\AgentStarted;
+use LimenAi\Events\ApprovalGranted;
+use LimenAi\Events\ApprovalRejected;
+use LimenAi\Events\ApprovalRequested;
 use LimenAi\Exceptions\ApprovalRequiredException;
+use LimenAi\Exceptions\InvalidRunStateException;
 use LimenAi\Exceptions\RunNotFoundException;
 use LimenAi\Runtime\RunContextData as RunContextDataImpl;
 use LimenAi\Tools\ToolPipeline;
@@ -25,6 +31,7 @@ class DefaultAgentRuntime implements AgentRuntime
     public function __construct(
         private readonly AgentResolver $agentResolver,
         private readonly AuthorizationService $authorization,
+        private readonly ApprovalRepository $approvals,
         private readonly ToolPipeline $toolPipeline,
         private readonly RunRepository $runs,
         private readonly CheckpointStore $checkpoints,
@@ -87,14 +94,16 @@ class DefaultAgentRuntime implements AgentRuntime
 
             return $runId;
         } catch (ApprovalRequiredException $exception) {
-            $this->saveApprovalCheckpoint($runId, $limits, $messages, $exception);
             $this->syncConversationMessages($conversationId, $messages, $historyCount);
             $this->conversations->markWaitingApproval($conversationId);
+
+            $approval = $this->approvals->findPendingForRun($runId);
 
             $this->persistRun($runId, RunStatus::WAITING_APPROVAL, [
                 'current_step' => $limits->currentStep(),
                 'tool_call_count' => $limits->toolCallCount(),
                 'messages' => $messages,
+                'metadata' => ['approval_id' => $approval['id'] ?? null],
             ]);
 
             return $runId;
@@ -114,23 +123,13 @@ class DefaultAgentRuntime implements AgentRuntime
 
     public function resume(string $runId, RunContext $context): void
     {
-        $run = $this->runs->find($runId);
-
-        if ($run === null) {
-            throw RunNotFoundException::forId($runId);
-        }
-
-        if ($run['status'] !== RunStatus::WAITING_APPROVAL) {
-            throw new RunNotFoundException("Agent run [{$runId}] is not waiting for approval.");
-        }
-
-        $checkpoint = $this->checkpoints->load($runId);
-
-        if ($checkpoint === null) {
-            throw RunNotFoundException::forId($runId);
-        }
-
+        $run = $this->loadRunWaitingForApproval($runId);
         $agent = $this->agentResolver->resolve((string) $run['agent_key']);
+
+        $this->authorization->authorizeAgent($agent->definition());
+        $this->authorization->validateRunContext($context, $agent->definition());
+
+        $checkpoint = $this->loadCheckpoint($runId);
         $state = $checkpoint['state'] ?? $checkpoint;
         $messages = $state['messages'] ?? [];
         $limits = new RuntimeLimits(
@@ -141,13 +140,22 @@ class DefaultAgentRuntime implements AgentRuntime
         );
 
         $historyCount = count($messages);
+        $conversationId = (string) $run['conversation_id'];
+        $approval = $this->approvals->findPendingForRun($runId);
+
+        if ($approval !== null) {
+            $resolverId = $context->userId() ?? 0;
+            $this->approvals->approve((string) $approval['id'], $resolverId);
+            $this->events->dispatch(new ApprovalGranted((string) $approval['id'], $runId, $resolverId));
+        }
+
+        $approvedContext = $this->approvedToolContext($context, $runId, $conversationId, $agent->key());
 
         if ($pending = $state['pending_approval'] ?? null) {
-            $toolContext = $this->toolContext($context, $runId, (string) $run['conversation_id'], $agent->key());
             $result = $this->toolPipeline->execute(
                 (string) $pending['tool_key'],
                 (array) ($pending['input'] ?? []),
-                $toolContext,
+                $approvedContext,
             );
 
             $messages[] = [
@@ -158,11 +166,12 @@ class DefaultAgentRuntime implements AgentRuntime
         }
 
         $this->persistRun($runId, RunStatus::RUNNING, []);
+        $this->conversations->markActive($conversationId);
 
         $finalMessage = $this->executeLoop(
             agent: $agent,
             runId: $runId,
-            conversationId: (string) $run['conversation_id'],
+            conversationId: $conversationId,
             messages: $messages,
             limits: $limits,
             context: $context,
@@ -176,7 +185,6 @@ class DefaultAgentRuntime implements AgentRuntime
             'error' => null,
         ]);
 
-        $conversationId = (string) $run['conversation_id'];
         $this->syncConversationMessages($conversationId, $messages, $historyCount);
 
         $this->events->dispatch(new AgentCompleted(
@@ -198,8 +206,32 @@ class DefaultAgentRuntime implements AgentRuntime
             throw RunNotFoundException::forId($runId);
         }
 
+        $agent = $this->agentResolver->resolve((string) $run['agent_key']);
+        $this->authorization->authorizeAgent($agent->definition());
+        $this->authorization->validateRunContext($context, $agent->definition());
+
+        $this->resolvePendingApproval($runId, $context, ApprovalStatus::REJECTED);
+
         $this->persistRun($runId, RunStatus::CANCELLED, []);
         $this->checkpoints->delete($runId);
+        $this->conversations->markActive((string) $run['conversation_id']);
+    }
+
+    public function reject(string $runId, RunContext $context): void
+    {
+        $run = $this->loadRunWaitingForApproval($runId);
+        $agent = $this->agentResolver->resolve((string) $run['agent_key']);
+
+        $this->authorization->authorizeAgent($agent->definition());
+        $this->authorization->validateRunContext($context, $agent->definition());
+
+        $this->resolvePendingApproval($runId, $context, ApprovalStatus::REJECTED);
+
+        $this->persistRun($runId, RunStatus::CANCELLED, [
+            'error' => 'Approval rejected.',
+        ]);
+        $this->checkpoints->delete($runId);
+        $this->conversations->markActive((string) $run['conversation_id']);
     }
 
     /**
@@ -244,7 +276,7 @@ class DefaultAgentRuntime implements AgentRuntime
                         $toolContext,
                     );
                 } catch (ApprovalRequiredException $exception) {
-                    $this->saveApprovalCheckpoint($runId, $limits, $messages, $exception, $toolCall['id']);
+                    $this->saveApprovalCheckpoint($runId, $limits, $messages, $exception, $context, $toolCall['id']);
                     throw $exception;
                 }
 
@@ -265,8 +297,21 @@ class DefaultAgentRuntime implements AgentRuntime
         RuntimeLimits $limits,
         array $messages,
         ApprovalRequiredException $exception,
+        RunContext $context,
         ?string $toolCallId = null,
-    ): void {
+    ): string {
+        $payload = [
+            'tool_call_id' => $toolCallId,
+            'input' => $exception->input(),
+        ];
+
+        $approvalId = $this->approvals->request(
+            $runId,
+            $exception->tool()->key(),
+            $payload,
+            $context->userId(),
+        );
+
         $this->checkpoints->save($runId, $limits->currentStep(), [
             'messages' => $messages,
             'tool_call_count' => $limits->toolCallCount(),
@@ -274,8 +319,68 @@ class DefaultAgentRuntime implements AgentRuntime
                 'tool_call_id' => $toolCallId,
                 'tool_key' => $exception->tool()->key(),
                 'input' => $exception->input(),
+                'approval_id' => $approvalId,
             ],
         ]);
+
+        $this->events->dispatch(new ApprovalRequested(
+            $approvalId,
+            $runId,
+            $exception->tool()->key(),
+            $payload,
+        ));
+
+        return $approvalId;
+    }
+
+    /** @return array<string, mixed> */
+    protected function loadRunWaitingForApproval(string $runId): array
+    {
+        $run = $this->runs->find($runId);
+
+        if ($run === null) {
+            throw RunNotFoundException::forId($runId);
+        }
+
+        if ($run['status'] !== RunStatus::WAITING_APPROVAL) {
+            throw InvalidRunStateException::notWaitingForApproval($runId);
+        }
+
+        return $run;
+    }
+
+    /** @return array<string, mixed> */
+    protected function loadCheckpoint(string $runId): array
+    {
+        $checkpoint = $this->checkpoints->load($runId);
+
+        if ($checkpoint === null) {
+            throw InvalidRunStateException::checkpointMissing($runId);
+        }
+
+        return $checkpoint;
+    }
+
+    protected function resolvePendingApproval(string $runId, RunContext $context, string $status): void
+    {
+        $approval = $this->approvals->findPendingForRun($runId);
+
+        if ($approval === null) {
+            return;
+        }
+
+        $resolverId = $context->userId() ?? 0;
+        $approvalId = (string) $approval['id'];
+
+        if ($status === ApprovalStatus::APPROVED) {
+            $this->approvals->approve($approvalId, $resolverId);
+            $this->events->dispatch(new ApprovalGranted($approvalId, $runId, $resolverId));
+
+            return;
+        }
+
+        $this->approvals->reject($approvalId, $resolverId);
+        $this->events->dispatch(new ApprovalRejected($approvalId, $runId, $resolverId));
     }
 
     protected function toolContext(
@@ -292,6 +397,26 @@ class DefaultAgentRuntime implements AgentRuntime
             'user_id' => $context->userId(),
             'guest_token' => $context->guestToken(),
             'metadata' => $context->metadata(),
+            'locale' => $context->locale(),
+        ])->forToolExecution($runId, $conversationId, $agentKey);
+    }
+
+    protected function approvedToolContext(
+        RunContext $context,
+        string $runId,
+        string $conversationId,
+        string $agentKey,
+    ): ToolExecutionContext {
+        $toolContext = $this->toolContext($context, $runId, $conversationId, $agentKey);
+
+        if ($toolContext instanceof RunContextDataImpl) {
+            return $toolContext->withApprovalGranted();
+        }
+
+        return RunContextDataImpl::make([
+            'user_id' => $context->userId(),
+            'guest_token' => $context->guestToken(),
+            'metadata' => array_merge($context->metadata(), ['approval_granted' => true]),
             'locale' => $context->locale(),
         ])->forToolExecution($runId, $conversationId, $agentKey);
     }
