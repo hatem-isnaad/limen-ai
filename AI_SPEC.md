@@ -167,4 +167,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 14 — DNS-aware SSRF, redirect blocking, prompt-injection sanitization
 - [x] Begin Phase 15 — Queue & Broadcasting
 - [x] Phase 15 — Agent run jobs, Pusher broadcaster, event subscription hooks
-- [ ] Begin Phase 16 — Chat UI
+- [x] Begin Phase 16 — Chat UI
+- [x] Phase 16 — Blade components, HTTP API, JS client with Echo hooks
+- [ ] Begin Phase 17 — Themes
