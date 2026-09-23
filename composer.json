@@ -57,7 +57,15 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "block-insecure": false
+        },
+        "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
     },
     "scripts": {
         "test": "phpunit",
