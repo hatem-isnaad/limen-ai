@@ -9,10 +9,10 @@ LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
 echo "Latest release tag: ${LAST_TAG:-<none>}"
 if [[ -n "$LAST_TAG" ]]; then
   RANGE="${LAST_TAG}..HEAD"
-  mapfile -t SUBJECTS < <(git log "${RANGE}" --pretty=format:%s)
+  mapfile -t SUBJECTS < <(git log "${RANGE}" --no-merges --pretty=format:%s)
 else
   RANGE=""
-  mapfile -t SUBJECTS < <(git log --pretty=format:%s)
+  mapfile -t SUBJECTS < <(git log --no-merges --pretty=format:%s)
 fi
 
 if [[ ${#SUBJECTS[@]} -eq 0 ]]; then
