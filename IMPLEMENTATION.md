@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 01 — Package Foundation**
+**Phase 06 — Runtime**
 
 ## Phase 01 Scope
 
@@ -79,10 +79,43 @@ At the end of each phase:
 | Multi-tenancy | SaaS phase | DB design prepares for it |
 | Attachment RAG pipeline | Phase 11+ | Security first |
 
-## Next Implementation Tasks (Phase 02)
+## Phase 02 Completed
 
-1. Add DTO/value objects for AgentDefinition, ToolDefinition, etc.
-2. Register contract bindings in service provider
-3. Implement config repository stubs (read-only)
-4. Add architecture tests for namespace boundaries
-5. Add ExampleAgent + ExampleTool config entries
+1. DTO/value objects: `ConfigAgentDefinition`, `ConfigToolDefinition`, `ConfigSkillDefinition`, `ConfigWorkflowDefinition`
+2. Config repositories bound in `LimenAiServiceProvider`
+3. `RunContextData` for execution context
+4. Example skill + knowledge collection wired to example agent
+5. Repository unit/integration tests added
+
+## Phase 03 Completed
+
+1. `LlmProviderManager` and `EmbeddingProviderManager`
+2. `FakeLlmProvider` with queued responses and call recording
+3. `FakeEmbeddingProvider` with deterministic vectors
+4. `OpenAiProvider` skeleton using Laravel HTTP client + `Http::fake()` tests
+5. Default provider switched to `fake` for safe local/test usage
+
+## Phase 04 Completed
+
+1. `DefaultAgentResolver` resolves agent + provider + tools + skills + limits
+2. `ResolvedAgent` exposes tool schemas, chat options, and provider chat helper
+3. `ToolSchemaBuilder` converts tool input schema to OpenAI function format
+4. `InstructionComposer` merges agent and skill instructions
+5. `AgentValidator` and `limen-ai:validate` Artisan command
+
+## Phase 05 Completed
+
+1. `ToolPipeline` orchestrates authorize → validate → approval gate → idempotency → execute
+2. `ToolInputValidator` validates tool arguments via Laravel Validator
+3. `ClassBasedToolExecutor` executes host app tool classes
+4. `LogAuditLogger` + `SensitiveDataRedactor` for audit logging
+5. `CacheIdempotencyGuard` and `NullIdempotencyGuard`
+6. Tool lifecycle events: `ToolStarted`, `ToolCompleted`, `ToolFailed`
+
+## Next Implementation Tasks (Phase 06)
+
+1. Implement core `AgentRuntime` multi-step loop
+2. Parse LLM tool calls and dispatch through `ToolPipeline`
+3. Enforce max steps, max tool calls, and timeout limits
+4. Persist run state skeleton
+5. Runtime integration tests with `FakeLlmProvider`
