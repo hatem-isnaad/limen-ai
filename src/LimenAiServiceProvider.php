@@ -22,6 +22,8 @@ use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
+use LimenAi\Contracts\Memory\MemoryRetriever;
+use LimenAi\Contracts\Memory\MemoryStore;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\EmbeddingProvider;
 use LimenAi\Contracts\Providers\LlmProvider;
@@ -45,6 +47,11 @@ use LimenAi\Runtime\DefaultAgentRuntime;
 use LimenAi\Runtime\InMemoryRunRepository;
 use LimenAi\Runtime\ToolCallParser;
 use LimenAi\Knowledge\ConfigKnowledgeRepository;
+use LimenAi\Memory\DatabaseMemoryStore;
+use LimenAi\Memory\DefaultMemoryRetriever;
+use LimenAi\Memory\InMemoryMemoryStore;
+use LimenAi\Memory\MemoryFormatter;
+use LimenAi\Memory\MemoryService;
 use LimenAi\Observability\LogAuditLogger;
 use LimenAi\Providers\EmbeddingProviderManager;
 use LimenAi\Providers\Fake\FakeEmbeddingProvider;
@@ -74,6 +81,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerRuntime();
         $this->registerConversations();
         $this->registerAuthorization();
+        $this->registerMemory();
     }
 
     public function boot(): void
@@ -212,5 +220,24 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(AuthorizationService::class, LaravelAuthorizationService::class);
+    }
+
+    protected function registerMemory(): void
+    {
+        $memory = $this->app['config']->get('limen-ai.memory', []);
+
+        $this->app->singleton(MemoryStore::class, function ($app) use ($memory): MemoryStore {
+            $implementation = $memory['store'] ?? InMemoryMemoryStore::class;
+
+            if ($implementation === DatabaseMemoryStore::class) {
+                return new DatabaseMemoryStore($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
+        $this->app->singleton(MemoryFormatter::class);
+        $this->app->singleton(MemoryRetriever::class, $memory['retriever'] ?? DefaultMemoryRetriever::class);
+        $this->app->singleton(MemoryService::class);
     }
 }
