@@ -97,6 +97,21 @@ return [
         ],
     ],
 
+    'integrations' => [
+        'connectors' => [
+            'example_api' => [
+                'base_url' => env('LIMEN_EXAMPLE_API_URL', 'https://api.example.com'),
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'authentication' => [
+                    'type' => 'bearer',
+                    'token' => env('LIMEN_EXAMPLE_API_TOKEN'),
+                ],
+            ],
+        ],
+    ],
+
     'tools' => [
         'example_echo' => [
             'name' => 'Example Echo',
@@ -110,6 +125,28 @@ return [
             ],
             'confirmation' => false,
             'timeout' => 5,
+            'version' => '1.0.0',
+        ],
+        'example_http_status' => [
+            'name' => 'Example HTTP Status',
+            'description' => 'Fetch a resource status from the example API connector.',
+            'integration' => [
+                'connector' => 'example_api',
+                'method' => 'GET',
+                'path' => '/status/{{ input.resource }}',
+                'query' => [
+                    'include' => '{{ input.include }}',
+                ],
+            ],
+            'input_schema' => [
+                'resource' => ['type' => 'string', 'required' => true],
+                'include' => ['type' => 'string', 'required' => false],
+            ],
+            'authorization' => [
+                'abilities' => [],
+            ],
+            'confirmation' => false,
+            'timeout' => 10,
             'version' => '1.0.0',
         ],
     ],
