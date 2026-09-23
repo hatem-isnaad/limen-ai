@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: release-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -44,6 +44,9 @@ jobs:
 
       - name: Run release readiness gate
         run: vendor/bin/phpunit --filter ReleaseReadinessTest
+
+      - name: List recent commits for release analysis
+        run: git log --no-merges -10 --pretty=format:'- %s'
 
       - name: Create GitHub release
         id: release
