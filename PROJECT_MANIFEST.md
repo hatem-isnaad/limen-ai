@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 13 — HTTP Integrations**
+Current: **Phase 14 — Security Hardening**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -201,3 +201,15 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Validation | `WorkflowValidator` |
 | Step types | agent, tool, approval, branch |
 | Events | `WorkflowStarted`, `WorkflowStepCompleted`, `WorkflowCompleted`, `WorkflowFailed` |
+
+## Phase 13 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| HTTP connectors | `ConfigHttpConnectorRepository` |
+| HTTP tool executor | `DeclarativeHttpToolExecutor` |
+| Request builder | `HttpRequestBuilder` |
+| SSRF guard | `SsrfUrlValidator` |
+| Secret resolver | `EnvSecretResolver` |
+| Validation | `HttpIntegrationValidator` |
+| Example tool | `example_http_status` |
