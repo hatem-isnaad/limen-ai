@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 11 knowledge / RAG with config and vector retrievers, in-memory vector store, and runtime injection
+- `AgentKnowledgeRetriever`, `KnowledgeService`, `KnowledgeFormatter`, and driver-based knowledge bindings
+- Knowledge unit, integration, and feature tests
+
+### Added (Phase 10)
+
 - Phase 10 scoped memory system with in-memory/database stores, retriever, and runtime injection
 - `MemoryService`, `DefaultMemoryRetriever`, and `limen_ai_memories` migration
 - Memory unit, integration, database, and feature tests

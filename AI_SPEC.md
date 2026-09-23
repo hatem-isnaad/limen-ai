@@ -157,3 +157,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 09 — Run/checkpoint/approval persistence, resume/reject/cancel hardening
 - [x] Begin Phase 10 — Memory
 - [x] Phase 10 — Scoped memory stores, retrieval hooks, runtime integration
+- [x] Begin Phase 11 — Knowledge / RAG
+- [x] Phase 11 — Config/vector retrievers, vector store abstraction, runtime integration
