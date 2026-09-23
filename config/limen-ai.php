@@ -365,6 +365,10 @@ return [
         'max_attachments' => 5,
     ],
 
+    'performance' => [
+        'cache_resolved_agents' => env('LIMEN_AI_CACHE_RESOLVED_AGENTS', true),
+    ],
+
     'broadcasting' => [
         'enabled' => env('LIMEN_AI_BROADCASTING_ENABLED', true),
         'driver' => env('LIMEN_AI_BROADCAST_DRIVER', 'null'),
