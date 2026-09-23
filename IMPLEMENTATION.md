@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 18 — Observability & Audit**
+**Phase 19 — Artisan Developer Tools**
 
 ## Phase 01 Scope
 
@@ -221,8 +221,17 @@ At the end of each phase:
 3. CSS variable tokens, RTL layout refinements, and client-side mode switching in JS
 4. `docs/theming.md` host override guide and theme unit/feature tests
 
-## Next Implementation Tasks (Phase 18)
+## Phase 18 Completed
 
-1. Usage tracking service and audit log exporters
-2. Run/tool trace correlation identifiers
-3. Observability integration tests
+1. `TraceContext` correlation IDs stored on runs and tool audit spans
+2. `LogUsageTracker` with `UsageBuffer` for LLM and tool usage records
+3. `AuditBuffer` and `DefaultAuditExporter` for run-scoped audit export
+4. `AgentObservabilityListener` for agent lifecycle audit events
+5. `RunObservabilityReporter` and `GET /runs/{id}/observability` API endpoint
+6. Observability unit, integration, and feature tests plus `docs/observability.md`
+
+## Next Implementation Tasks (Phase 19)
+
+1. `limen-ai:doctor` environment validation command
+2. `make:agent`, `make:tool`, and related stubs
+3. Developer tooling tests

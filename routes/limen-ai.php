@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use LimenAi\Http\Controllers\Api\ApprovalController;
 use LimenAi\Http\Controllers\Api\ConversationController;
 use LimenAi\Http\Controllers\Api\MessageController;
+use LimenAi\Http\Controllers\Api\ObservabilityController;
 use LimenAi\Http\Controllers\Api\RunController;
 
 $prefix = (string) config('limen-ai.ui.route_prefix', 'limen-ai');
@@ -17,6 +18,7 @@ Route::prefix($prefix)
         Route::get('conversations/{conversationId}', [ConversationController::class, 'show'])->name('conversations.show');
         Route::post('conversations/{conversationId}/messages', [MessageController::class, 'store'])->name('messages.store');
         Route::get('runs/{runId}', [RunController::class, 'show'])->name('runs.show');
+        Route::get('runs/{runId}/observability', [ObservabilityController::class, 'show'])->name('runs.observability');
         Route::post('approvals/{approvalId}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
         Route::post('approvals/{approvalId}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
     });
