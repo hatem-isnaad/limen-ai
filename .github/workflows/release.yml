@@ -1,20 +1,21 @@
-# Release validation runs on push to `stg` via the Tests workflow (release-gate job).
-# Tag and publish only after merging stg → main. Use workflow_dispatch below for
-# optional manual re-validation before tagging on main.
-
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: Version to validate against composer.json (without v prefix)
-        required: true
-        type: string
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
 
 jobs:
-  validate:
-    name: Validate release version
+  test:
+    name: Release gate (PHP 8.3)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,13 +29,29 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction
 
-      - name: Verify composer version matches input
-        run: |
-          COMPOSER_VERSION=$(composer config version)
-          if [ "${{ inputs.version }}" != "$COMPOSER_VERSION" ]; then
-            echo "Input version ${{ inputs.version }} does not match composer.json version ${COMPOSER_VERSION}"
-            exit 1
-          fi
-
       - name: Run full release test suite
         run: composer test:release
+
+  release:
+    name: Semantic release
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install semantic-release
+        run: npm install --no-audit --no-fund
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
