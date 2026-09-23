@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 16 — Chat UI**
+**Phase 17 — Themes**
 
 ## Phase 01 Scope
 
@@ -206,8 +206,16 @@ At the end of each phase:
 5. `RunStatusReader` for polling terminal run state
 6. Queue/broadcast config, bindings, and unit/integration/feature tests
 
-## Next Implementation Tasks (Phase 16)
+## Phase 16 Completed
 
-1. Blade chat widget components
-2. JS client for message send/receive
-3. Echo integration with conversation broadcast channels
+1. `<x-limen-ai::chatbot />` and `<x-limen-ai::widget />` Blade components with themed CSS variables
+2. Vanilla JS client with fetch API, run polling fallback, and Echo subscription hooks
+3. HTTP API routes for conversations, messages, runs, and approvals
+4. `ConversationAccessGuard` and private broadcast channel authorization
+5. UI unit, integration, and feature tests
+
+## Next Implementation Tasks (Phase 17)
+
+1. Publishable theme presets and dark/light mode switching
+2. RTL layout refinements and Arabic-friendly defaults
+3. Host app theme override documentation

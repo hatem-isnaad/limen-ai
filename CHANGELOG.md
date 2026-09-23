@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 16 chat UI with Blade chatbot/widget components, HTTP API, and Echo-ready JS client
+- Conversation/message/run/approval API controllers and private channel authorization
+- Chat UI unit, integration, and feature tests
+
+### Added (Phase 15)
+
 - Phase 15 queue and broadcasting with agent run jobs, sync/queued dispatcher, and Pusher adapter
 - `RunAgentJob`, `AgentRunDispatcher`, `PusherBroadcaster`, `AgentEventBroadcaster`, and `RunStatusReader`
 - Queue and broadcast unit, integration, and feature tests

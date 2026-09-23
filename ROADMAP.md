@@ -19,7 +19,7 @@ Implementation proceeds in controlled phases. Do not skip phases without archite
 | 13 | HTTP Integrations | Declarative external API tools | Complete |
 | 14 | Security Hardening | SSRF, redaction, injection defenses | Complete |
 | 15 | Queue & Broadcasting | Jobs, Pusher adapter, channels | Complete |
-| 16 | Chat UI | Blade components + JS | Pending |
+| 16 | Chat UI | Blade components + JS | Complete |
 | 17 | Themes | RTL/LTR, dark/light, customization | Pending |
 | 18 | Observability & Audit | Usage, traces, audit logs | Pending |
 | 19 | Artisan Developer Tools | make:* commands, stubs, doctor | Pending |

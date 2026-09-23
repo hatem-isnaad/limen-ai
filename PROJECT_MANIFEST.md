@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 16 — Chat UI**
+Current: **Phase 17 — Themes**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -235,3 +235,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Event subscriber | `AgentEventBroadcaster` |
 | Run polling | `DefaultRunStatusReader` |
 | Config | `queue.agent_runs`, `broadcasting.enabled/driver/connection` |
+
+## Phase 16 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Blade UI | `<x-limen-ai::chatbot />`, `<x-limen-ai::widget />` |
+| JS client | `resources/js/limen-ai/chat.js` with Echo + polling |
+| HTTP API | Conversation, message, run, approval controllers |
+| Access guard | `ConversationAccessGuard` |
+| Routes | `routes/limen-ai.php`, `routes/channels.php` |
+| Assets | `UiAssets`, publishable CSS/JS/views |
