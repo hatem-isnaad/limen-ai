@@ -138,5 +138,13 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Produce SaaS migration strategy
 - [x] Document contradictions / ambiguities
 - [x] Create project documentation files
-- [ ] Architecture approval
-- [ ] Begin Phase 02 implementation
+- [x] Architecture approval
+- [x] Begin Phase 02 implementation
+- [x] Phase 02 — DTOs, config repositories, bindings, tests
+- [x] Begin Phase 03 — Provider System
+- [x] Phase 03 — Fake/OpenAI providers, managers, tests
+- [x] Begin Phase 04 — Agent System
+- [x] Phase 04 — Agent resolver, tool schemas, validation command
+- [x] Begin Phase 05 — Tool System
+- [x] Phase 05 — Tool pipeline, validation, audit, idempotency
+- [ ] Begin Phase 06 — Runtime
