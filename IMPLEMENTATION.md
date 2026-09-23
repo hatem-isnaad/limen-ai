@@ -69,15 +69,31 @@ At the end of each phase:
 5. Run tests + architecture validation
 6. Record deferred items explicitly
 
-## Deferred Functionality (Known)
+## Deferred Functionality (Known — intentional, not gaps)
 
-| Item | Target Phase | Notes |
-|------|--------------|-------|
-| Database agent repository | Post-v1 / SaaS | Contract ready |
-| Reverb broadcaster | Phase 15+ | Adapter pattern |
-| MCP integrations | Future | Mentioned in spec |
-| Multi-tenancy | SaaS phase | DB design prepares for it |
-| Attachment RAG pipeline | Phase 11+ | Security first |
+These items are **out of v1 scope by design**. Contracts and extension points exist where noted.
+
+| Item | Target | Notes |
+|------|--------|-------|
+| Database agent repository | SaaS | `AgentRepository` contract ready; v1 uses config repos |
+| Reverb broadcaster | Future adapter | `RealtimeBroadcaster` contract; Pusher + null shipped |
+| MCP integrations | Future | Tool pipeline supports class/HTTP tools today |
+| Multi-tenancy | SaaS | DB schema prepares for tenant columns |
+| Attachment RAG pipeline | Future | Security model defined; uploads not in v1 |
+| OpenTelemetry export | Future | Trace/usage/audit hooks shipped; exporter optional |
+
+## Provider coverage (v1.0.0+)
+
+| Driver | Implementation | Config key |
+|--------|----------------|------------|
+| fake | `FakeLlmProvider` | `providers.fake` |
+| openai | `OpenAiProvider` | `providers.openai` |
+| openrouter | `OpenAiProvider` (compatible API) | `providers.openrouter` |
+| anthropic | `AnthropicProvider` | `providers.anthropic` |
+| gemini | `GeminiProvider` | `providers.gemini` |
+| custom | Host class via `providers.drivers` | any |
+
+See [docs/providers.md](docs/providers.md).
 
 ## Phase 02 Completed
 

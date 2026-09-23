@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- First-class `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) LLM drivers
+- `OpenAiEmbeddingProvider` for production vector knowledge
+- Config-driven provider registry (`providers.drivers`) for adding custom LLM adapters without core changes
+- `docs/providers.md` and publishable `custom-llm-provider.stub`
+- Agent validation for registered provider drivers
+
 ## [1.0.0] - 2026-09-23
 
 First stable release of the Limen AI Laravel agent framework (phases 01–22).
