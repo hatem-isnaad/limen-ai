@@ -163,3 +163,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 12 — Step runner, branching, approval pause/resume, checkpoint integration
 - [x] Begin Phase 13 — HTTP Integrations
 - [x] Phase 13 — Declarative HTTP tools, connectors, SSRF hooks, Http::fake tests
+- [x] Begin Phase 14 — Security Hardening
+- [x] Phase 14 — DNS-aware SSRF, redirect blocking, prompt-injection sanitization
+- [ ] Begin Phase 15 — Queue & Broadcasting
