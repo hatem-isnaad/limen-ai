@@ -101,7 +101,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null,
+            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -124,7 +124,65 @@ return [
         ],
     ],
 
-    'workflows' => [],
+    'workflows' => [
+        'example_flow' => [
+            'name' => 'Example Workflow',
+            'version' => '1.0.0',
+            'start' => 'greet',
+            'steps' => [
+                'greet' => [
+                    'type' => 'agent',
+                    'agent' => 'example',
+                    'message' => 'Reply with a short greeting.',
+                    'next' => 'check_mode',
+                ],
+                'check_mode' => [
+                    'type' => 'branch',
+                    'condition' => [
+                        'field' => 'input.mode',
+                        'operator' => 'equals',
+                        'value' => 'tool',
+                    ],
+                    'then' => 'echo',
+                    'else' => 'finish',
+                ],
+                'echo' => [
+                    'type' => 'tool',
+                    'tool' => 'example_echo',
+                    'input' => ['message' => 'workflow tool branch'],
+                    'next' => 'finish',
+                ],
+                'finish' => [
+                    'type' => 'agent',
+                    'agent' => 'example',
+                    'message' => 'Summarize the workflow in one sentence.',
+                ],
+            ],
+        ],
+        'shipment_notify' => [
+            'name' => 'Shipment Notification',
+            'version' => '1.0.0',
+            'start' => 'draft',
+            'steps' => [
+                'draft' => [
+                    'type' => 'agent',
+                    'agent' => 'example',
+                    'message' => 'Draft a short customer delay notification.',
+                    'next' => 'approve_send',
+                ],
+                'approve_send' => [
+                    'type' => 'approval',
+                    'message' => 'Approve sending the customer notification?',
+                    'next' => 'send',
+                ],
+                'send' => [
+                    'type' => 'tool',
+                    'tool' => 'example_echo',
+                    'input' => ['message' => 'notification sent'],
+                ],
+            ],
+        ],
+    ],
 
     'knowledge' => [
         'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),

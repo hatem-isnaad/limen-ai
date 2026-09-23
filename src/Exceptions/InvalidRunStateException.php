@@ -18,4 +18,14 @@ class InvalidRunStateException extends ToolException
     {
         return new self("Approval [{$approvalId}] is not pending.");
     }
+
+    public static function notWorkflowRun(string $runId): self
+    {
+        return new self("Run [{$runId}] is not a workflow run.");
+    }
+
+    public static function invalidWorkflowStart(string $workflowKey): self
+    {
+        return new self("Workflow [{$workflowKey}] is missing a valid start step.");
+    }
 }
