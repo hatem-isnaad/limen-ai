@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 09 — State & Checkpoints** (Complete)
+**Phase 10 — Memory** (Complete)
 
 ## Completed
 
@@ -54,6 +54,8 @@
 - Database-backed run, checkpoint, and approval repositories
 - Approval lifecycle events and runtime `reject()` support
 - Resume/cancel hardening with persisted approval state
+- Scoped memory store with in-memory and database drivers
+- Memory retrieval injected into agent runtime context
 
 ## In Progress
 
@@ -65,9 +67,9 @@
 
 ## Next Steps
 
-1. Begin Phase 10 — Memory
+1. Begin Phase 11 — Knowledge / RAG
 2. Add queue-dispatched runtime job skeleton
-3. Begin Phase 11 — Knowledge / RAG
+3. Begin Phase 12 — Workflow Engine
 
 ## Risks
 

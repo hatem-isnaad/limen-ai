@@ -101,7 +101,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
+            'class' => null,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -153,7 +153,9 @@ return [
     ],
 
     'memory' => [
-        'driver' => env('LIMEN_AI_MEMORY_DRIVER', 'database'),
+        'store' => LimenAi\Memory\InMemoryMemoryStore::class,
+        'retriever' => LimenAi\Memory\DefaultMemoryRetriever::class,
+        'limit' => 20,
     ],
 
     'responses' => [
