@@ -13,8 +13,12 @@ use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
 use LimenAi\Console\ValidateCommand;
+use LimenAi\Broadcasting\AgentEventBroadcaster;
+use LimenAi\Broadcasting\NullBroadcaster;
+use LimenAi\Broadcasting\PusherBroadcaster;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Agents\AgentResolver;
+use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Authorization\GuestSessionValidator;
@@ -38,9 +42,11 @@ use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Skills\SkillRepository;
 use LimenAi\Contracts\Tools\IdempotencyGuard;
 use LimenAi\Contracts\Tools\ToolExecutor;
+use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
+use LimenAi\Contracts\Runtime\RunStatusReader;
 use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
@@ -53,7 +59,10 @@ use LimenAi\Runtime\ArrayCheckpointStore;
 use LimenAi\Runtime\DatabaseCheckpointStore;
 use LimenAi\Runtime\DatabaseRunRepository;
 use LimenAi\Runtime\DefaultAgentRuntime;
+use LimenAi\Runtime\DefaultRunStatusReader;
 use LimenAi\Runtime\InMemoryRunRepository;
+use LimenAi\Runtime\QueuedAgentRunDispatcher;
+use LimenAi\Runtime\SyncAgentRunDispatcher;
 use LimenAi\Runtime\ToolCallParser;
 use LimenAi\Integrations\ConfigHttpConnectorRepository;
 use LimenAi\Integrations\DeclarativeHttpToolExecutor;
@@ -116,6 +125,8 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerWorkflows();
         $this->registerIntegrations();
         $this->registerSecurity();
+        $this->registerQueue();
+        $this->registerBroadcasting();
     }
 
     public function boot(): void
@@ -133,6 +144,10 @@ class LimenAiServiceProvider extends ServiceProvider
         }
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'limen-ai');
+
+        if ((bool) $this->app['config']->get('limen-ai.broadcasting.enabled', true)) {
+            $this->app->make(AgentEventBroadcaster::class)->subscribe($this->app['events']);
+        }
     }
 
     protected function registerRepositories(): void
@@ -335,5 +350,32 @@ class LimenAiServiceProvider extends ServiceProvider
 
             return $app->make(PromptInjectionSanitizer::class);
         });
+    }
+
+    protected function registerQueue(): void
+    {
+        $this->app->singleton(RunStatusReader::class, DefaultRunStatusReader::class);
+
+        $this->app->singleton(AgentRunDispatcher::class, function ($app): AgentRunDispatcher {
+            if ((bool) $app['config']->get('limen-ai.queue.agent_runs', false)) {
+                return $app->make(QueuedAgentRunDispatcher::class);
+            }
+
+            return $app->make(SyncAgentRunDispatcher::class);
+        });
+    }
+
+    protected function registerBroadcasting(): void
+    {
+        $this->app->singleton(RealtimeBroadcaster::class, function ($app): RealtimeBroadcaster {
+            $driver = $app['config']->get('limen-ai.broadcasting.driver', 'null');
+
+            return match ($driver) {
+                'pusher' => $app->make(PusherBroadcaster::class),
+                default => $app->make(NullBroadcaster::class),
+            };
+        });
+
+        $this->app->singleton(AgentEventBroadcaster::class);
     }
 }
