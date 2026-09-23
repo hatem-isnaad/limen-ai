@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 15 — Queue & Broadcasting**
+**Phase 16 — Chat UI**
 
 ## Phase 01 Scope
 
@@ -197,8 +197,17 @@ At the end of each phase:
 6. Security config for SSRF and injection patterns in `config/limen-ai.php`
 7. Unit, integration, and feature security tests
 
-## Next Implementation Tasks (Phase 15)
+## Phase 15 Completed
 
-1. Queue-dispatched runtime job skeleton
-2. Broadcast channel adapter for agent lifecycle events
-3. Async run status polling or event subscription hooks
+1. `RunAgentJob`, `ResumeAgentRunJob`, `CancelAgentRunJob`, and `RejectAgentRunJob` queue skeleton
+2. `AgentRunDispatcher` with sync and queued implementations plus `AgentRunDispatchResult`
+3. `PusherBroadcaster` and `NullBroadcaster` behind `RealtimeBroadcaster`
+4. `AgentEventBroadcaster` subscriber for agent, conversation, and approval lifecycle events
+5. `RunStatusReader` for polling terminal run state
+6. Queue/broadcast config, bindings, and unit/integration/feature tests
+
+## Next Implementation Tasks (Phase 16)
+
+1. Blade chat widget components
+2. JS client for message send/receive
+3. Echo integration with conversation broadcast channels

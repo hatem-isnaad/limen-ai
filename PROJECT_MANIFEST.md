@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 15 — Queue & Broadcasting**
+Current: **Phase 16 — Chat UI**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -224,3 +224,14 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Untrusted wrapping | Knowledge, memory, and user message delimiters |
 | HTTP hardening | Redirect blocking via `allow_redirects: false` |
 | Config | `security.ssrf` and `security.injection` sections |
+
+## Phase 15 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Run jobs | `RunAgentJob`, `ResumeAgentRunJob`, `CancelAgentRunJob`, `RejectAgentRunJob` |
+| Dispatcher | `SyncAgentRunDispatcher`, `QueuedAgentRunDispatcher` |
+| Broadcast adapter | `PusherBroadcaster`, `NullBroadcaster` |
+| Event subscriber | `AgentEventBroadcaster` |
+| Run polling | `DefaultRunStatusReader` |
+| Config | `queue.agent_runs`, `broadcasting.enabled/driver/connection` |
