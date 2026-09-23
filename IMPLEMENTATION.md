@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 17 — Themes**
+**Phase 18 — Observability & Audit**
 
 ## Phase 01 Scope
 
@@ -214,8 +214,15 @@ At the end of each phase:
 4. `ConversationAccessGuard` and private broadcast channel authorization
 5. UI unit, integration, and feature tests
 
-## Next Implementation Tasks (Phase 17)
+## Phase 17 Completed
 
-1. Publishable theme presets and dark/light mode switching
-2. RTL layout refinements and Arabic-friendly defaults
-3. Host app theme override documentation
+1. `ThemeResolver` and `ResolvedTheme` with palettes, presets, and overrides
+2. Light/dark palettes, `arabic` RTL preset, and optional mode toggle/auto detection
+3. CSS variable tokens, RTL layout refinements, and client-side mode switching in JS
+4. `docs/theming.md` host override guide and theme unit/feature tests
+
+## Next Implementation Tasks (Phase 18)
+
+1. Usage tracking service and audit log exporters
+2. Run/tool trace correlation identifiers
+3. Observability integration tests

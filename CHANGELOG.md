@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 17 theming with palettes, presets, ThemeResolver, RTL/dark mode, and mode toggle
+- Arabic RTL preset, CSS variable tokens, and docs/theming.md override guide
+- Theme unit and feature tests
+
+### Added (Phase 16)
+
 - Phase 16 chat UI with Blade chatbot/widget components, HTTP API, and Echo-ready JS client
 - Conversation/message/run/approval API controllers and private channel authorization
 - Chat UI unit, integration, and feature tests

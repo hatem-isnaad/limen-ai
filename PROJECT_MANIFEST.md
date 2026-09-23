@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 17 — Themes**
+Current: **Phase 18 — Observability & Audit**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -246,3 +246,13 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Access guard | `ConversationAccessGuard` |
 | Routes | `routes/limen-ai.php`, `routes/channels.php` |
 | Assets | `UiAssets`, publishable CSS/JS/views |
+
+## Phase 17 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Theme resolver | `ThemeResolver`, `ResolvedTheme` |
+| Palettes | `ui.palettes.light`, `ui.palettes.dark` |
+| Presets | `default`, `arabic` (RTL + Arabic copy) |
+| Modes | `light`, `dark`, `auto`, optional toggle |
+| Docs | `docs/theming.md` |
