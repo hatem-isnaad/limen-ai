@@ -3,6 +3,7 @@
 namespace LimenAi\Tests\Feature;
 
 use Illuminate\Auth\GenericUser;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Exceptions\AgentAuthorizationException;
@@ -76,6 +77,11 @@ class AgentAuthorizationTest extends TestCase
         auth()->logout();
 
         config()->set('limen-ai.agents.example.authorization.guest_allowed', true);
+
+        Cache::put('limen-ai:guest:guest-session-1', [
+            'agent' => 'example',
+            'profile' => ['name' => 'Guest'],
+        ], now()->addHour());
 
         app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
             'content' => 'Guest reply.',

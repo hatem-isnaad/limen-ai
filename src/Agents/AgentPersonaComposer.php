@@ -5,6 +5,7 @@ namespace LimenAi\Agents;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentDefinition;
 use LimenAi\Contracts\Runtime\RunContext;
+use LimenAi\Support\ResponseLanguageResolver;
 
 class AgentPersonaComposer
 {
@@ -14,8 +15,15 @@ class AgentPersonaComposer
     /** @var list<string> */
     private const RESPONSE_STYLES = ['concise', 'detailed', 'bullet_points', 'step_by_step'];
 
+    /** @var list<string> */
+    private const GENDERS = ['male', 'female', 'neutral'];
+
+    /** @var list<string> */
+    private const FORMALITIES = ['casual', 'neutral', 'formal'];
+
     public function __construct(
         private readonly ConfigRepository $config,
+        private readonly ResponseLanguageResolver $languages,
     ) {}
 
     /**
@@ -46,13 +54,39 @@ class AgentPersonaComposer
         $language = (string) ($persona['language'] ?? $this->config->get('limen-ai.quality.default_language', 'en'));
 
         if ($language !== '' && $language !== 'auto') {
-            $lines[] = "Respond only in language [{$language}] unless the user explicitly requests another language.";
+            $lines[] = "Respond only in {$this->languages->label($language)} [{$language}] unless the user explicitly requests another supported language.";
+        } elseif ($language === 'auto') {
+            $lines[] = 'Support Arabic and English. Match the user\'s language, and switch immediately when they ask to talk in a specific language.';
         }
 
         $style = (string) ($persona['response_style'] ?? '');
 
         if ($style !== '') {
             $lines[] = 'Response style: '.$this->styleGuidance($style);
+        }
+
+        $gender = (string) ($persona['gender'] ?? $this->config->get('limen-ai.agent_defaults.persona.gender', 'neutral'));
+
+        if ($gender !== '') {
+            $lines[] = 'Voice profile: '.$this->genderGuidance($gender);
+        }
+
+        $region = (string) ($persona['region'] ?? $this->config->get('limen-ai.agent_defaults.persona.region', 'international'));
+
+        if ($region !== '') {
+            $lines[] = 'Regional style: '.$this->regionGuidance($region);
+        }
+
+        $formality = (string) ($persona['formality'] ?? $this->config->get('limen-ai.agent_defaults.persona.formality', 'neutral'));
+
+        if ($formality !== '') {
+            $lines[] = 'Formality: '.$this->formalityGuidance($formality);
+        }
+
+        $voice = trim((string) ($persona['voice'] ?? $this->config->get('limen-ai.agent_defaults.persona.voice', '')));
+
+        if ($voice !== '') {
+            $lines[] = "Voice style: {$voice}.";
         }
 
         foreach ($persona['rules'] ?? [] as $rule) {
@@ -93,9 +127,21 @@ class AgentPersonaComposer
             return null;
         }
 
-        $locale = $context->locale() !== '' ? $context->locale() : (string) $this->config->get('limen-ai.quality.default_language', 'en');
+        $locale = $this->languages->normalize($context->locale())
+            ?? (string) $this->config->get('limen-ai.quality.default_language', 'en');
+        $label = $this->languages->label($locale);
+        $preferred = $context->metadata()['preferred_language'] ?? null;
 
-        return "Respond in the user's locale/language [{$locale}] unless they explicitly request another language.";
+        $lines = [
+            "Respond in {$label} [{$locale}] for this turn.",
+            'The user may write in Arabic or English. If they ask to switch language (for example: "talk in Arabic", "speak English", "بالعربية", "in English"), switch immediately and keep using that language until they ask again.',
+        ];
+
+        if (is_string($preferred) && $preferred !== '') {
+            $lines[] = 'Stored conversation language preference: '.$this->languages->label($preferred)." [{$preferred}].";
+        }
+
+        return implode("\n", $lines);
     }
 
     /** @return list<string> */
@@ -108,6 +154,24 @@ class AgentPersonaComposer
     public static function allowedResponseStyles(): array
     {
         return self::RESPONSE_STYLES;
+    }
+
+    /** @return list<string> */
+    public static function allowedGenders(): array
+    {
+        return self::GENDERS;
+    }
+
+    /** @return list<string> */
+    public static function allowedFormalities(): array
+    {
+        return self::FORMALITIES;
+    }
+
+    /** @return list<string> */
+    public static function allowedRegions(): array
+    {
+        return array_keys(config('limen-ai.agent_presets.regions', []));
     }
 
     protected function toneGuidance(string $tone): string
@@ -129,5 +193,31 @@ class AgentPersonaComposer
             'step_by_step' => 'Use numbered steps for procedures.',
             default => 'Keep answers short and actionable.',
         };
+    }
+
+    protected function genderGuidance(string $gender): string
+    {
+        return $this->presetGuidance('genders', $gender, 'Keep phrasing gender-neutral in all languages.');
+    }
+
+    protected function regionGuidance(string $region): string
+    {
+        return $this->presetGuidance('regions', $region, 'Use clear modern language without a strong local dialect unless requested.');
+    }
+
+    protected function formalityGuidance(string $formality): string
+    {
+        return $this->presetGuidance('formality', $formality, 'Use balanced professional language.');
+    }
+
+    protected function presetGuidance(string $group, string $key, string $fallback): string
+    {
+        $preset = $this->config->get("limen-ai.agent_presets.{$group}.{$key}", []);
+
+        if (is_array($preset) && isset($preset['guidance']) && is_string($preset['guidance'])) {
+            return $preset['guidance'];
+        }
+
+        return $fallback;
     }
 }

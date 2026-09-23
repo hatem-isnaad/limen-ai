@@ -63,6 +63,27 @@ class AgentObservabilityListenerTest extends TestCase
         ));
     }
 
+    public function test_handle_agent_started_logs_active_skill_keys(): void
+    {
+        $this->expectNotToPerformAssertions();
+        $audit = Mockery::mock(AuditLogger::class);
+        $audit->shouldReceive('log')
+            ->once()
+            ->with('agent.started', Mockery::on(function (array $context): bool {
+                return $context['skill_keys'] === ['general_assistance']
+                    && $context['skill_count'] === 1;
+            }));
+
+        $listener = new AgentObservabilityListener($audit);
+        $listener->handleAgentStarted(new AgentStarted(
+            'run-skill',
+            'example',
+            'conv-skill',
+            RunContextData::make(['user_id' => 1]),
+            ['general_assistance'],
+        ));
+    }
+
     public function test_handle_agent_completed_logs_final_message(): void
     {
         $this->expectNotToPerformAssertions();

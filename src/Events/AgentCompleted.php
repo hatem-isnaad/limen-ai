@@ -17,5 +17,7 @@ class AgentCompleted
         public readonly string $conversationId,
         public readonly string $finalMessage,
         public readonly RunContext $context,
+        /** @var list<string> */
+        public readonly array $skillKeys = [],
     ) {}
 }

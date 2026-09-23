@@ -98,6 +98,19 @@ final class RunContextData implements ToolExecutionContext
         );
     }
 
+    public function withLocale(string $locale): self
+    {
+        return new self(
+            userId: $this->userId,
+            guestToken: $this->guestToken,
+            metadata: $this->metadata,
+            locale: $locale,
+            runId: $this->runId,
+            conversationId: $this->conversationId,
+            agentKey: $this->agentKey,
+        );
+    }
+
     public function withApprovalGranted(): self
     {
         return $this->withMetadata(['approval_granted' => true]);

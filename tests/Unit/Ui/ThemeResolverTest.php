@@ -34,8 +34,20 @@ class ThemeResolverTest extends TestCase
         $theme = app(ThemeResolver::class)->resolve(['preset' => 'arabic']);
 
         $this->assertSame('rtl', $theme->direction());
-        $this->assertStringContainsString('Noto Sans Arabic', (string) $theme->get('font_family'));
+        $this->assertStringContainsString('Cairo', (string) $theme->get('font_family'));
         $this->assertStringContainsString('مساعد', (string) $theme->get('title'));
+    }
+
+    public function test_configured_theme_overrides_non_default_preset_tokens(): void
+    {
+        config()->set('limen-ai.ui.theme.preset', 'arabic');
+        config()->set('limen-ai.ui.theme.direction', 'ltr');
+        config()->set('limen-ai.ui.theme.title', 'Configured Title');
+
+        $theme = app(ThemeResolver::class)->resolve();
+
+        $this->assertSame('ltr', $theme->direction());
+        $this->assertSame('Configured Title', $theme->get('title'));
     }
 
     public function test_it_merges_component_overrides(): void

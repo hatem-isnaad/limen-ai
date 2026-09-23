@@ -38,7 +38,8 @@ All commands registered under `limen-ai:*` namespace.
 
 | Command | Purpose |
 |---------|---------|
-| `limen-ai:agent:test {agent}` | Run agent against fake or live provider |
+| `limen-ai:agent:test {agent}` | Run agent against fake or live provider (`--expect-contains`) |
+| `limen-ai:skill:test {skill}` | Preview skill instructions (`--agent=` for composed prompt) |
 | `limen-ai:tool:test {tool}` | Execute tool with JSON input |
 | `limen-ai:workflow:test {workflow}` | Dry-run workflow |
 | `limen-ai:run {agent}` | Interactive CLI chat session |

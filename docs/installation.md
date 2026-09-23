@@ -215,14 +215,33 @@ LIMEN_AI_PROVIDER=fake
 php artisan migrate
 ```
 
-### 4. Validate
+### 4. Persistence (required for web chat)
+
+The package defaults to **in-memory** repositories for fast tests. The chat widget and HTTP API need **database-backed** persistence or conversations are lost between requests (second message returns `403 Conversation access denied`).
+
+In your host `.env`:
+
+```env
+LIMEN_AI_PERSISTENCE_DRIVER=database
+```
+
+Then migrate and clear config cache:
+
+```bash
+php artisan migrate
+php artisan config:clear
+```
+
+This switches conversation, message, run, checkpoint, and approval storage to the database implementations shipped in the package.
+
+### 5. Validate
 
 ```bash
 php artisan limen-ai:doctor
 php artisan limen-ai:validate
 ```
 
-### 5. Optional — Limen 3PL demo stubs
+### 6. Optional — Limen 3PL demo stubs
 
 ```bash
 php artisan vendor:publish --tag=limen-ai-limen-demo
@@ -255,6 +274,9 @@ Drop the chat widget into a Blade view:
 | Provider not registered | Ensure `composer.json` has Laravel auto-discovery; run `php artisan package:discover` |
 | Config out of date | `php artisan vendor:publish --tag=limen-ai-config --force` |
 | Path repo not updating | `composer update limen-ai/limen-ai --prefer-source` |
+| `403 Conversation access denied` on second message | Set `LIMEN_AI_PERSISTENCE_DRIVER=database`, run `php artisan migrate`, then `php artisan config:clear` |
+| Widget theme ignored | Use `LIMEN_AI_UI_*` env vars; omit hardcoded `:theme` props on `<x-limen-ai::widget />` |
+| Published views look outdated | `php artisan vendor:publish --tag=limen-ai-ui --force` or customize via config/env instead |
 
 ---
 

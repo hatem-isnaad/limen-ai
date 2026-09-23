@@ -24,13 +24,17 @@ class AgentObservabilityListener
 
     public function handleAgentStarted(AgentStarted $event): void
     {
-        $this->audit->log('agent.started', $this->context($event->runId, $event->agentKey, $event->conversationId, $event->context));
+        $this->audit->log('agent.started', array_merge(
+            $this->context($event->runId, $event->agentKey, $event->conversationId, $event->context),
+            $this->skillContext($event->skillKeys),
+        ));
     }
 
     public function handleAgentCompleted(AgentCompleted $event): void
     {
         $this->audit->log('agent.completed', array_merge(
             $this->context($event->runId, $event->agentKey, $event->conversationId, $event->context),
+            $this->skillContext($event->skillKeys),
             ['final_message' => $event->finalMessage],
         ));
     }
@@ -63,5 +67,18 @@ class AgentObservabilityListener
         }
 
         return $payload;
+    }
+
+    /** @param  list<string>  $skillKeys */
+    protected function skillContext(array $skillKeys): array
+    {
+        if ($skillKeys === []) {
+            return [];
+        }
+
+        return [
+            'skill_keys' => $skillKeys,
+            'skill_count' => count($skillKeys),
+        ];
     }
 }

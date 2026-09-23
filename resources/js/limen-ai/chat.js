@@ -99,11 +99,33 @@
             this.unreadCount = 0;
             this.widgetRoot = root.closest('[data-limen-ai-widget]');
             this.sounds = new LimenAiSoundPlayer(this.config.sounds || {});
+            this.authenticated = root.dataset.authenticated === 'true';
+            this.userId = root.dataset.userId || null;
+            this.historyEnabled = root.dataset.historyEnabled === 'true' || this.config.history?.enabled !== false;
+            this.guestEnabled = root.dataset.guestEnabled === 'true' || this.config.guest?.enabled === true;
+            this.guestToken = null;
+            this.historyEl = root.querySelector('[data-limen-ai-history]');
+            this.historyBackdropEl = root.querySelector('[data-limen-ai-history-backdrop]');
+            this.historyListEl = root.querySelector('[data-limen-ai-history-list]');
+            this.historyEmptyEl = root.querySelector('[data-limen-ai-history-empty]');
+            this.guestEl = root.querySelector('[data-limen-ai-guest]');
+            this.guestFormEl = root.querySelector('[data-limen-ai-guest-form]');
+            this.guestErrorEl = root.querySelector('[data-limen-ai-guest-error]');
+            this.conversations = [];
+            this.initialized = false;
+            this.initPromise = null;
+            this.locale = this.currentLocale();
 
             this.applyUiPreferences();
+            this.applyUiLanguage(this.locale, { persist: false });
             this.bindEvents();
             this.initializeTheme();
-            this.initialize();
+
+            if (this.shouldDeferInitialization()) {
+                return;
+            }
+
+            this.initPromise = this.initialize();
         }
 
         parseConfig(raw) {
@@ -170,6 +192,27 @@
                     }
                 });
             }
+
+            this.root.querySelector('[data-limen-ai-history-toggle]')?.addEventListener('click', () => {
+                this.toggleHistoryPanel();
+            });
+
+            this.root.querySelector('[data-limen-ai-history-close]')?.addEventListener('click', () => {
+                this.closeHistoryPanel();
+            });
+
+            this.historyBackdropEl?.addEventListener('click', () => {
+                this.closeHistoryPanel();
+            });
+
+            this.root.querySelector('[data-limen-ai-new-conversation]')?.addEventListener('click', () => {
+                this.startNewConversation();
+            });
+
+            this.guestFormEl?.addEventListener('submit', (event) => {
+                event.preventDefault();
+                this.submitGuestForm();
+            });
         }
 
         initializeTheme() {
@@ -199,15 +242,324 @@
             }
         }
 
+        resumeEnabled() {
+            return this.config.history?.resume_last_conversation !== false;
+        }
+
+        shouldDeferInitialization() {
+            if (this.root.dataset.conversationId) {
+                return false;
+            }
+
+            if (!this.widgetRoot || this.root.dataset.variant !== 'embedded') {
+                return false;
+            }
+
+            return this.config.history?.defer_until_open !== false;
+        }
+
+        sessionScopeKey() {
+            if (this.authenticated && this.userId) {
+                return `user:${this.userId}`;
+            }
+
+            if (this.guestToken) {
+                return `guest:${this.guestToken}`;
+            }
+
+            return 'anonymous';
+        }
+
+        guestStorageKey() {
+            return this.config.guest?.storage_key || 'limen-ai-guest-token';
+        }
+
+        conversationStorageKey() {
+            const base = this.config.history?.storage_key
+                || this.config.guest?.conversation_storage_key
+                || 'limen-ai-active-conversation';
+
+            return `${base}:${this.agent}:${this.sessionScopeKey()}`;
+        }
+
+        localeStorageKey() {
+            return this.config.i18n?.storage_key || 'limen-ai-locale';
+        }
+
+        normalizeLocale(locale) {
+            if (!locale || typeof locale !== 'string') {
+                return null;
+            }
+
+            const primary = locale.toLowerCase().split('-')[0];
+            const supported = this.config.i18n?.supported || ['en', 'ar'];
+
+            return supported.includes(primary) ? primary : null;
+        }
+
+        currentLocale() {
+            const stored = window.localStorage.getItem(this.localeStorageKey());
+            const fromStorage = this.normalizeLocale(stored);
+            if (fromStorage) {
+                return fromStorage;
+            }
+
+            const fromDocument = this.normalizeLocale(document.documentElement.lang);
+            if (fromDocument) {
+                return fromDocument;
+            }
+
+            return this.normalizeLocale(this.config.i18n?.default_locale) || 'en';
+        }
+
+        detectLocaleFromMessage(message) {
+            if (!message) {
+                return null;
+            }
+
+            const lower = message.toLowerCase();
+
+            if (/\b(talk|speak|reply|respond|write|chat)\s+(to\s+me\s+)?in\s+(arabic|english)\b/.test(lower)) {
+                return lower.includes('arabic') ? 'ar' : 'en';
+            }
+
+            if (/\b(use|switch\s+to)\s+(arabic|english)\b/.test(lower)) {
+                return lower.includes('arabic') ? 'ar' : 'en';
+            }
+
+            if (/(?:بالعربية|بالعربي|عربي|تحدث\s+بالعربية|تكلم\s+عربي)/u.test(message)) {
+                return 'ar';
+            }
+
+            if (/(?:بالانجليزية|بالإنجليزية|انجليزي|إنجليزي|in\s+english)/iu.test(message)) {
+                return 'en';
+            }
+
+            if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(message)) {
+                return 'ar';
+            }
+
+            if (/\b[a-z]{2,}\b/i.test(message)) {
+                return 'en';
+            }
+
+            return null;
+        }
+
+        i18nLabel(key) {
+            const labels = this.config.i18n?.labels?.[this.locale]
+                || this.config.i18n?.labels?.en
+                || {};
+
+            return labels[key] || '';
+        }
+
+        applyUiLanguage(locale, options = {}) {
+            const normalized = this.normalizeLocale(locale) || 'en';
+            const shouldPersist = options.persist !== false;
+
+            this.locale = normalized;
+
+            if (shouldPersist) {
+                window.localStorage.setItem(this.localeStorageKey(), normalized);
+            }
+
+            if (this.inputEl) {
+                const placeholder = this.i18nLabel('placeholder');
+                if (placeholder) {
+                    this.inputEl.placeholder = placeholder;
+                }
+            }
+
+            const typingLabel = this.root.querySelector('.limen-ai-chat__typing-label');
+            if (typingLabel) {
+                const label = this.i18nLabel('typing');
+                if (label) {
+                    typingLabel.textContent = label;
+                }
+            }
+
+            const historyTitle = this.root.querySelector('.limen-ai-chat__history-heading strong');
+            if (historyTitle) {
+                const label = this.i18nLabel('history');
+                if (label) {
+                    historyTitle.textContent = label;
+                }
+            }
+
+            const newChatLabel = this.root.querySelector('[data-limen-ai-new-conversation] span');
+            if (newChatLabel) {
+                const label = this.i18nLabel('new_chat');
+                if (label) {
+                    newChatLabel.textContent = label;
+                }
+            }
+
+            const guestTitle = this.root.querySelector('.limen-ai-chat__guest-title');
+            if (guestTitle) {
+                const label = this.i18nLabel('guest_title');
+                if (label) {
+                    guestTitle.textContent = label;
+                }
+            }
+
+            const guestCopy = this.root.querySelector('.limen-ai-chat__guest-copy');
+            if (guestCopy) {
+                const label = this.i18nLabel('guest_copy');
+                if (label) {
+                    guestCopy.textContent = label;
+                }
+            }
+
+            const guestSubmit = this.guestFormEl?.querySelector('button[type="submit"]');
+            if (guestSubmit) {
+                const label = this.i18nLabel('guest_continue');
+                if (label) {
+                    guestSubmit.textContent = label;
+                }
+            }
+        }
+
+        restoreConversationIdFromStorage() {
+            if (!this.resumeEnabled() || this.root.dataset.conversationId) {
+                return null;
+            }
+
+            return window.localStorage.getItem(this.conversationStorageKey());
+        }
+
+        async ensureReady() {
+            if (this.initialized) {
+                return;
+            }
+
+            if (!this.initPromise) {
+                this.initPromise = this.initialize();
+            }
+
+            await this.initPromise;
+        }
+
+        restoreGuestToken() {
+            if (this.authenticated || !this.guestEnabled) {
+                return;
+            }
+
+            const stored = window.localStorage.getItem(this.guestStorageKey());
+            if (stored) {
+                this.guestToken = stored;
+            }
+        }
+
+        persistGuestToken(token) {
+            if (!token) {
+                return;
+            }
+
+            this.guestToken = token;
+            window.localStorage.setItem(this.guestStorageKey(), token);
+        }
+
+        persistConversationId(conversationId) {
+            if (!conversationId) {
+                return;
+            }
+
+            window.localStorage.setItem(this.conversationStorageKey(), conversationId);
+        }
+
+        clearPersistedConversationId() {
+            window.localStorage.removeItem(this.conversationStorageKey());
+        }
+
         async initialize() {
+            this.restoreGuestToken();
+
+            if (!this.authenticated && this.guestEnabled && !this.guestToken) {
+                this.showGuestForm();
+                return;
+            }
+
+            await this.bootstrapConversation();
+        }
+
+        async bootstrapConversation() {
+            if (!this.conversationId) {
+                const storedConversationId = this.restoreConversationIdFromStorage();
+                if (storedConversationId) {
+                    this.conversationId = storedConversationId;
+                    this.root.dataset.conversationId = storedConversationId;
+                }
+            }
+
+            if (this.historyEnabled) {
+                await this.loadHistoryList();
+            }
+
             if (!this.conversationId) {
                 await this.createConversation();
             } else {
-                await this.loadConversation();
+                try {
+                    await this.loadConversation();
+                } catch (error) {
+                    this.conversationId = null;
+                    this.clearPersistedConversationId();
+                    await this.createConversation();
+                }
             }
 
             this.subscribeToRealtime();
             this.autoResizeInput();
+            this.initialized = true;
+        }
+
+        showGuestForm() {
+            if (!this.guestEl) {
+                return;
+            }
+
+            this.guestEl.hidden = false;
+            this.setComposerDisabled(true);
+        }
+
+        hideGuestForm() {
+            if (this.guestEl) {
+                this.guestEl.hidden = true;
+            }
+
+            if (this.guestErrorEl) {
+                this.guestErrorEl.hidden = true;
+                this.guestErrorEl.textContent = '';
+            }
+
+            this.setComposerDisabled(false);
+        }
+
+        async submitGuestForm() {
+            if (!this.guestFormEl) {
+                return;
+            }
+
+            const profile = {};
+            this.guestFormEl.querySelectorAll('input[name]').forEach((input) => {
+                profile[input.name] = input.value.trim();
+            });
+
+            try {
+                const response = await this.request('POST', `${this.apiBase}/guest/session`, {
+                    profile,
+                });
+
+                this.persistGuestToken(response.guest_token);
+                this.hideGuestForm();
+                await this.bootstrapConversation();
+                this.initialized = true;
+            } catch (error) {
+                if (this.guestErrorEl) {
+                    this.guestErrorEl.hidden = false;
+                    this.guestErrorEl.textContent = error.message || 'Unable to start guest session.';
+                }
+            }
         }
 
         async createConversation() {
@@ -217,15 +569,162 @@
 
             this.conversationId = response.conversation.id;
             this.root.dataset.conversationId = this.conversationId;
+            this.persistConversationId(this.conversationId);
+
+            if (response.guest_token) {
+                this.persistGuestToken(response.guest_token);
+            }
+
+            this.clearMessages();
             this.renderWelcome();
+
+            if (this.historyEnabled) {
+                await this.loadHistoryList();
+            }
+        }
+
+        async loadHistoryList() {
+            if (!this.historyEnabled) {
+                return;
+            }
+
+            try {
+                const response = await this.request('GET', `${this.apiBase}/conversations?agent=${encodeURIComponent(this.agent)}`);
+                this.conversations = response.conversations || [];
+                this.renderHistoryList();
+            } catch (error) {
+                this.conversations = [];
+                this.renderHistoryList();
+            }
+        }
+
+        renderHistoryList() {
+            if (!this.historyListEl) {
+                return;
+            }
+
+            this.historyListEl.innerHTML = '';
+
+            if (this.historyEmptyEl) {
+                this.historyEmptyEl.hidden = this.conversations.length > 0;
+            }
+
+            this.conversations.forEach((conversation) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'limen-ai-chat__history-item';
+                item.dataset.conversationId = conversation.id;
+                item.setAttribute('role', 'listitem');
+
+                if (conversation.id === this.conversationId) {
+                    item.classList.add('is-active');
+                }
+
+                const title = document.createElement('span');
+                title.className = 'limen-ai-chat__history-title';
+                title.textContent = conversation.title || 'Conversation';
+
+                const preview = document.createElement('span');
+                preview.className = 'limen-ai-chat__history-preview';
+                preview.textContent = conversation.preview || '';
+
+                item.appendChild(title);
+                if (this.config.history?.show_preview !== false && conversation.preview) {
+                    item.appendChild(preview);
+                }
+
+                item.addEventListener('click', () => {
+                    this.openConversation(conversation.id);
+                });
+
+                this.historyListEl.appendChild(item);
+            });
+        }
+
+        setHistoryOpen(open) {
+            this.root.dataset.historyOpen = open ? 'true' : 'false';
+
+            if (this.historyEl) {
+                this.historyEl.hidden = !open;
+            }
+
+            if (this.historyBackdropEl) {
+                this.historyBackdropEl.hidden = !open;
+            }
+
+            this.root.querySelector('[data-limen-ai-history-toggle]')?.classList.toggle('is-active', open);
+
+            if (open) {
+                this.loadHistoryList();
+            }
+        }
+
+        toggleHistoryPanel() {
+            if (!this.historyEl) {
+                return;
+            }
+
+            this.setHistoryOpen(this.root.dataset.historyOpen !== 'true');
+        }
+
+        closeHistoryPanel() {
+            this.setHistoryOpen(false);
+        }
+
+        async openConversation(conversationId) {
+            if (!conversationId || conversationId === this.conversationId) {
+                this.closeHistoryPanel();
+                return;
+            }
+
+            this.leaveRealtimeChannel();
+            this.conversationId = conversationId;
+            this.root.dataset.conversationId = conversationId;
+            this.persistConversationId(conversationId);
+            await this.loadConversation();
             this.subscribeToRealtime();
+            this.renderHistoryList();
+            this.closeHistoryPanel();
+            this.resetUnreadBadge();
+        }
+
+        async startNewConversation() {
+            this.leaveRealtimeChannel();
+            this.conversationId = null;
+            this.root.dataset.conversationId = '';
+            this.clearPersistedConversationId();
+            await this.createConversation();
+            this.subscribeToRealtime();
+            this.closeHistoryPanel();
+        }
+
+        leaveRealtimeChannel() {
+            if (!this.echoChannel || !window.Echo) {
+                this.echoChannel = null;
+                return;
+            }
+
+            const channelName = `${this.channelPrefix}.${this.conversationId}`;
+            window.Echo.leave(channelName);
+            this.echoChannel = null;
         }
 
         async loadConversation() {
             const response = await this.request('GET', `${this.apiBase}/conversations/${this.conversationId}`);
             this.clearMessages();
 
-            response.messages.forEach((message) => this.appendMessage(message.role, message.content, { animate: false }));
+            const preferredLanguage = response.conversation?.preferred_language;
+            if (preferredLanguage) {
+                this.applyUiLanguage(preferredLanguage);
+            }
+
+            response.messages.forEach((message) => {
+                if (!['user', 'assistant', 'system'].includes(message.role)) {
+                    return;
+                }
+
+                this.appendMessage(message.role, message.content, { animate: false });
+            });
 
             if (response.messages.length === 0) {
                 this.renderWelcome();
@@ -240,7 +739,11 @@
         }
 
         subscribeToRealtime() {
-            if (!window.Echo || !this.conversationId || this.echoChannel) {
+            if (!window.Echo || !this.conversationId) {
+                return;
+            }
+
+            if (this.echoChannel) {
                 return;
             }
 
@@ -248,12 +751,14 @@
             this.echoChannel = window.Echo.private(channelName);
 
             this.echoChannel.listen('AgentStarted', () => this.setThinking(true, 'Agent is thinking...'));
-            this.echoChannel.listen('AgentCompleted', (payload) => {
+            this.echoChannel.listen('AgentCompleted', async (payload) => {
                 this.pendingRunId = null;
                 this.setThinking(false);
                 this.setComposerDisabled(false);
+
+                await this.loadConversation();
+
                 if (payload.final_message) {
-                    this.appendMessage('assistant', payload.final_message);
                     this.sounds.play('receive');
                     this.incrementUnreadIfClosed();
                 }
@@ -263,11 +768,6 @@
                 this.setThinking(false, payload.error || 'Agent failed.');
                 this.setComposerDisabled(false);
                 this.sounds.play('notification');
-            });
-            this.echoChannel.listen('MessageCreated', (payload) => {
-                if (payload.role === 'assistant') {
-                    this.loadConversation();
-                }
             });
             this.echoChannel.listen('ConversationUpdated', (payload) => {
                 if (payload.state === 'waiting_approval') {
@@ -282,9 +782,18 @@
         }
 
         async sendMessage() {
+            await this.ensureReady();
+
             const message = this.inputEl?.value?.trim();
             if (!message || !this.conversationId) {
                 return;
+            }
+
+            this.persistConversationId(this.conversationId);
+
+            const detectedLocale = this.detectLocaleFromMessage(message);
+            if (detectedLocale) {
+                this.applyUiLanguage(detectedLocale);
             }
 
             this.appendMessage('user', message);
@@ -297,7 +806,12 @@
 
             const response = await this.request('POST', `${this.apiBase}/conversations/${this.conversationId}/messages`, {
                 message,
+                locale: this.locale,
             });
+
+            if (response.locale) {
+                this.applyUiLanguage(response.locale);
+            }
 
             this.pendingRunId = response.run_id || null;
 
@@ -330,7 +844,7 @@
                     this.setThinking(false);
 
                     if (run.status === 'completed' && run.final_message) {
-                        this.appendMessage('assistant', run.final_message);
+                        await this.loadConversation();
                         this.sounds.play('receive');
                         this.incrementUnreadIfClosed();
                     } else if (run.status === 'waiting_approval') {
@@ -461,7 +975,7 @@
             }
 
             if (active && this.subtitleEl) {
-                this.subtitleEl.textContent = statusText || 'Typing...';
+                this.subtitleEl.textContent = statusText || this.i18nLabel('typing') || 'Typing...';
             } else if (this.subtitleEl) {
                 const original = this.root.dataset.subtitleOriginal;
                 if (original) {
@@ -557,6 +1071,19 @@
                 credentials: 'same-origin',
             };
 
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                options.headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            if (this.guestToken) {
+                options.headers['X-Limen-Guest-Token'] = this.guestToken;
+            }
+
+            if (this.locale) {
+                options.headers['X-Limen-Locale'] = this.locale;
+            }
+
             if (body !== undefined) {
                 options.body = JSON.stringify(body);
             }
@@ -576,13 +1103,13 @@
         }
     }
 
-    function mountWidget(root) {
+    function mountWidget(root, chat) {
         const launcher = root.querySelector('[data-limen-ai-launcher]');
-        const chat = root.querySelector('[data-limen-ai-chat]');
-        const subtitle = chat?.querySelector('[data-limen-ai-subtitle]');
+        const chatRoot = root.querySelector('[data-limen-ai-chat]');
+        const subtitle = chatRoot?.querySelector('[data-limen-ai-subtitle]');
 
-        if (subtitle && !chat.dataset.subtitleOriginal) {
-            chat.dataset.subtitleOriginal = subtitle.textContent || '';
+        if (subtitle && !chatRoot.dataset.subtitleOriginal) {
+            chatRoot.dataset.subtitleOriginal = subtitle.textContent || '';
         }
 
         launcher?.addEventListener('click', () => {
@@ -590,6 +1117,8 @@
             root.dataset.open = isOpen ? 'false' : 'true';
 
             if (!isOpen) {
+                chat?.ensureReady().catch(() => {});
+
                 let soundConfig = {};
                 try {
                     soundConfig = JSON.parse(root.dataset.uiConfig || '{}').sounds || {};
@@ -608,11 +1137,17 @@
         });
     }
 
-    document.querySelectorAll('[data-limen-ai-chat]').forEach((root) => {
-        new LimenAiChat(root);
+    document.querySelectorAll('[data-limen-ai-widget]').forEach((widgetRoot) => {
+        const chatRoot = widgetRoot.querySelector('[data-limen-ai-chat]');
+        const chat = chatRoot ? new LimenAiChat(chatRoot) : null;
+        mountWidget(widgetRoot, chat);
     });
 
-    document.querySelectorAll('[data-limen-ai-widget]').forEach((root) => {
-        mountWidget(root);
+    document.querySelectorAll('[data-limen-ai-chat]').forEach((root) => {
+        if (root.closest('[data-limen-ai-widget]')) {
+            return;
+        }
+
+        new LimenAiChat(root);
     });
 })();

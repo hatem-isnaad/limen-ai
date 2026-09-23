@@ -46,4 +46,41 @@ class InMemoryConversationRepository implements ConversationRepository
             ['updated_at' => now()->toIso8601String()],
         );
     }
+
+    public function listForUser(int $userId, ?string $agentKey = null, int $limit = 50): array
+    {
+        return $this->sortedList(
+            array_values(array_filter(
+                $this->conversations,
+                static fn (array $conversation): bool => (int) ($conversation['user_id'] ?? 0) === $userId
+                    && ($agentKey === null || (string) ($conversation['agent_key'] ?? '') === $agentKey),
+            )),
+            $limit,
+        );
+    }
+
+    public function listForGuest(string $guestToken, ?string $agentKey = null, int $limit = 50): array
+    {
+        return $this->sortedList(
+            array_values(array_filter(
+                $this->conversations,
+                static fn (array $conversation): bool => ($conversation['guest_token'] ?? null) === $guestToken
+                    && ($agentKey === null || (string) ($conversation['agent_key'] ?? '') === $agentKey),
+            )),
+            $limit,
+        );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $conversations
+     * @return list<array<string, mixed>>
+     */
+    protected function sortedList(array $conversations, int $limit): array
+    {
+        usort($conversations, static function (array $left, array $right): int {
+            return strcmp((string) ($right['updated_at'] ?? ''), (string) ($left['updated_at'] ?? ''));
+        });
+
+        return array_slice($conversations, 0, $limit);
+    }
 }

@@ -66,6 +66,40 @@ class DatabaseConversationRepository implements ConversationRepository
             ->update($updates);
     }
 
+    public function listForUser(int $userId, ?string $agentKey = null, int $limit = 50): array
+    {
+        $query = $this->db->table('limen_ai_conversations')
+            ->where('user_id', $userId)
+            ->orderByDesc('updated_at')
+            ->limit($limit);
+
+        if ($agentKey !== null) {
+            $query->where('agent_key', $agentKey);
+        }
+
+        return array_map(
+            fn (object $row): array => $this->mapRow((array) $row),
+            $query->get()->all(),
+        );
+    }
+
+    public function listForGuest(string $guestToken, ?string $agentKey = null, int $limit = 50): array
+    {
+        $query = $this->db->table('limen_ai_conversations')
+            ->where('guest_token', $guestToken)
+            ->orderByDesc('updated_at')
+            ->limit($limit);
+
+        if ($agentKey !== null) {
+            $query->where('agent_key', $agentKey);
+        }
+
+        return array_map(
+            fn (object $row): array => $this->mapRow((array) $row),
+            $query->get()->all(),
+        );
+    }
+
     /** @param  array<string, mixed>  $row */
     protected function mapRow(array $row): array
     {

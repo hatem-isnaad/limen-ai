@@ -84,6 +84,10 @@ class DefaultAgentRuntime implements AgentRuntime
         $attachmentIds = array_values(array_filter((array) ($context->metadata()['attachment_ids'] ?? [])));
         $attachmentMessages = $this->attachments->retrieve($conversationId, $userMessage, $attachmentIds);
         $runtimePersona = $this->runtimePersonaMessage($agent, $context);
+        $contextPrefixCount = count($memoryMessages)
+            + count($knowledgeMessages)
+            + count($attachmentMessages)
+            + ($runtimePersona !== null ? 1 : 0);
         $messages = array_merge(
             $memoryMessages,
             $knowledgeMessages,
@@ -102,7 +106,9 @@ class DefaultAgentRuntime implements AgentRuntime
             'span_id' => $trace?->spanId,
         ]);
 
-        $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context));
+        $skillKeys = $this->skillKeys($agent);
+
+        $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context, $skillKeys));
 
         $limits = new RuntimeLimits($agent->limits(), microtime(true));
 
@@ -124,14 +130,14 @@ class DefaultAgentRuntime implements AgentRuntime
                 'error' => null,
             ]);
 
-            $this->syncConversationMessages($conversationId, $messages, $historyCount);
+            $this->syncConversationMessages($conversationId, $messages, $historyCount, $contextPrefixCount);
 
-            $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $finalMessage, $context));
+            $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $finalMessage, $context, $skillKeys));
             $this->checkpoints->delete($runId);
 
             return $runId;
         } catch (ApprovalRequiredException $exception) {
-            $this->syncConversationMessages($conversationId, $messages, $historyCount);
+            $this->syncConversationMessages($conversationId, $messages, $historyCount, $contextPrefixCount);
             $this->conversations->markWaitingApproval($conversationId);
 
             $approval = $this->approvals->findPendingForRun($runId);
@@ -230,6 +236,7 @@ class DefaultAgentRuntime implements AgentRuntime
             $conversationId,
             $finalMessage,
             $context,
+            $this->skillKeys($agent),
         ));
 
         $this->checkpoints->delete($runId);
@@ -464,15 +471,35 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->runs->updateStatus($runId, $status, $attributes);
     }
 
-    protected function syncConversationMessages(string $conversationId, array $messages, int $historyCount): void
-    {
-        $newMessages = array_slice($messages, $historyCount);
+    protected function syncConversationMessages(
+        string $conversationId,
+        array $messages,
+        int $historyCount,
+        int $contextPrefixCount = 0,
+    ): void {
+        if ($contextPrefixCount > 0) {
+            $turnStart = $contextPrefixCount + $historyCount - 1;
+            $newMessages = array_slice($messages, $turnStart + 1);
+        } else {
+            $newMessages = array_slice($messages, $historyCount);
+        }
 
-        if ($newMessages === []) {
+        $persistable = array_values(array_filter(
+            $newMessages,
+            static function (array $message): bool {
+                if (($message['role'] ?? '') !== 'assistant') {
+                    return false;
+                }
+
+                return trim((string) ($message['content'] ?? '')) !== '';
+            },
+        ));
+
+        if ($persistable === []) {
             return;
         }
 
-        $this->conversations->appendAgentMessages($conversationId, $newMessages);
+        $this->conversations->appendAgentMessages($conversationId, $persistable);
     }
 
     protected function shouldTrace(): bool
@@ -488,6 +515,15 @@ class DefaultAgentRuntime implements AgentRuntime
             'user_id' => $context->userId(),
             'guest_token' => $context->guestToken(),
         ];
+    }
+
+    /** @return list<string> */
+    protected function skillKeys(ResolvedAgent $agent): array
+    {
+        return array_values(array_map(
+            static fn ($skill): string => $skill->key(),
+            $agent->skills(),
+        ));
     }
 
     protected function runtimePersonaMessage(ResolvedAgent $agent, RunContext $context): ?array

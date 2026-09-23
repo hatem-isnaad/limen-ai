@@ -21,4 +21,20 @@ class DoctorCommandTest extends TestCase
             ->expectsOutputToContain('doctor found problems')
             ->assertFailed();
     }
+
+    public function test_doctor_warns_when_in_memory_conversation_repositories_are_used(): void
+    {
+        $this->artisan('limen-ai:doctor')
+            ->expectsOutputToContain('in-memory repositories')
+            ->assertSuccessful();
+    }
+
+    public function test_doctor_fails_on_in_memory_repositories_in_production(): void
+    {
+        $this->app['env'] = 'production';
+
+        $this->artisan('limen-ai:doctor')
+            ->expectsOutputToContain('in-memory repositories')
+            ->assertFailed();
+    }
 }

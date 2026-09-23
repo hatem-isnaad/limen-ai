@@ -10,6 +10,11 @@ abstract class TestCase extends Orchestra
 {
     protected function setUp(): void
     {
+        $publishedConfig = dirname(__DIR__).'/vendor/orchestra/testbench-core/laravel/config/limen-ai.php';
+        if (is_file($publishedConfig)) {
+            unlink($publishedConfig);
+        }
+
         parent::setUp();
 
         $publishedViews = dirname(__DIR__).'/vendor/orchestra/testbench-core/laravel/resources/views/vendor/limen-ai';

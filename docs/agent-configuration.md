@@ -8,8 +8,18 @@ Every agent is fully controlled from `config/limen-ai.php`. No code changes are 
 'persona' => [
     'display_name' => 'Limen 3PL Assistant',
     'tone' => 'professional',
-    'language' => 'en',
+    'language' => 'auto',
     'response_style' => 'concise',
+    'gender' => 'female',          // male | female | neutral
+    'region' => 'eg',              // eg | sa | ae | jo | us | uk | international
+    'formality' => 'formal',       // casual | neutral | formal
+    'voice' => 'clear operational support',
+    'ui' => [
+        'title' => 'Limen 3PL Support',
+        'subtitle' => 'Shipment lookups and approved customer updates',
+        'welcome_message' => 'How can I help with your shipment today?',
+        'avatar_url' => null,
+    ],
     'rules' => [
         'Reference shipment IDs explicitly.',
     ],
@@ -18,6 +28,15 @@ Every agent is fully controlled from `config/limen-ai.php`. No code changes are 
         'Promising delivery dates without tool confirmation',
     ],
 ],
+```
+
+Global defaults merge into every agent from `limen-ai.agent_defaults`. Preset guidance for gender, region, and formality lives in `limen-ai.agent_presets`.
+
+Inspect a resolved profile:
+
+```bash
+php artisan limen-ai:agents
+curl /limen-ai/agents/example
 ```
 
 Persona rules are injected into the **system instructions** at resolve time. Language `auto` adds a runtime system addendum based on `RunContext::locale()`.
@@ -90,9 +109,38 @@ Disallowed keys throw `MemoryPolicyException` before persistence.
 | Prompt injection | `ContentSanitizer` on user messages, memory, knowledge |
 | SSRF | HTTP tool allowlists + private IP blocking |
 | Memory | Key allowlist + length limits + sanitization on recall |
-| Output | `max_response_chars` guard on final assistant message |
+| Output | `AgentResponseGuard` — optional validation/moderation + `max_response_chars` |
 
 See [SECURITY.md](../SECURITY.md) for the full threat model.
+
+## Output validation and moderation
+
+Host apps can plug custom validators into the post-LLM pipeline:
+
+```php
+// config/limen-ai.php
+'quality' => [
+    'output_validator' => App\LimenAi\Output\BrandOutputValidator::class,
+    'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
+],
+```
+
+Built-in behavior:
+
+- `StructuredOutputValidator` — when `output.format` is `json`, rejects invalid JSON before persisting
+- `BasicOutputModerator` — optional pattern redaction when `LIMEN_AI_OUTPUT_MODERATION=true`
+
+Smoke-test agent replies from CI:
+
+```bash
+php artisan limen-ai:agent:test example --message="Hello" --expect-contains="help"
+```
+
+Preview skill instructions:
+
+```bash
+php artisan limen-ai:skill:test general_assistance --agent=example
+```
 
 ## Global quality defaults
 
@@ -101,6 +149,8 @@ See [SECURITY.md](../SECURITY.md) for the full threat model.
     'default_tone' => 'professional',
     'default_language' => 'en',
     'save_tokens' => true,
+    'output_validator' => env('LIMEN_AI_OUTPUT_VALIDATOR'),
+    'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
 ],
 ```
 

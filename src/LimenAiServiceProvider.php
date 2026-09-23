@@ -8,6 +8,12 @@ use LimenAi\Agents\ConfigAgentRepository;
 use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\AgentPersonaComposer;
 use LimenAi\Agents\AgentResponseGuard;
+use LimenAi\Agents\ChainedOutputValidator;
+use LimenAi\Agents\StructuredOutputValidator;
+use LimenAi\Contracts\Agents\OutputModerator;
+use LimenAi\Contracts\Agents\OutputValidator;
+use LimenAi\Security\BasicOutputModerator;
+use LimenAi\Security\NullOutputModerator;
 use LimenAi\Agents\InstructionComposer;
 use LimenAi\Authorization\CacheGuestSessionValidator;
 use LimenAi\Authorization\DatabaseApprovalRepository;
@@ -38,6 +44,7 @@ use LimenAi\Console\MakeSkillCommand;
 use LimenAi\Console\MakeToolCommand;
 use LimenAi\Console\MakeWorkflowCommand;
 use LimenAi\Console\RunCommand;
+use LimenAi\Console\SkillTestCommand;
 use LimenAi\Console\SkillsCommand;
 use LimenAi\Console\StubGenerator;
 use LimenAi\Console\ToolTestCommand;
@@ -93,8 +100,12 @@ use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Conversations\ConversationService;
+use LimenAi\Conversations\DatabaseConversationRepository;
+use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Conversations\InMemoryConversationRepository;
 use LimenAi\Conversations\InMemoryMessageRepository;
+use LimenAi\Support\EnvironmentDoctor;
+use LimenAi\Support\PersistenceConfig;
 use LimenAi\Conversations\MessageFormatter;
 use LimenAi\Conversations\NullConversationSummarizer;
 use LimenAi\Runtime\ArrayCheckpointStore;
@@ -183,6 +194,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerUi();
         $this->registerAttachments();
         $this->registerManager();
+        $this->registerSupport();
         $this->registerConsole();
     }
 
@@ -263,6 +275,31 @@ class LimenAiServiceProvider extends ServiceProvider
 
     protected function registerAgents(): void
     {
+        $this->app->singleton(OutputValidator::class, function ($app): OutputValidator {
+            $validators = [new StructuredOutputValidator()];
+            $custom = $app['config']->get('limen-ai.quality.output_validator');
+
+            if (is_string($custom) && $custom !== '') {
+                $validators[] = $app->make($custom);
+            }
+
+            return new ChainedOutputValidator($validators);
+        });
+
+        $this->app->singleton(OutputModerator::class, function ($app): OutputModerator {
+            if (! (bool) $app['config']->get('limen-ai.quality.output_moderation_enabled', false)) {
+                return new NullOutputModerator();
+            }
+
+            $custom = $app['config']->get('limen-ai.quality.output_moderator');
+
+            if (is_string($custom) && $custom !== '') {
+                return $app->make($custom);
+            }
+
+            return $app->make(BasicOutputModerator::class);
+        });
+
         $this->app->singleton(AgentPersonaComposer::class);
         $this->app->singleton(AgentResponseGuard::class);
         $this->app->singleton(InstructionComposer::class);
@@ -295,8 +332,10 @@ class LimenAiServiceProvider extends ServiceProvider
     protected function registerRuntime(): void
     {
         $this->app->singleton(RunRepository::class, function ($app): RunRepository {
-            $runtime = $app['config']->get('limen-ai.runtime', []);
-            $implementation = $runtime['run_repository'] ?? InMemoryRunRepository::class;
+            $implementation = $this->resolvePersistenceClass(
+                $app['config']->get('limen-ai.runtime.run_repository'),
+                PersistenceConfig::runRepositoryClass($this->persistenceDriver($app)),
+            );
 
             if ($implementation === DatabaseRunRepository::class) {
                 return new DatabaseRunRepository($app['db']->connection());
@@ -306,8 +345,10 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(CheckpointStore::class, function ($app): CheckpointStore {
-            $runtime = $app['config']->get('limen-ai.runtime', []);
-            $implementation = $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class;
+            $implementation = $this->resolvePersistenceClass(
+                $app['config']->get('limen-ai.runtime.checkpoint_store'),
+                PersistenceConfig::checkpointStoreClass($this->persistenceDriver($app)),
+            );
 
             if ($implementation === DatabaseCheckpointStore::class) {
                 return new DatabaseCheckpointStore($app['db']->connection());
@@ -317,8 +358,10 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ApprovalRepository::class, function ($app): ApprovalRepository {
-            $runtime = $app['config']->get('limen-ai.runtime', []);
-            $implementation = $runtime['approval_repository'] ?? InMemoryApprovalRepository::class;
+            $implementation = $this->resolvePersistenceClass(
+                $app['config']->get('limen-ai.runtime.approval_repository'),
+                PersistenceConfig::approvalRepositoryClass($this->persistenceDriver($app)),
+            );
 
             if ($implementation === DatabaseApprovalRepository::class) {
                 return new DatabaseApprovalRepository($app['db']->connection());
@@ -335,8 +378,32 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $conversations = $this->app['config']->get('limen-ai.conversations', []);
 
-        $this->app->singleton(ConversationRepository::class, $conversations['repository'] ?? InMemoryConversationRepository::class);
-        $this->app->singleton(MessageRepository::class, $conversations['message_repository'] ?? InMemoryMessageRepository::class);
+        $this->app->singleton(ConversationRepository::class, function ($app) use ($conversations): ConversationRepository {
+            $implementation = $this->resolvePersistenceClass(
+                $conversations['repository'] ?? null,
+                PersistenceConfig::conversationRepositoryClass($this->persistenceDriver($app)),
+            );
+
+            if ($implementation === DatabaseConversationRepository::class) {
+                return new DatabaseConversationRepository($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
+        $this->app->singleton(MessageRepository::class, function ($app) use ($conversations): MessageRepository {
+            $implementation = $this->resolvePersistenceClass(
+                $conversations['message_repository'] ?? null,
+                PersistenceConfig::messageRepositoryClass($this->persistenceDriver($app)),
+            );
+
+            if ($implementation === DatabaseMessageRepository::class) {
+                return new DatabaseMessageRepository($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
         $this->app->singleton(MessageFormatter::class);
         $this->app->singleton(ConversationSummarizer::class, $conversations['summarizer'] ?? NullConversationSummarizer::class);
         $this->app->singleton(ConversationService::class);
@@ -480,6 +547,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(ConversationAccessGuard::class);
         $this->app->singleton(ThemeResolver::class);
         $this->app->singleton(ChatUiConfig::class);
+        $this->app->singleton(\LimenAi\Ui\WidgetThemeOptions::class);
     }
 
     protected function registerAttachments(): void
@@ -517,6 +585,11 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(LimenAiManager::class);
     }
 
+    protected function registerSupport(): void
+    {
+        $this->app->singleton(EnvironmentDoctor::class);
+    }
+
     protected function registerConsole(): void
     {
         $this->app->singleton(StubGenerator::class, fn ($app): StubGenerator => new StubGenerator(
@@ -533,6 +606,7 @@ class LimenAiServiceProvider extends ServiceProvider
                 AgentsCommand::class,
                 ToolsCommand::class,
                 SkillsCommand::class,
+                SkillTestCommand::class,
                 WorkflowsCommand::class,
                 LogsCommand::class,
                 RunCommand::class,
@@ -569,5 +643,15 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(UsageReader::class, fn ($app): UsageReader => $app->make(UsageTracker::class));
+    }
+
+    protected function persistenceDriver($app): string
+    {
+        return (string) $app['config']->get('limen-ai.persistence.driver', PersistenceConfig::driver());
+    }
+
+    protected function resolvePersistenceClass(?string $configured, string $default): string
+    {
+        return is_string($configured) && $configured !== '' ? $configured : $default;
     }
 }

@@ -186,6 +186,40 @@ class AgentRuntimeTest extends TestCase
         $this->assertCount(4, $stored);
     }
 
+    public function test_it_persists_only_final_assistant_message_after_tool_call(): void
+    {
+        $fake = app(FakeLlmProvider::class);
+        $fake->queueResponse(LlmResponseData::fromArray([
+            'tool_calls' => [[
+                'id' => 'call_1',
+                'function' => [
+                    'name' => 'example_echo',
+                    'arguments' => json_encode(['message' => 'myname is hatem elsheref']),
+                ],
+            ]],
+            'finish_reason' => 'tool_calls',
+        ]));
+        $fake->queueResponse(LlmResponseData::fromArray([
+            'content' => 'Echo complete.',
+            'finish_reason' => 'stop',
+        ]));
+
+        app(AgentRuntime::class)->run(
+            'example',
+            'conv-tool-persist',
+            'yes echo myname is hatem elsheref',
+            RunContextData::make(['user_id' => 1]),
+        );
+
+        $stored = app(ConversationService::class)->storedMessages('conv-tool-persist');
+
+        $this->assertCount(2, $stored);
+        $this->assertSame('user', $stored[0]['role']);
+        $this->assertSame('yes echo myname is hatem elsheref', $stored[0]['content']);
+        $this->assertSame('assistant', $stored[1]['role']);
+        $this->assertSame('Echo complete.', $stored[1]['content']);
+    }
+
     public function test_it_persists_messages_to_conversation_on_completion(): void
     {
         app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([

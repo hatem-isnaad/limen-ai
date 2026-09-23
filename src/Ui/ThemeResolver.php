@@ -24,12 +24,8 @@ class ThemeResolver
         $presetTokens = $this->config->get('limen-ai.ui.presets.'.$preset, []);
 
         $reserved = ['preset', 'mode', 'overrides', 'allow_mode_toggle'];
-        $configOverrides = array_diff_key($themeConfig, array_flip($reserved));
-        $explicitOverrides = is_array($themeConfig['overrides'] ?? null) ? $themeConfig['overrides'] : [];
-
-        if ($preset !== 'default' && $presetTokens !== []) {
-            $configOverrides = array_diff_key($configOverrides, $presetTokens);
-        }
+        $configOverrides = $this->filterEmpty(array_diff_key($themeConfig, array_flip($reserved)));
+        $explicitOverrides = $this->filterEmpty(is_array($themeConfig['overrides'] ?? null) ? $themeConfig['overrides'] : []);
 
         $resolved = array_merge(
             $palette,
@@ -50,5 +46,17 @@ class ThemeResolver
         }
 
         return new ResolvedTheme($resolved);
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @return array<string, mixed>
+     */
+    protected function filterEmpty(array $values): array
+    {
+        return array_filter(
+            $values,
+            static fn (mixed $value): bool => $value !== null && $value !== '',
+        );
     }
 }

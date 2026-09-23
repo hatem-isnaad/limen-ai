@@ -8,11 +8,12 @@ use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\RunRepository;
+use LimenAi\Http\Concerns\AuthorizesConversationAccess;
 use LimenAi\Http\Concerns\BuildsRunContext;
-use LimenAi\Http\Services\ConversationAccessGuard;
 
 class ApprovalController
 {
+    use AuthorizesConversationAccess;
     use BuildsRunContext;
 
     public function __construct(
@@ -20,7 +21,6 @@ class ApprovalController
         private readonly RunRepository $runs,
         private readonly AgentRunDispatcher $dispatcher,
         private readonly AuthorizationService $authorization,
-        private readonly ConversationAccessGuard $accessGuard,
     ) {}
 
     public function approve(Request $request, string $approvalId): JsonResponse { return $this->resolve($request, $approvalId, approve: true); }
@@ -33,7 +33,7 @@ class ApprovalController
         $runId = (string) ($approval['run_id'] ?? '');
         $run = $this->runs->find($runId) ?? [];
         $conversationId = (string) ($run['conversation_id'] ?? '');
-        abort_unless($this->accessGuard->canAccess($request->user(), $conversationId), 403, 'Approval access denied.');
+        $this->authorizeConversationAccess($request, $conversationId);
         $context = $this->runContextFromRequest($request, $this->authorization);
         $result = $approve ? $this->dispatcher->dispatchResume($runId, $context) : $this->dispatcher->dispatchReject($runId, $context);
         return response()->json(['approval_id' => $approvalId, 'run_id' => $runId, 'action' => $approve ? 'approved' : 'rejected', 'queued' => $result->queued]);

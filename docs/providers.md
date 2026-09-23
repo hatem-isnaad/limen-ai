@@ -61,6 +61,21 @@ Or see `.env.example` in the package repository for the full key list.
 | `LIMEN_AI_OPENROUTER_MODEL` | Model for `example_openrouter` |
 | `OPENAI_EMBEDDING_MODEL` | Embedding model (default `text-embedding-3-small`) |
 
+## Ollama / local OpenAI-compatible servers
+
+Ollama exposes an OpenAI-compatible API. Point the `openai` provider at your local server:
+
+```env
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434/v1
+LIMEN_AI_EXAMPLE_MODEL=qwen3:8b
+```
+
+Use the model name exactly as `ollama list` shows it. The API key can be any non-empty string — Ollama does not validate it, but Limen AI requires a value.
+
+For agents other than `example`, set the matching `LIMEN_AI_*_MODEL` env key or override `model` in the agent config block.
+
 ## OpenRouter example
 
 OpenRouter uses the OpenAI chat-completions format. Set any OpenRouter model slug on the agent:

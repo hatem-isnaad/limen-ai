@@ -7,8 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Widget and chatbot now correctly apply `LIMEN_AI_UI_*` theme env vars over agent persona UI and theme presets (`ThemeResolver`, `WidgetThemeOptions`, `widget` Blade component)
+- Removed hardcoded example-agent `persona.ui` copy that masked env-driven widget titles and welcome messages
+- `LIMEN_AI_PERSISTENCE_DRIVER=database` switches conversation, message, run, checkpoint, and approval repos to database implementations (fixes web chat `403` on second request)
+- `limen-ai:doctor` warns on in-memory persistence (fails in production) and missing migrations when database driver is enabled
+- CLI `limen-ai:run` and `limen-ai:agent:test` authenticate via `Auth::loginUsingId()` before agent execution
+- Conversation sync after agent runs persists only final assistant text (not tool JSON or tool-call stubs) and accounts for runtime context prefixes (memory, knowledge, persona)
+- Chat API and widget filter internal `tool` role messages from user-visible history
+- Release test fixes: checkpoint FK seeding in `DatabaseCheckpointStoreTest`, guest validator binding/auth alignment, `AgentRuntimeTest` history persistence
+
 ### Added
 
+- `OutputValidator` and `OutputModerator` contracts with `StructuredOutputValidator`, `BasicOutputModerator`, and chained validation in `AgentResponseGuard`
+- `limen-ai:skill:test` command and `limen-ai:agent:test --expect-contains` smoke assertion flag
+- Skill adherence metrics (`skill_keys`, `skill_count`) in audit logs for agent start/complete events
+- Published UI `VERSION` stamp and `limen-ai:doctor` warning when host views are stale
+- Host integration test template at `examples/limen-host/tests/Feature/LimenAiAgentTest.php`
+- Synced `.env.example` and `stubs/limen-ai.env.example` with all `LIMEN_AI_*` config keys
+- `DatabaseConversationRepository` and `DatabaseMessageRepository` tests; HTTP persistence feature test
+- `PersistenceConfig` and `EnvironmentDoctor` support classes
+- Ollama/local LLM setup guide in `docs/providers.md`
+- Installation guide section: web UI requires database persistence
 - Professional chat UI redesign: avatars, typing indicator, animations, sounds, unread badge, polished widget launcher
 - Configurable UI preferences (`ui.sounds`, `ui.animations`, `ui.widget`, `ui.messages`, `ui.composer`) via config and env
 - [`AGENTS.md`](AGENTS.md) — complete AI agent and contributor reference guide

@@ -3,6 +3,8 @@
 namespace LimenAi\Tests\Unit\Runtime;
 
 use LimenAi\Runtime\DatabaseCheckpointStore;
+use LimenAi\Runtime\DatabaseRunRepository;
+use LimenAi\Runtime\RunStatus;
 use LimenAi\Tests\DatabaseTestCase;
 
 class DatabaseCheckpointStoreTest extends DatabaseTestCase
@@ -10,6 +12,8 @@ class DatabaseCheckpointStoreTest extends DatabaseTestCase
     public function test_it_saves_and_loads_checkpoint_state(): void
     {
         $store = app(DatabaseCheckpointStore::class);
+
+        $this->seedRun('run-cp-1');
 
         $store->save('run-cp-1', 3, [
             'messages' => [['role' => 'assistant', 'content' => 'Paused']],
@@ -26,6 +30,8 @@ class DatabaseCheckpointStoreTest extends DatabaseTestCase
     public function test_it_updates_existing_checkpoint(): void
     {
         $store = app(DatabaseCheckpointStore::class);
+
+        $this->seedRun('run-cp-2');
 
         $store->save('run-cp-2', 1, ['step' => 'first']);
         $store->save('run-cp-2', 2, ['step' => 'second']);
@@ -45,9 +51,21 @@ class DatabaseCheckpointStoreTest extends DatabaseTestCase
     {
         $store = app(DatabaseCheckpointStore::class);
 
+        $this->seedRun('run-cp-3');
+
         $store->save('run-cp-3', 1, ['ok' => true]);
         $store->delete('run-cp-3');
 
         $this->assertNull($store->load('run-cp-3'));
+    }
+
+    protected function seedRun(string $runId): void
+    {
+        app(DatabaseRunRepository::class)->create([
+            'id' => $runId,
+            'conversation_id' => 'conv-'.$runId,
+            'agent_key' => 'example',
+            'status' => RunStatus::RUNNING,
+        ]);
     }
 }

@@ -23,6 +23,9 @@ final class ChatUiConfig
             'widget' => $ui['widget'] ?? [],
             'composer' => $ui['composer'] ?? [],
             'messages' => $ui['messages'] ?? [],
+            'guest' => $ui['guest'] ?? [],
+            'history' => $ui['history'] ?? [],
+            'i18n' => $ui['i18n'] ?? [],
         ];
     }
 

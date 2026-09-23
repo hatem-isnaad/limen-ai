@@ -5,7 +5,26 @@
 ])
 
 @php
-    $resolvedTheme = app(\LimenAi\Ui\ThemeResolver::class)->resolve(is_array($theme) ? $theme : []);
+    use LimenAi\Agents\AgentProfilePresenter;
+    use LimenAi\Contracts\Agents\AgentRepository;
+    use LimenAi\Ui\WidgetThemeOptions;
+
+    $agentUi = [];
+    $agentDefinition = app(AgentRepository::class)->find($agent);
+
+    if ($agentDefinition !== null) {
+        $agentProfile = app(AgentProfilePresenter::class)->present($agentDefinition);
+        $agentUi = [
+            'title' => $agentProfile['ui']['title'] ?? null,
+            'subtitle' => $agentProfile['ui']['subtitle'] ?? null,
+            'welcome_message' => $agentProfile['ui']['welcome_message'] ?? null,
+            'avatar_url' => $agentProfile['ui']['avatar_url'] ?? null,
+        ];
+    }
+
+    $resolvedTheme = app(\LimenAi\Ui\ThemeResolver::class)->resolve(
+        app(WidgetThemeOptions::class)->merge($agentUi, is_array($theme) ? $theme : []),
+    );
     $launcherLabel = config('limen-ai.ui.widget.launcher_label') ?: ($resolvedTheme->direction() === 'rtl' ? 'محادثة' : 'Chat');
 @endphp
 

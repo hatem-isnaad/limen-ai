@@ -17,6 +17,7 @@ abstract class DatabaseTestCase extends TestCase
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',
+            'foreign_key_constraints' => true,
         ]);
     }
 }

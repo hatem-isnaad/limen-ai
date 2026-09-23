@@ -16,7 +16,8 @@ class AgentTestCommand extends Command
                             {agent : The agent key to test}
                             {--message=Hello from Limen AI CLI : Message to send}
                             {--conversation= : Conversation id (generated when omitted)}
-                            {--user=1 : User id for the run context}';
+                            {--user=1 : User id for the run context}
+                            {--expect-contains=* : Substring that must appear in the final assistant message}';
 
     protected $description = 'Run an agent once against the configured provider (fake by default)';
 
@@ -65,12 +66,28 @@ class AgentTestCommand extends Command
 
         $this->components->info("Run [{$runId}] completed with status [{$run['status']}].");
 
+        $finalMessage = (string) ($run['final_message'] ?? '');
+
         if (($run['status'] ?? null) === RunStatus::COMPLETED) {
-            $this->line((string) ($run['final_message'] ?? ''));
+            $this->line($finalMessage);
         }
 
-        return ($run['status'] ?? null) === RunStatus::COMPLETED
-            ? self::SUCCESS
-            : self::FAILURE;
+        if (($run['status'] ?? null) !== RunStatus::COMPLETED) {
+            return self::FAILURE;
+        }
+
+        foreach ((array) $this->option('expect-contains') as $expected) {
+            if (! is_string($expected) || $expected === '') {
+                continue;
+            }
+
+            if (! str_contains($finalMessage, $expected)) {
+                $this->components->error("Expected assistant output to contain [{$expected}].");
+
+                return self::FAILURE;
+            }
+        }
+
+        return self::SUCCESS;
     }
 }

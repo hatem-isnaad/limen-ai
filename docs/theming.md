@@ -57,6 +57,8 @@ Sounds use the Web Audio API (no external files). Animations respect `prefers-re
 | `LIMEN_AI_THEME_PRESET` | Preset name (`default`, `arabic`, custom) |
 | `LIMEN_AI_THEME_MODE` | `light`, `dark`, or `auto` |
 | `LIMEN_AI_THEME_TOGGLE` | Show in-widget light/dark toggle |
+| `LIMEN_AI_UI_DIRECTION` | Layout direction: `ltr` or `rtl` (independent of chat language) |
+| `LIMEN_AI_UI_POSITION` | Widget position: `bottom-right` or `bottom-left` |
 
 ## Blade Usage
 
@@ -111,3 +113,5 @@ Dark/light switching uses `data-mode="light|dark"` on `.limen-ai-chat`. RTL uses
 ## Arabic / RTL Preset
 
 Set `LIMEN_AI_THEME_PRESET=arabic` for RTL layout, Arabic placeholders, and a font stack suitable for Arabic script.
+
+**Direction vs language:** Switching chat language (e.g. asking the agent to reply in Arabic) does **not** change layout direction or widget position. Control those explicitly with `LIMEN_AI_UI_DIRECTION` and `LIMEN_AI_UI_POSITION` in your host `.env`.

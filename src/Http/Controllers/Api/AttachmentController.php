@@ -7,18 +7,18 @@ use Illuminate\Http\Request;
 use LimenAi\Attachments\AttachmentService;
 use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Conversations\ConversationRepository;
+use LimenAi\Http\Concerns\AuthorizesConversationAccess;
 use LimenAi\Http\Concerns\BuildsRunContext;
-use LimenAi\Http\Services\ConversationAccessGuard;
 
 class AttachmentController
 {
+    use AuthorizesConversationAccess;
     use BuildsRunContext;
 
     public function __construct(
         private readonly AttachmentService $attachments,
         private readonly AttachmentStore $store,
         private readonly ConversationRepository $conversations,
-        private readonly ConversationAccessGuard $accessGuard,
     ) {}
 
     public function index(Request $request, string $conversationId): JsonResponse
@@ -60,11 +60,6 @@ class AttachmentController
         $this->attachments->delete($attachmentId);
 
         return response()->json(['deleted' => true]);
-    }
-
-    protected function authorizeConversationAccess(Request $request, string $conversationId): void
-    {
-        abort_unless($this->accessGuard->canAccess($request->user(), $conversationId), 403, 'Conversation access denied.');
     }
 
     /** @param  array<string, mixed>  $attachment */

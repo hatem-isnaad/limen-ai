@@ -124,6 +124,24 @@ class AgentValidator
             $errors[] = "Agent [{$agentKey}] persona language [{$language}] must be ISO-639-1 (e.g. en, ar) or auto.";
         }
 
+        $gender = (string) ($persona['gender'] ?? '');
+
+        if ($gender !== '' && ! in_array($gender, AgentPersonaComposer::allowedGenders(), true)) {
+            $errors[] = "Agent [{$agentKey}] persona gender [{$gender}] is invalid.";
+        }
+
+        $region = (string) ($persona['region'] ?? '');
+
+        if ($region !== '' && ! in_array($region, AgentPersonaComposer::allowedRegions(), true)) {
+            $errors[] = "Agent [{$agentKey}] persona region [{$region}] is invalid.";
+        }
+
+        $formality = (string) ($persona['formality'] ?? '');
+
+        if ($formality !== '' && ! in_array($formality, AgentPersonaComposer::allowedFormalities(), true)) {
+            $errors[] = "Agent [{$agentKey}] persona formality [{$formality}] is invalid.";
+        }
+
         return $errors;
     }
 

@@ -31,7 +31,7 @@ class AgentPersonaComposerTest extends TestCase
         $composed = app(AgentPersonaComposer::class)->composeStatic($agent);
 
         $this->assertStringContainsString('Demo Bot', $composed);
-        $this->assertStringContainsString('language [en]', $composed);
+        $this->assertStringContainsString('[en]', $composed);
         $this->assertStringContainsString('Never guess IDs.', $composed);
         $this->assertStringContainsString('Legal advice', $composed);
         $this->assertStringContainsString('500 characters', $composed);

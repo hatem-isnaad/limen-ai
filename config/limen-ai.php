@@ -69,6 +69,104 @@ return [
         ],
     ],
 
+    'agent_defaults' => [
+        'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+        'model' => env('LIMEN_AI_DEFAULT_MODEL', 'gpt-4.1-mini'),
+        'persona' => [
+            'tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
+            'language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'auto'),
+            'response_style' => 'concise',
+            'gender' => env('LIMEN_AI_DEFAULT_GENDER', 'neutral'),
+            'region' => env('LIMEN_AI_DEFAULT_REGION', 'international'),
+            'formality' => env('LIMEN_AI_DEFAULT_FORMALITY', 'neutral'),
+            'voice' => env('LIMEN_AI_DEFAULT_VOICE', ''),
+        ],
+        'output' => [
+            'format' => 'text',
+            'max_response_chars' => 4000,
+        ],
+        'limits' => [
+            'max_tool_calls' => 10,
+            'max_steps' => 20,
+            'timeout' => 60,
+            'temperature' => 0.2,
+            'max_tokens' => 1200,
+            'max_history_messages' => 30,
+        ],
+        'authorization' => [
+            'required' => true,
+            'abilities' => [],
+            'guest_allowed' => false,
+        ],
+        'memory' => [
+            'conversation' => true,
+            'user' => false,
+            'limit' => 10,
+            'max_value_length' => 256,
+        ],
+    ],
+
+    'agent_presets' => [
+        'genders' => [
+            'male' => [
+                'label' => 'Male',
+                'guidance' => 'Use a professional male assistant voice. In Arabic, use masculine agreement and phrasing.',
+            ],
+            'female' => [
+                'label' => 'Female',
+                'guidance' => 'Use a professional female assistant voice. In Arabic, use feminine agreement and phrasing.',
+            ],
+            'neutral' => [
+                'label' => 'Neutral',
+                'guidance' => 'Keep phrasing gender-neutral in all languages.',
+            ],
+        ],
+        'regions' => [
+            'international' => [
+                'label' => 'International',
+                'guidance' => 'Use clear modern Arabic or English without a strong local dialect unless the user prefers one.',
+            ],
+            'eg' => [
+                'label' => 'Egypt',
+                'guidance' => 'When speaking Arabic, prefer natural Egyptian Arabic vocabulary and phrasing.',
+            ],
+            'sa' => [
+                'label' => 'Saudi Arabia',
+                'guidance' => 'When speaking Arabic, prefer Saudi Arabic vocabulary and phrasing.',
+            ],
+            'ae' => [
+                'label' => 'UAE',
+                'guidance' => 'When speaking Arabic, prefer Gulf/UAE-friendly vocabulary and phrasing.',
+            ],
+            'jo' => [
+                'label' => 'Jordan',
+                'guidance' => 'When speaking Arabic, prefer Levantine/Jordanian phrasing.',
+            ],
+            'us' => [
+                'label' => 'United States',
+                'guidance' => 'Use American English spelling and phrasing.',
+            ],
+            'uk' => [
+                'label' => 'United Kingdom',
+                'guidance' => 'Use British English spelling and phrasing.',
+            ],
+        ],
+        'formality' => [
+            'casual' => [
+                'label' => 'Casual',
+                'guidance' => 'Friendly and conversational, but still respectful.',
+            ],
+            'neutral' => [
+                'label' => 'Neutral',
+                'guidance' => 'Balanced professional tone suitable for support and sales.',
+            ],
+            'formal' => [
+                'label' => 'Formal',
+                'guidance' => 'Formal, polished, and business-appropriate language.',
+            ],
+        ],
+    ],
+
     'agents' => [
         'example' => [
             'name' => 'Example Agent',
@@ -79,11 +177,17 @@ return [
             'persona' => [
                 'display_name' => 'Example Agent',
                 'tone' => 'friendly',
-                'language' => 'en',
+                'language' => env('LIMEN_AI_EXAMPLE_LANGUAGE', 'auto'),
                 'response_style' => 'concise',
+                'gender' => env('LIMEN_AI_EXAMPLE_GENDER', 'neutral'),
+                'region' => env('LIMEN_AI_EXAMPLE_REGION', 'international'),
+                'formality' => env('LIMEN_AI_EXAMPLE_FORMALITY', 'casual'),
+                'voice' => env('LIMEN_AI_EXAMPLE_VOICE', 'warm and helpful'),
+                'ui' => [],
                 'rules' => [
                     'Use tools only when they add value.',
                     'Never invent shipment, order, or account data.',
+                    'Support Arabic and English. Switch language immediately when the user asks.',
                 ],
                 'forbidden' => [
                     'Legal advice',
@@ -131,6 +235,15 @@ return [
                 'tone' => 'professional',
                 'language' => env('LIMEN_AI_LIMEN_LANGUAGE', 'auto'),
                 'response_style' => 'concise',
+                'gender' => env('LIMEN_AI_LIMEN_GENDER', 'female'),
+                'region' => env('LIMEN_AI_LIMEN_REGION', 'eg'),
+                'formality' => env('LIMEN_AI_LIMEN_FORMALITY', 'formal'),
+                'voice' => env('LIMEN_AI_LIMEN_VOICE', 'clear operational support'),
+                'ui' => [
+                    'title' => 'Limen 3PL Support',
+                    'subtitle' => 'Shipment lookups and approved customer updates',
+                    'welcome_message' => 'How can I help with your shipment today?',
+                ],
                 'rules' => [
                     'Reference shipment IDs explicitly.',
                     'Escalate to a human when data is missing or ambiguous.',
@@ -171,15 +284,19 @@ return [
         ],
     ],
 
+    'persistence' => [
+        'driver' => env('LIMEN_AI_PERSISTENCE_DRIVER', 'memory'),
+    ],
+
     'runtime' => [
-        'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
-        'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
-        'approval_repository' => LimenAi\Authorization\InMemoryApprovalRepository::class,
+        'run_repository' => env('LIMEN_AI_RUN_REPOSITORY'),
+        'checkpoint_store' => env('LIMEN_AI_CHECKPOINT_STORE'),
+        'approval_repository' => env('LIMEN_AI_APPROVAL_REPOSITORY'),
     ],
 
     'conversations' => [
-        'repository' => LimenAi\Conversations\InMemoryConversationRepository::class,
-        'message_repository' => LimenAi\Conversations\InMemoryMessageRepository::class,
+        'repository' => env('LIMEN_AI_CONVERSATION_REPOSITORY'),
+        'message_repository' => env('LIMEN_AI_MESSAGE_REPOSITORY'),
         'history_limit' => 50,
         'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
     ],
@@ -401,7 +518,7 @@ return [
     'authorization' => [
         'enforce_context_user_match' => true,
         'guest' => [
-            'validator' => LimenAi\Authorization\NullGuestSessionValidator::class,
+            'validator' => LimenAi\Authorization\CacheGuestSessionValidator::class,
             'cache_prefix' => 'limen-ai:guest:',
         ],
     ],
@@ -422,6 +539,9 @@ return [
         'default_tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
         'default_language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'en'),
         'save_tokens' => env('LIMEN_AI_SAVE_TOKENS', true),
+        'output_validator' => env('LIMEN_AI_OUTPUT_VALIDATOR'),
+        'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
+        'output_moderator' => env('LIMEN_AI_OUTPUT_MODERATOR'),
     ],
 
     'responses' => [
@@ -510,12 +630,19 @@ return [
         'redaction' => [
             'keys' => ['password', 'token', 'secret', 'api_key'],
         ],
+        'output_moderation' => [
+            'patterns' => [
+                '/\b(?:password|token|secret|api[_-]?key)\s*[:=]\s*\S+/i',
+                '/\bsk-[A-Za-z0-9]{10,}\b/',
+            ],
+        ],
     ],
 
     'ui' => [
         'enabled' => env('LIMEN_AI_UI_ENABLED', true),
         'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
-        'middleware' => ['web', 'auth'],
+        'middleware' => ['web'],
+        'auth_middleware' => env('LIMEN_AI_UI_REQUIRE_AUTH', true),
         'palettes' => [
             'light' => [
                 'primary' => '#4F46E5',
@@ -539,14 +666,14 @@ return [
                 'radius' => '16px',
                 'position' => 'bottom-right',
                 'direction' => 'ltr',
-                'font_family' => '"Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif',
+                'font_family' => '"Cairo", sans-serif',
                 'title' => 'Limen AI Assistant',
                 'subtitle' => 'Typically replies in a few seconds',
                 'welcome_message' => 'How can I help you today?',
             ],
             'arabic' => [
                 'direction' => 'rtl',
-                'font_family' => '"Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif',
+                'font_family' => '"Cairo", sans-serif',
                 'title' => 'مساعد Limen AI',
                 'welcome_message' => 'كيف يمكنني مساعدتك اليوم؟',
             ],
@@ -556,14 +683,15 @@ return [
             'mode' => env('LIMEN_AI_THEME_MODE', 'light'),
             'allow_mode_toggle' => env('LIMEN_AI_THEME_TOGGLE', false),
             'overrides' => [],
-            'radius' => '16px',
-            'position' => 'bottom-right',
-            'direction' => 'ltr',
-            'title' => 'Limen AI Assistant',
-            'subtitle' => 'Typically replies in a few seconds',
-            'welcome_message' => 'How can I help you today?',
-            'avatar_url' => null,
-            'user_avatar_url' => null,
+            'radius' => env('LIMEN_AI_UI_RADIUS'),
+            'position' => env('LIMEN_AI_UI_POSITION'),
+            'direction' => env('LIMEN_AI_UI_DIRECTION'),
+            'title' => env('LIMEN_AI_UI_TITLE'),
+            'subtitle' => env('LIMEN_AI_UI_SUBTITLE'),
+            'welcome_message' => env('LIMEN_AI_UI_WELCOME_MESSAGE'),
+            'avatar_url' => env('LIMEN_AI_UI_AVATAR_URL'),
+            'user_avatar_url' => env('LIMEN_AI_UI_USER_AVATAR_URL'),
+            'font_family' => env('LIMEN_AI_UI_FONT_FAMILY'),
         ],
 
         'sounds' => [
@@ -602,6 +730,69 @@ return [
             'show_avatars' => env('LIMEN_AI_UI_AVATARS', true),
             'show_role_labels' => env('LIMEN_AI_UI_ROLE_LABELS', false),
             'time_format' => env('LIMEN_AI_UI_TIME_FORMAT', 'short'),
+        ],
+
+        'guest' => [
+            'enabled' => env('LIMEN_AI_UI_GUEST_ENABLED', false),
+            'session_ttl_minutes' => (int) env('LIMEN_AI_UI_GUEST_SESSION_TTL', 10080),
+            'storage_key' => 'limen-ai-guest-token',
+            'form' => [
+                'name' => [
+                    'label' => 'Name',
+                    'placeholder' => 'Your name',
+                    'required' => true,
+                    'max' => 120,
+                ],
+                'email' => [
+                    'label' => 'Email',
+                    'placeholder' => 'you@example.com',
+                    'required' => true,
+                    'max' => 255,
+                ],
+                'phone' => [
+                    'label' => 'Phone',
+                    'placeholder' => '+1 555 000 0000',
+                    'required' => false,
+                    'max' => 40,
+                ],
+            ],
+        ],
+
+        'history' => [
+            'enabled' => env('LIMEN_AI_UI_HISTORY_ENABLED', true),
+            'show_preview' => env('LIMEN_AI_UI_HISTORY_PREVIEW', true),
+            'resume_last_conversation' => env('LIMEN_AI_UI_RESUME_CONVERSATION', true),
+            'defer_until_open' => env('LIMEN_AI_UI_DEFER_UNTIL_OPEN', true),
+            'storage_key' => 'limen-ai-active-conversation',
+        ],
+
+        'i18n' => [
+            'enabled' => env('LIMEN_AI_UI_I18N_ENABLED', true),
+            'default_locale' => env('LIMEN_AI_UI_DEFAULT_LOCALE', 'en'),
+            'storage_key' => 'limen-ai-locale',
+            'supported' => ['en', 'ar'],
+            'labels' => [
+                'en' => [
+                    'placeholder' => 'Type your message...',
+                    'send' => 'Send',
+                    'typing' => 'Typing...',
+                    'history' => 'Conversations',
+                    'new_chat' => 'New chat',
+                    'guest_title' => 'Start a conversation',
+                    'guest_copy' => 'Enter your details to continue.',
+                    'guest_continue' => 'Continue',
+                ],
+                'ar' => [
+                    'placeholder' => 'اكتب رسالتك...',
+                    'send' => 'إرسال',
+                    'typing' => 'يكتب...',
+                    'history' => 'المحادثات',
+                    'new_chat' => 'محادثة جديدة',
+                    'guest_title' => 'ابدأ المحادثة',
+                    'guest_copy' => 'أدخل بياناتك للمتابعة.',
+                    'guest_continue' => 'متابعة',
+                ],
+            ],
         ],
     ],
 

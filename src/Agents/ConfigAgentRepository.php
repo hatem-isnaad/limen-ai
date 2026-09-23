@@ -10,6 +10,7 @@ class ConfigAgentRepository implements AgentRepository
 {
     public function __construct(
         private readonly ConfigRepository $config,
+        private readonly AgentConfigurationMerger $merger,
     ) {}
 
     public function find(string $key): ?AgentDefinition
@@ -20,7 +21,7 @@ class ConfigAgentRepository implements AgentRepository
             return null;
         }
 
-        return ConfigAgentDefinition::fromConfig($key, $definition);
+        return ConfigAgentDefinition::fromConfig($key, $this->merger->merge($definition));
     }
 
     public function all(): array
@@ -32,7 +33,10 @@ class ConfigAgentRepository implements AgentRepository
         }
 
         return array_values(array_map(
-            fn (string $key, array $definition): AgentDefinition => ConfigAgentDefinition::fromConfig($key, $definition),
+            fn (string $key, array $definition): AgentDefinition => ConfigAgentDefinition::fromConfig(
+                $key,
+                $this->merger->merge($definition),
+            ),
             array_keys($agents),
             $agents,
         ));

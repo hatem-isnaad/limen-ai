@@ -7,6 +7,7 @@ use LimenAi\Agents\AgentValidator;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
+use LimenAi\Support\EnvironmentDoctor;
 use LimenAi\Support\LimenAiManager;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\LlmProvider;
@@ -25,6 +26,7 @@ class DoctorCommand extends Command
         AgentValidator $agents,
         WorkflowValidator $workflows,
         HttpIntegrationValidator $integrations,
+        EnvironmentDoctor $environmentDoctor,
     ): int {
         $failures = [];
 
@@ -87,6 +89,19 @@ class DoctorCommand extends Command
             $failures = array_merge($failures, $validationErrors);
         } else {
             $this->components->twoColumnDetail('Definitions', '<fg=green>valid</>');
+        }
+
+        $environmentReport = $environmentDoctor->inspect((string) app()->environment());
+        $failures = array_merge($failures, $environmentReport['failures']);
+        $warnings = $environmentReport['warnings'];
+
+        if ($warnings !== []) {
+            $this->newLine();
+            $this->components->warn('Limen AI doctor warnings:');
+
+            foreach ($warnings as $warning) {
+                $this->line("- {$warning}");
+            }
         }
 
         if ($failures !== []) {

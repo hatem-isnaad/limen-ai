@@ -3,16 +3,43 @@
     'agent' => config('limen-ai.default_agent', 'example'),
     'theme' => [],
     'variant' => 'standalone',
+    'userId' => null,
+    'authenticated' => null,
 ])
 
 @php
-    $resolvedTheme = app(\LimenAi\Ui\ThemeResolver::class)->resolve(is_array($theme) ? $theme : []);
+    use LimenAi\Agents\AgentProfilePresenter;
+    use LimenAi\Contracts\Agents\AgentRepository;
+    use LimenAi\Ui\WidgetThemeOptions;
+
+    $agentProfile = null;
+    $agentUi = [];
+    $agentDefinition = app(AgentRepository::class)->find($agent);
+
+    if ($agentDefinition !== null) {
+        $agentProfile = app(AgentProfilePresenter::class)->present($agentDefinition);
+        $agentUi = [
+            'title' => $agentProfile['ui']['title'] ?? null,
+            'subtitle' => $agentProfile['ui']['subtitle'] ?? null,
+            'welcome_message' => $agentProfile['ui']['welcome_message'] ?? null,
+            'avatar_url' => $agentProfile['ui']['avatar_url'] ?? null,
+        ];
+    }
+
+    $resolvedTheme = app(\LimenAi\Ui\ThemeResolver::class)->resolve(
+        app(WidgetThemeOptions::class)->merge($agentUi, is_array($theme) ? $theme : []),
+    );
     $isRtl = $resolvedTheme->direction() === 'rtl';
     $isEmbedded = $variant === 'embedded';
     $placeholder = $isRtl ? 'اكتب رسالتك...' : 'Type your message...';
     $sendLabel = $isRtl ? 'إرسال' : 'Send';
     $subtitle = $resolvedTheme->get('subtitle', $isRtl ? 'عادةً ما يرد خلال ثوانٍ' : 'Typically replies in a few seconds');
     $avatarUrl = $resolvedTheme->get('avatar_url');
+    $isAuthenticated = $authenticated ?? auth()->check();
+    $resolvedUserId = $userId ?? ($isAuthenticated ? auth()->id() : null);
+    $guestFormFields = config('limen-ai.ui.guest.form', []);
+    $historyEnabled = (bool) config('limen-ai.ui.history.enabled', true);
+    $guestEnabled = (bool) config('limen-ai.ui.guest.enabled', false);
 @endphp
 
 <div
@@ -23,6 +50,13 @@
     data-conversation-id="{{ $conversationId }}"
     data-api-base="{{ url(config('limen-ai.ui.route_prefix', 'limen-ai')) }}"
     data-channel-prefix="{{ config('limen-ai.broadcasting.channel_prefix', 'limen-ai.conversation') }}"
+    data-authenticated="{{ $isAuthenticated ? 'true' : 'false' }}"
+    data-user-id="{{ $resolvedUserId }}"
+    data-history-enabled="{{ $historyEnabled ? 'true' : 'false' }}"
+    data-guest-enabled="{{ $guestEnabled ? 'true' : 'false' }}"
+    @if ($agentProfile)
+        data-agent-profile="{{ e(json_encode($agentProfile, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)) }}"
+    @endif
     @include('limen-ai::partials.theme-attributes', ['theme' => $resolvedTheme])
     @include('limen-ai::partials.ui-config')
 >
@@ -50,6 +84,11 @@
             </div>
         </div>
         <div class="limen-ai-chat__header-actions">
+            @if ($historyEnabled)
+                <button type="button" class="limen-ai-chat__icon-btn" data-limen-ai-history-toggle aria-label="{{ $isRtl ? 'المحادثات السابقة' : 'Conversation history' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M8 9h8M8 13h5"/></svg>
+                </button>
+            @endif
             @if ($resolvedTheme->allowsModeToggle())
                 <button type="button" class="limen-ai-chat__icon-btn" data-limen-ai-mode-toggle aria-label="{{ $isRtl ? 'تبديل المظهر' : 'Toggle theme' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3a9 9 0 1 0 9 9 4.5 4.5 0 0 1-5-5 4.5 4.5 0 0 1-5-5Z"/></svg>
@@ -66,13 +105,72 @@
         </div>
     </header>
 
-    <div class="limen-ai-chat__body">
-        <div class="limen-ai-chat__messages" data-limen-ai-messages role="log" aria-live="polite" aria-relevant="additions"></div>
-        <div class="limen-ai-chat__typing" data-limen-ai-typing hidden aria-hidden="true">
-            <span class="limen-ai-chat__typing-dots"><span></span><span></span><span></span></span>
-            <span class="limen-ai-chat__typing-label">{{ $isRtl ? 'يكتب...' : 'Typing...' }}</span>
+    <div class="limen-ai-chat__layout">
+        <div class="limen-ai-chat__main">
+            <div class="limen-ai-chat__body">
+                <div class="limen-ai-chat__messages" data-limen-ai-messages role="log" aria-live="polite" aria-relevant="additions"></div>
+                <div class="limen-ai-chat__typing" data-limen-ai-typing hidden aria-hidden="true">
+                    <span class="limen-ai-chat__typing-dots"><span></span><span></span><span></span></span>
+                    <span class="limen-ai-chat__typing-label">{{ $isRtl ? 'يكتب...' : 'Typing...' }}</span>
+                </div>
+            </div>
         </div>
+
+        @if ($historyEnabled)
+            <div class="limen-ai-chat__history-backdrop" data-limen-ai-history-backdrop hidden></div>
+            <aside class="limen-ai-chat__history" data-limen-ai-history hidden>
+                <div class="limen-ai-chat__history-header">
+                    <div class="limen-ai-chat__history-heading">
+                        <strong>{{ $isRtl ? 'المحادثات' : 'Conversations' }}</strong>
+                        <span>{{ $isRtl ? 'اختر محادثة أو ابدأ جديدة' : 'Pick a chat or start fresh' }}</span>
+                    </div>
+                    <button type="button" class="limen-ai-chat__history-close" data-limen-ai-history-close aria-label="{{ $isRtl ? 'إغلاق' : 'Close history' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <button type="button" class="limen-ai-chat__history-new" data-limen-ai-new-conversation>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>{{ $isRtl ? 'محادثة جديدة' : 'New chat' }}</span>
+                </button>
+                <div class="limen-ai-chat__history-list" data-limen-ai-history-list role="list"></div>
+                <p class="limen-ai-chat__history-empty" data-limen-ai-history-empty hidden>
+                    {{ $isRtl ? 'لا توجد محادثات سابقة بعد.' : 'No previous conversations yet.' }}
+                </p>
+            </aside>
+        @endif
     </div>
+
+    @if ($guestEnabled && ! $isAuthenticated)
+        <div class="limen-ai-chat__guest" data-limen-ai-guest hidden>
+            <div class="limen-ai-chat__guest-card">
+                <h3 class="limen-ai-chat__guest-title">{{ $isRtl ? 'ابدأ المحادثة' : 'Start a conversation' }}</h3>
+                <p class="limen-ai-chat__guest-copy">{{ $isRtl ? 'أدخل بياناتك للمتابعة.' : 'Enter your details to continue.' }}</p>
+                <form class="limen-ai-chat__guest-form" data-limen-ai-guest-form>
+                    @foreach ($guestFormFields as $fieldKey => $field)
+                        <label class="limen-ai-chat__guest-field">
+                            <span>
+                                {{ $field['label'] ?? ucfirst($fieldKey) }}
+                                @if ($field['required'] ?? false)
+                                    <span class="limen-ai-chat__guest-required" aria-hidden="true">*</span>
+                                @endif
+                            </span>
+                            <input
+                                type="{{ $fieldKey === 'email' ? 'email' : 'text' }}"
+                                name="{{ $fieldKey }}"
+                                placeholder="{{ $field['placeholder'] ?? '' }}"
+                                @if ($field['required'] ?? false) required @endif
+                                maxlength="{{ (int) ($field['max'] ?? 255) }}"
+                            />
+                        </label>
+                    @endforeach
+                    <p class="limen-ai-chat__guest-error" data-limen-ai-guest-error hidden></p>
+                    <button type="submit" class="limen-ai-chat__button limen-ai-chat__button--primary">
+                        {{ $isRtl ? 'متابعة' : 'Continue' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
 
     <div class="limen-ai-chat__status" data-limen-ai-status aria-live="polite"></div>
 
@@ -112,7 +210,7 @@
     @push('limen-ai-assets')
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>{!! \LimenAi\Support\UiAssets::css() !!}</style>
         <script>{!! \LimenAi\Support\UiAssets::js() !!}</script>
     @endpush
