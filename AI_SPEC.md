@@ -169,4 +169,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 15 — Agent run jobs, Pusher broadcaster, event subscription hooks
 - [x] Begin Phase 16 — Chat UI
 - [x] Phase 16 — Blade components, HTTP API, JS client with Echo hooks
-- [ ] Begin Phase 17 — Themes
+- [x] Begin Phase 17 — Themes
+- [x] Phase 17 — Palettes, presets, RTL/dark mode, ThemeResolver
+- [ ] Begin Phase 18 — Observability & Audit
