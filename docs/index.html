@@ -8,7 +8,7 @@
   <title>Limen AI — Documentation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
   <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
   <style>
     :root {
@@ -485,6 +485,7 @@
           <a class="nav-link" href="#http-api">HTTP API</a>
           <a class="nav-link" href="#queue-broadcasting">Queue &amp; realtime</a>
           <a class="nav-link" href="#chat-ui">Chat UI &amp; theming</a>
+          <a class="nav-link" href="#quality">Quality layer</a>
           <a class="nav-link" href="#security">Security</a>
           <a class="nav-link" href="#observability">Observability</a>
         </div>
@@ -502,7 +503,7 @@
     <main class="main">
       <div class="content">
         <header class="hero" id="overview">
-          <span class="hero-badge">v1.0.6 · Laravel 11–13 · PHP 8.2+</span>
+          <span class="hero-badge">v1.2.2 · Laravel 11–13 · PHP 8.2+</span>
           <h2>Drop-in AI chat for Laravel — black-box simple</h2>
           <p class="hero-lead">
             Install, set <code>.env</code>, add agents/tools/knowledge in config, embed the widget — chat replies automatically.
@@ -549,10 +550,13 @@ LIMEN_AI_UI_TITLE="Support"
 LIMEN_AI_UI_GUEST_ENABLED=true
 LIMEN_AI_UI_HISTORY_ENABLED=true
 
-# Ollama (optional)
+# Ollama (optional — e.g. qwen3:8b)
 # OPENAI_API_KEY=ollama
 # OPENAI_BASE_URL=http://localhost:11434/v1
-# LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b</code></pre>
+# LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+# LIMEN_AI_HEURISTIC_VALIDATION=true
+# LIMEN_AI_SEMANTIC_VALIDATION=true
+# LIMEN_AI_SEMANTIC_MIN_SCORE=0.6</code></pre>
           </div>
 
           <h3>3 — Knowledge base (so chat answers real questions)</h3>
@@ -621,7 +625,7 @@ php artisan limen-ai:agent:test app_assistant --message="What is your return pol
 
         <section id="installation">
           <h2 class="section-title">Installation</h2>
-          <p class="section-desc">Install into an existing Laravel 11 or 12 app. <strong>Packagist is optional</strong> — see <a href="installation.md">installation.md</a> for VCS, path repo, private registry, and monorepo methods.</p>
+          <p class="section-desc">Install into an existing Laravel 11, 12, or 13 app. <strong>Packagist is optional</strong> — see <a href="installation.md">installation.md</a> for VCS, path repo, private registry, and monorepo methods.</p>
 
           <h3>1. Require the package</h3>
           <div class="code-block" data-lang="Shell">
@@ -671,6 +675,11 @@ php artisan limen-ai:validate</code></pre>
                 <tr><td><code>LIMEN_AI_BROADCASTING_ENABLED</code></td><td>Enable realtime chat updates</td></tr>
                 <tr><td><code>LIMEN_AI_ATTACHMENTS_ENABLED</code></td><td>Enable file upload and attachment injection</td></tr>
                 <tr><td><code>LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB</code></td><td>Max upload size per file</td></tr>
+                <tr><td><code>LIMEN_AI_HEURISTIC_VALIDATION</code></td><td>Built-in reply quality heuristics (default <code>true</code>)</td></tr>
+                <tr><td><code>LIMEN_AI_SEMANTIC_VALIDATION</code></td><td>LLM judge scoring for reply quality (Ollama/OpenAI-compatible)</td></tr>
+                <tr><td><code>LIMEN_AI_UI_GUEST_ENABLED</code></td><td>Public widget sessions; auto-enables rate limiting when <code>true</code></td></tr>
+                <tr><td><code>LIMEN_AI_UI_RATE_LIMIT_ENABLED</code></td><td>Explicit throttle for staff routes (guest widgets throttle automatically)</td></tr>
+                <tr><td><code>LIMEN_AI_STREAMING_ENABLED</code></td><td>SSE run stream + EventSource fallback in chat UI</td></tr>
               </tbody>
             </table>
           </div>
@@ -888,8 +897,13 @@ LlmProvider (with tool result) → persist + broadcast</div>
                 <tr><td><code>anthropic</code></td><td>AnthropicProvider</td><td>Claude models</td></tr>
                 <tr><td><code>gemini</code></td><td>GeminiProvider</td><td>Google Gemini</td></tr>
                 <tr><td><code>openrouter</code></td><td>OpenAiProvider (compatible)</td><td>Any OpenRouter-listed model</td></tr>
+                <tr><td>Ollama (local)</td><td><code>openai</code> driver</td><td><code>OPENAI_API_KEY=ollama</code> + <code>OPENAI_BASE_URL=http://localhost:11434/v1</code></td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="callout callout-info">
+            <strong>Ollama + qwen3:8b</strong>
+            <p>Use the OpenAI-compatible driver with a small local model. Enable <code>LIMEN_AI_HEURISTIC_VALIDATION</code> and optional <code>LIMEN_AI_SEMANTIC_VALIDATION</code> for reply quality. See <a href="providers.md">providers.md</a>.</p>
           </div>
           <div class="code-block" data-lang="PHP">
             <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
@@ -927,11 +941,16 @@ $runId = app(AgentRuntime::class)->run(
             <table>
               <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
               <tbody>
-                <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation</td></tr>
+                <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation <code>{ "agent": "example" }</code></td></tr>
                 <tr><td>GET</td><td><code>/conversations/{id}</code></td><td>Fetch conversation with messages</td></tr>
-                <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send a user message</td></tr>
+                <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send message <code>{ "message": "...", "attachment_ids": [] }</code></td></tr>
+                <tr><td>GET/POST</td><td><code>/conversations/{id}/attachments</code></td><td>List or upload attachments</td></tr>
+                <tr><td>DELETE</td><td><code>/attachments/{id}</code></td><td>Delete an attachment</td></tr>
                 <tr><td>GET</td><td><code>/runs/{id}</code></td><td>Poll run status and output</td></tr>
+                <tr><td>GET</td><td><code>/runs/{id}/stream</code></td><td>SSE stream (status, deltas, completion)</td></tr>
+                <tr><td>GET</td><td><code>/runs/{id}/observability</code></td><td>Audit trace and token usage</td></tr>
                 <tr><td>POST</td><td><code>/approvals/{id}/approve</code></td><td>Approve a paused tool action</td></tr>
+                <tr><td>POST</td><td><code>/approvals/{id}/reject</code></td><td>Reject a paused tool action</td></tr>
               </tbody>
             </table>
           </div>
@@ -941,20 +960,25 @@ $runId = app(AgentRuntime::class)->run(
 { "agent": "example" }
 
 POST /limen-ai/conversations/{uuid}/messages
-{ "content": "Echo hello world" }
+{ "message": "Echo hello world" }
 
-GET /limen-ai/runs/{runId}</code></pre>
+GET /limen-ai/runs/{runId}
+GET /limen-ai/runs/{runId}/stream</code></pre>
           </div>
         </section>
 
         <section id="queue-broadcasting">
-          <h2 class="section-title">Queue &amp; realtime</h2>
+          <h2 class="section-title">Queue, streaming &amp; realtime</h2>
+          <p class="section-desc">Long runs can queue to Redis; live updates via Pusher, Laravel Reverb, or SSE fallback.</p>
           <div class="code-block" data-lang="Env">
             <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
             <pre><code class="language-ini">LIMEN_AI_QUEUE_AGENT_RUNS=true
 LIMEN_AI_QUEUE_CONNECTION=redis
 LIMEN_AI_BROADCASTING_ENABLED=true
-LIMEN_AI_BROADCAST_DRIVER=pusher</code></pre>
+LIMEN_AI_BROADCAST_DRIVER=pusher
+# Or: LIMEN_AI_BROADCAST_DRIVER=reverb
+LIMEN_AI_STREAMING_ENABLED=true
+LIMEN_AI_UI_STREAMING_ENABLED=true</code></pre>
           </div>
         </section>
 
@@ -968,17 +992,42 @@ LIMEN_AI_BROADCAST_DRIVER=pusher</code></pre>
           </div>
         </section>
 
+        <section id="quality">
+          <h2 class="section-title">Quality layer</h2>
+          <p class="section-desc">Optional reply guards run after the LLM returns — before the user sees the message. See <a href="QUALITY-GATE.md">QUALITY-GATE.md</a>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Layer</th><th>Env</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>Heuristic</td><td><code>LIMEN_AI_HEURISTIC_VALIDATION</code></td><td>Length, empty reply, basic sanity checks</td></tr>
+                <tr><td>Semantic judge</td><td><code>LIMEN_AI_SEMANTIC_VALIDATION</code></td><td>Second LLM pass scores reply quality (works with Ollama)</td></tr>
+                <tr><td>Forbidden topics</td><td><code>LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS</code></td><td>Block configured topic patterns</td></tr>
+                <tr><td>Custom hooks</td><td><code>LIMEN_AI_OUTPUT_VALIDATOR</code></td><td>Host-implementable <code>OutputValidator</code> class</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-block" data-lang="env">
+            <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-ini">LIMEN_AI_HEURISTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_MIN_SCORE=0.6
+LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false</code></pre>
+          </div>
+        </section>
+
         <section id="security">
           <h2 class="section-title">Security</h2>
           <p class="section-desc">Defense in depth — the LLM never becomes your authorization layer.</p>
           <div class="flow">Authentication (Laravel Guards)
-    ↓ Agent authorization (abilities)
+    ↓ Agent authorization (abilities / simple mode)
     ↓ Server-derived RunContext (user ID)
     ↓ Prompt injection sanitization
     ↓ Tool authorization + validation
     ↓ Approval gate for sensitive tools
+    ↓ Guest-safe tool enforcement
+    ↓ Auto rate limiting on public widgets
     ↓ SSRF-safe HTTP + audit log</div>
-          <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model. Install guide: <a href="installation.md">installation.md</a>.</p>
+          <p>Guest widgets apply <code>ThrottleAgentRequests</code> automatically — no middleware publish required. See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model.</p>
         </section>
 
         <section id="observability">
@@ -1034,6 +1083,8 @@ $fake->queueResponse(LlmResponseData::fromArray([
                 <tr><td><code>limen-ai:install</code></td><td>Publish config, views, assets, migrations</td></tr>
                 <tr><td><code>limen-ai:doctor</code></td><td>Health check: config, providers, queue</td></tr>
                 <tr><td><code>limen-ai:validate</code></td><td>Validate all definitions</td></tr>
+                <tr><td><code>limen-ai:checklist</code></td><td>First-run host integration checklist</td></tr>
+                <tr><td><code>limen-ai:import:knowledge</code></td><td>Import FAQ documents from JSON/CSV</td></tr>
                 <tr><td><code>limen-ai:make:tool</code></td><td>Generate tool class + test</td></tr>
                 <tr><td><code>limen-ai:agent:test {agent}</code></td><td>Run agent against fake or live provider</td></tr>
               </tbody>
@@ -1053,8 +1104,9 @@ $fake->queueResponse(LlmResponseData::fromArray([
                 <tr><td><code>tools</code></td><td>Tool definitions</td></tr>
                 <tr><td><code>workflows</code></td><td>Multi-step workflow definitions</td></tr>
                 <tr><td><code>knowledge</code></td><td>RAG collections and vector store</td></tr>
+                <tr><td><code>quality</code></td><td>Heuristic + semantic validation, output hooks</td></tr>
                 <tr><td><code>security</code></td><td>SSRF, injection patterns, redaction</td></tr>
-                <tr><td><code>ui</code></td><td>Chat widget, themes, route prefix</td></tr>
+                <tr><td><code>ui</code></td><td>Chat widget, themes, rate limits, route prefix</td></tr>
               </tbody>
             </table>
           </div>
@@ -1074,8 +1126,19 @@ composer test:release</code></pre>
 
         <section id="releases">
           <h2 class="section-title">Releases</h2>
-          <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>.</p>
+          <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>. Current: <strong>v1.2.2</strong>. Full history: <a href="../CHANGELOG.md">CHANGELOG.md</a>.</p>
           <div class="table-wrap">
+            <table>
+              <thead><tr><th>Version</th><th>Highlights</th></tr></thead>
+              <tbody>
+                <tr><td><strong>v1.2.2</strong></td><td>Semantic LLM judge validation, automatic guest rate limiting</td></tr>
+                <tr><td><strong>v1.2.1</strong></td><td>CI matrix fix, Pint style gate</td></tr>
+                <tr><td><strong>v1.2.0</strong></td><td>Conversation summarizer, SSE streaming, Reverb driver</td></tr>
+                <tr><td><strong>v1.1.0</strong></td><td>Heuristic validators, checklist command, composite tool repo</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap" style="margin-top:1rem">
             <table>
               <thead><tr><th>Change type</th><th>Version bump</th></tr></thead>
               <tbody>
@@ -1089,7 +1152,7 @@ composer test:release</code></pre>
 
         <footer>
           <p><strong>Limen AI</strong> · MIT License · <a href="https://github.com/hatem-isnaad/limen-ai">github.com/hatem-isnaad/limen-ai</a></p>
-          <p><a href="../AGENTS.md">AGENTS.md</a> (AI contributors) · <a href="architecture/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="project/AI_SPEC.md">AI_SPEC.md</a> · <a href="installation.md">installation.md</a> · <a href="providers.md">providers.md</a></p>
+          <p><a href="../AGENTS.md">AGENTS.md</a> (AI contributors) · <a href="architecture/ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="project/AI_SPEC.md">AI_SPEC.md</a> · <a href="installation.md">installation.md</a> · <a href="providers.md">providers.md</a> · <a href="QUALITY-GATE.md">QUALITY-GATE.md</a> · <a href="../CHANGELOG.md">CHANGELOG.md</a></p>
         </footer>
       </div>
     </main>
