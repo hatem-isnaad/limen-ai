@@ -175,4 +175,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 18 — Trace IDs, usage tracking, audit export, observability API
 - [x] Begin Phase 19 — Artisan Developer Tools
 - [x] Phase 19 — doctor, make:* generators, list command, publishable stubs
-- [ ] Begin Phase 20 — Testing & Architecture Validation
+- [x] Begin Phase 20 — Testing & Architecture Validation
+- [x] Phase 20 — Architecture boundary tests, security gates, CI workflow
+- [ ] Begin Phase 21 — Limen Integration
