@@ -29,7 +29,10 @@ composer test                  # full suite
 composer test:architecture     # boundary gates only
 composer test:security         # security gates only
 composer test:gates            # architecture + security (merge gate)
+composer test:release          # full suite + merge gates (pre-tag)
 ```
+
+Release tags additionally run [`.github/workflows/release.yml`](../.github/workflows/release.yml), which verifies the tag matches `composer.json` version and executes `composer test:release`.
 
 ## Merge Gates (Required)
 

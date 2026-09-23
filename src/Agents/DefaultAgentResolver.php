@@ -70,17 +70,17 @@ class DefaultAgentResolver implements AgentResolver
     protected function assertAgentIsConfigured(AgentDefinition $agent): void
     {
         if ($agent->model() === '') {
-            throw AgentConfigurationException::forKey($agent->key());
+            throw new AgentConfigurationException("Agent [{$agent->key()}] is missing a model.");
         }
 
         if ($agent->instructions() === '') {
-            throw AgentConfigurationException::forKey($agent->key());
+            throw new AgentConfigurationException("Agent [{$agent->key()}] is missing instructions.");
         }
 
         $providerConfig = $this->config->get("limen-ai.providers.{$agent->provider()}");
 
         if (! is_array($providerConfig)) {
-            throw AgentConfigurationException::forKey($agent->key());
+            throw new AgentConfigurationException("Agent [{$agent->key()}] references unknown provider [{$agent->provider()}].");
         }
     }
 

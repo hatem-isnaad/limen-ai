@@ -10,6 +10,9 @@ use LimenAi\Tools\ToolSchemaBuilder;
 
 final class ResolvedAgent
 {
+    /** @var list<array<string, mixed>>|null */
+    private ?array $cachedToolSchemas = null;
+
     /**
      * @param  list<ToolDefinition>  $tools
      * @param  list<SkillDefinition>  $skills
@@ -81,7 +84,13 @@ final class ResolvedAgent
     /** @return list<array<string, mixed>> */
     public function toolSchemas(): array
     {
-        return $this->toolSchemaBuilder->buildMany($this->tools);
+        if ($this->cachedToolSchemas !== null) {
+            return $this->cachedToolSchemas;
+        }
+
+        $this->cachedToolSchemas = $this->toolSchemaBuilder->buildMany($this->tools);
+
+        return $this->cachedToolSchemas;
     }
 
     /** @return array<string, mixed> */
