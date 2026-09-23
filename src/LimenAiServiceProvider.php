@@ -8,11 +8,14 @@ use LimenAi\Agents\ConfigAgentRepository;
 use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\InstructionComposer;
 use LimenAi\Authorization\CacheGuestSessionValidator;
+use LimenAi\Authorization\DatabaseApprovalRepository;
+use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
 use LimenAi\Console\ValidateCommand;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Agents\AgentResolver;
+use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Authorization\GuestSessionValidator;
 use LimenAi\Contracts\Conversations\ConversationRepository;
@@ -36,6 +39,8 @@ use LimenAi\Conversations\InMemoryMessageRepository;
 use LimenAi\Conversations\MessageFormatter;
 use LimenAi\Conversations\NullConversationSummarizer;
 use LimenAi\Runtime\ArrayCheckpointStore;
+use LimenAi\Runtime\DatabaseCheckpointStore;
+use LimenAi\Runtime\DatabaseRunRepository;
 use LimenAi\Runtime\DefaultAgentRuntime;
 use LimenAi\Runtime\InMemoryRunRepository;
 use LimenAi\Runtime\ToolCallParser;
@@ -144,8 +149,36 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $runtime = $this->app['config']->get('limen-ai.runtime', []);
 
-        $this->app->singleton(RunRepository::class, $runtime['run_repository'] ?? InMemoryRunRepository::class);
-        $this->app->singleton(CheckpointStore::class, $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class);
+        $this->app->singleton(RunRepository::class, function ($app) use ($runtime): RunRepository {
+            $implementation = $runtime['run_repository'] ?? InMemoryRunRepository::class;
+
+            if ($implementation === DatabaseRunRepository::class) {
+                return new DatabaseRunRepository($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
+        $this->app->singleton(CheckpointStore::class, function ($app) use ($runtime): CheckpointStore {
+            $implementation = $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class;
+
+            if ($implementation === DatabaseCheckpointStore::class) {
+                return new DatabaseCheckpointStore($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
+        $this->app->singleton(ApprovalRepository::class, function ($app) use ($runtime): ApprovalRepository {
+            $implementation = $runtime['approval_repository'] ?? InMemoryApprovalRepository::class;
+
+            if ($implementation === DatabaseApprovalRepository::class) {
+                return new DatabaseApprovalRepository($app['db']->connection());
+            }
+
+            return $app->make($implementation);
+        });
+
         $this->app->singleton(ToolCallParser::class);
         $this->app->singleton(AgentRuntime::class, DefaultAgentRuntime::class);
     }
