@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use LimenAi\Agents\AgentValidator;
 use LimenAi\Agents\ConfigAgentRepository;
 use LimenAi\Agents\DefaultAgentResolver;
+use LimenAi\Agents\AgentPersonaComposer;
+use LimenAi\Agents\AgentResponseGuard;
 use LimenAi\Agents\InstructionComposer;
 use LimenAi\Authorization\CacheGuestSessionValidator;
 use LimenAi\Authorization\DatabaseApprovalRepository;
@@ -91,6 +93,7 @@ use LimenAi\Knowledge\NullVectorStore;
 use LimenAi\Knowledge\VectorKnowledgeRetriever;
 use LimenAi\Memory\DatabaseMemoryStore;
 use LimenAi\Memory\DefaultMemoryRetriever;
+use LimenAi\Memory\StrictMemoryPolicy;
 use LimenAi\Memory\InMemoryMemoryStore;
 use LimenAi\Memory\MemoryFormatter;
 use LimenAi\Memory\MemoryService;
@@ -224,6 +227,8 @@ class LimenAiServiceProvider extends ServiceProvider
 
     protected function registerAgents(): void
     {
+        $this->app->singleton(AgentPersonaComposer::class);
+        $this->app->singleton(AgentResponseGuard::class);
         $this->app->singleton(InstructionComposer::class);
         $this->app->singleton(ToolSchemaBuilder::class);
         $this->app->singleton(AgentValidator::class);
@@ -335,6 +340,7 @@ class LimenAiServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(MemoryFormatter::class);
+        $this->app->singleton(StrictMemoryPolicy::class);
         $this->app->singleton(MemoryRetriever::class, $memory['retriever'] ?? DefaultMemoryRetriever::class);
         $this->app->singleton(MemoryService::class);
     }

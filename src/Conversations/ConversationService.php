@@ -4,6 +4,7 @@ namespace LimenAi\Conversations;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Events\Dispatcher;
+use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
@@ -18,6 +19,7 @@ class ConversationService
         private readonly MessageRepository $messages,
         private readonly MessageFormatter $formatter,
         private readonly ConversationSummarizer $summarizer,
+        private readonly AgentRepository $agents,
         private readonly ConfigRepository $config,
         private readonly Dispatcher $events,
     ) {}
@@ -41,9 +43,9 @@ class ConversationService
     }
 
     /** @return list<array<string, mixed>> */
-    public function historyForAgent(string $conversationId): array
+    public function historyForAgent(string $conversationId, ?string $agentKey = null): array
     {
-        $limit = (int) $this->config->get('limen-ai.conversations.history_limit', 50);
+        $limit = $this->resolveHistoryLimit($agentKey);
         $stored = $this->messages->forConversation($conversationId, $limit);
 
         $summary = $this->summarizer->summarize($conversationId, $stored);
@@ -115,5 +117,18 @@ class ConversationService
     public function storedMessages(string $conversationId): array
     {
         return $this->messages->forConversation($conversationId);
+    }
+
+    protected function resolveHistoryLimit(?string $agentKey): int
+    {
+        if ($agentKey !== null) {
+            $agent = $this->agents->find($agentKey);
+
+            if ($agent !== null && isset($agent->limits()['max_history_messages'])) {
+                return max(1, (int) $agent->limits()['max_history_messages']);
+            }
+        }
+
+        return max(1, (int) $this->config->get('limen-ai.conversations.history_limit', 50));
     }
 }
