@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 14 — Security Hardening** (Complete)
+**Phase 15 — Queue & Broadcasting** (Complete)
 
 ## Completed
 
@@ -67,6 +67,10 @@
 - SSRF DNS resolution checks, `assertAllowed()` API, and redirect blocking on HTTP tools
 - `ContentSanitizer` with prompt-injection pattern filtering and untrusted content delimiters
 - Sanitization integrated into knowledge, memory formatters, and agent runtime user messages
+- Queue-dispatched agent run jobs with sync/queued `AgentRunDispatcher`
+- `PusherBroadcaster` and `NullBroadcaster` adapters behind `RealtimeBroadcaster`
+- `AgentEventBroadcaster` subscriber for agent, conversation, and approval events
+- `RunStatusReader` for async run status polling hooks
 
 ## In Progress
 
@@ -78,9 +82,9 @@
 
 ## Next Steps
 
-1. Begin Phase 15 — Queue & Broadcasting
-2. Add queue-dispatched runtime job skeleton
-3. Add Pusher/broadcast channel adapter for agent events
+1. Begin Phase 16 — Chat UI
+2. Add Blade chat components and JS client
+3. Wire Echo subscription to conversation broadcast channels
 
 ## Risks
 
