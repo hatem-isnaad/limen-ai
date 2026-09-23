@@ -127,11 +127,23 @@ return [
     'workflows' => [],
 
     'knowledge' => [
-        'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'null'),
+        'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
+        'vector_store' => LimenAi\Knowledge\InMemoryVectorStore::class,
+        'limit' => 5,
         'collections' => [
             'getting_started' => [
                 'name' => 'Getting Started',
                 'description' => 'Introductory knowledge for the example agent.',
+                'documents' => [
+                    [
+                        'content' => 'Limen AI is a Laravel-native agent framework. Tools require Laravel authorization before execution.',
+                        'metadata' => ['source' => 'docs'],
+                    ],
+                    [
+                        'content' => 'Use the example_echo tool to echo messages during development and testing.',
+                        'metadata' => ['source' => 'docs'],
+                    ],
+                ],
             ],
         ],
     ],
