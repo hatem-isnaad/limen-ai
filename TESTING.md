@@ -16,6 +16,7 @@
 | Feature | HTTP endpoints, commands, end-to-end with fakes |
 | Architecture | Namespace/dependency boundary enforcement |
 | Security | SSRF, auth bypass attempts, redaction |
+| Release readiness | Changelog, composer version, release docs |
 | Workflow | Branching, approval, resume |
 
 ## Fake Implementations

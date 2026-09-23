@@ -18,10 +18,13 @@
 | Tool pipeline | Complete |
 | UI | Complete |
 | Limen integration | Reference demo complete |
+| Release | **v1.0.0** |
 
 ## Current Phase
 
-**Phase 21 — Limen Integration** (Complete)
+**Phase 22 — Final Hardening** (Complete)
+
+All 22 implementation phases are complete. The package is ready for host app integration at v1.0.0.
 
 ## Completed
 
@@ -88,6 +91,8 @@
 - Limen host reference tools: `GetShipmentStatus`, `SendCustomerMessage`
 - `limen_3pl` agent, logistics skill/knowledge, and updated `shipment_notify` workflow
 - Publishable Limen demo stubs and `docs/limen-integration.md`
+- Request-scoped agent cache, tool schema memoization, and `docs/performance.md`
+- v1.0.0 release docs, changelog, security checklist, and release CI workflow
 
 ## In Progress
 
@@ -99,9 +104,9 @@
 
 ## Next Steps
 
-1. Begin Phase 22 — Final Hardening
-2. Performance profiling and release prep
-3. Wire published Limen demo into production host app
+1. Wire published Limen demo into production host app
+2. Configure production LLM provider and queue workers
+3. Plan v1.1 features based on host app feedback
 
 ## Risks
 

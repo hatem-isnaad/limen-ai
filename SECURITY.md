@@ -104,3 +104,18 @@ Log at minimum:
 ## Failure Mode
 
 When in doubt: **deny execution**, return safe user-facing message, log internally.
+
+## Pre-release security checklist (v1.0.0+)
+
+Before tagging a release, confirm:
+
+- [ ] `composer test:security` passes (SSRF, sanitization, redaction matrix)
+- [ ] `composer test:architecture` passes (no host `App\` imports in package)
+- [ ] Tool pipeline authorization tests pass for guest and authenticated users
+- [ ] HTTP integration tools block private IPs and disallowed redirects
+- [ ] Provider and connector secrets are env/config only — never in prompts or logs
+- [ ] Approval gates remain enabled for sensitive tools (e.g. customer messaging)
+- [ ] Broadcasting uses private channels with conversation access checks
+- [ ] Default agent config uses fake provider in examples; production uses real keys in `.env`
+
+See [docs/release.md](docs/release.md) for the full release process.
