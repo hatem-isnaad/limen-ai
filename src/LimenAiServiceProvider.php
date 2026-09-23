@@ -37,6 +37,7 @@ use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Contracts\Tools\ToolRepository;
+use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Conversations\ConversationService;
 use LimenAi\Conversations\InMemoryConversationRepository;
@@ -78,6 +79,11 @@ use LimenAi\Tools\ToolInputValidator;
 use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tools\ToolSchemaBuilder;
 use LimenAi\Workflows\ConfigWorkflowRepository;
+use LimenAi\Workflows\DefaultWorkflowEngine;
+use LimenAi\Workflows\WorkflowBranchEvaluator;
+use LimenAi\Workflows\WorkflowStepRunner;
+use LimenAi\Workflows\WorkflowValidator;
+use LimenAi\Workflows\WorkflowVariableResolver;
 
 class LimenAiServiceProvider extends ServiceProvider
 {
@@ -94,6 +100,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerAuthorization();
         $this->registerMemory();
         $this->registerKnowledge();
+        $this->registerWorkflows();
     }
 
     public function boot(): void
@@ -283,5 +290,14 @@ class LimenAiServiceProvider extends ServiceProvider
 
         $this->app->singleton(AgentKnowledgeRetriever::class, DefaultAgentKnowledgeRetriever::class);
         $this->app->singleton(KnowledgeService::class);
+    }
+
+    protected function registerWorkflows(): void
+    {
+        $this->app->singleton(WorkflowVariableResolver::class);
+        $this->app->singleton(WorkflowBranchEvaluator::class);
+        $this->app->singleton(WorkflowStepRunner::class);
+        $this->app->singleton(WorkflowValidator::class);
+        $this->app->singleton(WorkflowEngine::class, DefaultWorkflowEngine::class);
     }
 }
