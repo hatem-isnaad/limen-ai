@@ -77,7 +77,7 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 12 — Workflow Engine**
+Current: **Phase 13 — HTTP Integrations**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
 
@@ -189,3 +189,15 @@ See [ROADMAP.md](ROADMAP.md) for full phase list.
 | Knowledge service | `KnowledgeService` |
 | Formatter | `KnowledgeFormatter` |
 | Runtime injection | Knowledge after memory, before history |
+
+## Phase 12 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Workflow engine | `DefaultWorkflowEngine` |
+| Step runner | `WorkflowStepRunner` |
+| Branch routing | `WorkflowBranchEvaluator` |
+| Variable templating | `WorkflowVariableResolver` |
+| Validation | `WorkflowValidator` |
+| Step types | agent, tool, approval, branch |
+| Events | `WorkflowStarted`, `WorkflowStepCompleted`, `WorkflowCompleted`, `WorkflowFailed` |

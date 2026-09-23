@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 12 — Workflow Engine**
+**Phase 13 — HTTP Integrations**
 
 ## Phase 01 Scope
 
@@ -169,8 +169,17 @@ At the end of each phase:
 6. Config-driven driver bindings (`null`, `config`, `vector`) in service provider
 7. Unit, integration, and feature knowledge tests
 
-## Next Implementation Tasks (Phase 12)
+## Phase 12 Completed
 
-1. Workflow definition repository and step runner skeleton
-2. Branching and approval step types
-3. Workflow resume integration with runtime checkpoints
+1. `DefaultWorkflowEngine` with start, resume, cancel, and reject lifecycle
+2. `WorkflowStepRunner` for agent, tool, approval, and branch steps
+3. `WorkflowBranchEvaluator` and `WorkflowVariableResolver` for conditional routing and templating
+4. Workflow lifecycle events and checkpoint integration with approval repository
+5. `WorkflowValidator` wired into `limen-ai:validate`
+6. Example workflows in config and unit/integration/feature tests
+
+## Next Implementation Tasks (Phase 13)
+
+1. Declarative HTTP connector config schema
+2. HTTP tool executor with SSRF guard hooks
+3. Integration tests with `Http::fake()`
