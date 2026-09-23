@@ -21,7 +21,10 @@ use LimenAi\Contracts\Authorization\GuestSessionValidator;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
+use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
+use LimenAi\Contracts\Knowledge\KnowledgeRetriever;
+use LimenAi\Contracts\Knowledge\VectorStore;
 use LimenAi\Contracts\Memory\MemoryRetriever;
 use LimenAi\Contracts\Memory\MemoryStore;
 use LimenAi\Contracts\Observability\AuditLogger;
@@ -47,6 +50,14 @@ use LimenAi\Runtime\DefaultAgentRuntime;
 use LimenAi\Runtime\InMemoryRunRepository;
 use LimenAi\Runtime\ToolCallParser;
 use LimenAi\Knowledge\ConfigKnowledgeRepository;
+use LimenAi\Knowledge\ConfigKnowledgeRetriever;
+use LimenAi\Knowledge\DefaultAgentKnowledgeRetriever;
+use LimenAi\Knowledge\InMemoryVectorStore;
+use LimenAi\Knowledge\KnowledgeFormatter;
+use LimenAi\Knowledge\KnowledgeService;
+use LimenAi\Knowledge\NullKnowledgeRetriever;
+use LimenAi\Knowledge\NullVectorStore;
+use LimenAi\Knowledge\VectorKnowledgeRetriever;
 use LimenAi\Memory\DatabaseMemoryStore;
 use LimenAi\Memory\DefaultMemoryRetriever;
 use LimenAi\Memory\InMemoryMemoryStore;
@@ -82,6 +93,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerConversations();
         $this->registerAuthorization();
         $this->registerMemory();
+        $this->registerKnowledge();
     }
 
     public function boot(): void
@@ -239,5 +251,37 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(MemoryFormatter::class);
         $this->app->singleton(MemoryRetriever::class, $memory['retriever'] ?? DefaultMemoryRetriever::class);
         $this->app->singleton(MemoryService::class);
+    }
+
+    protected function registerKnowledge(): void
+    {
+        $knowledge = $this->app['config']->get('limen-ai.knowledge', []);
+
+        $this->app->singleton(KnowledgeFormatter::class);
+
+        $this->app->singleton(VectorStore::class, function ($app) use ($knowledge): VectorStore {
+            $driver = $knowledge['driver'] ?? 'null';
+
+            if ($driver === 'vector') {
+                return $app->make($knowledge['vector_store'] ?? InMemoryVectorStore::class);
+            }
+
+            return new NullVectorStore();
+        });
+
+        $this->app->singleton(KnowledgeRetriever::class, function ($app) use ($knowledge): KnowledgeRetriever {
+            if (isset($knowledge['retriever'])) {
+                return $app->make($knowledge['retriever']);
+            }
+
+            return match ($knowledge['driver'] ?? 'null') {
+                'config' => $app->make(ConfigKnowledgeRetriever::class),
+                'vector' => $app->make(VectorKnowledgeRetriever::class),
+                default => new NullKnowledgeRetriever(),
+            };
+        });
+
+        $this->app->singleton(AgentKnowledgeRetriever::class, DefaultAgentKnowledgeRetriever::class);
+        $this->app->singleton(KnowledgeService::class);
     }
 }
