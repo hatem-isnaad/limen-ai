@@ -33,6 +33,7 @@ Reusable Laravel AI Agent Framework for any business domain. First host: Limen 3
 | docs/limen-integration.md | Limen 3PL host app integration |
 | docs/release.md | Install, publish, and release guide |
 | docs/performance.md | Caching and profiling notes |
+| docs/providers.md | LLM/embedding providers and per-agent models |
 | CHANGELOG.md | Version history |
 | .ai/MASTER_PROMPT.md | AI coding agent instructions |
 

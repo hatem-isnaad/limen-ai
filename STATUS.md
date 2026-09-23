@@ -11,8 +11,8 @@
 | Contracts | Complete |
 | Config repositories | Complete |
 | DTOs / value objects | Complete |
-| LLM providers | Fake + OpenAI skeleton |
-| Embedding providers | Fake driver |
+| LLM providers | Fake, OpenAI, Anthropic, Gemini, OpenRouter + custom drivers |
+| Embedding providers | Fake + OpenAI |
 | Runtime | Core loop complete |
 | Conversations | In-memory persistence complete |
 | Tool pipeline | Complete |
@@ -36,7 +36,8 @@ All 22 implementation phases are complete. The package is ready for host app int
 - Unit and integration tests for repositories
 - `FakeLlmProvider` and `FakeEmbeddingProvider`
 - `LlmProviderManager` and `EmbeddingProviderManager`
-- `OpenAiProvider` skeleton with HTTP mapping
+- `OpenAiProvider`, `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) adapters
+- `OpenAiEmbeddingProvider` for vector RAG
 - Provider unit/integration/architecture tests
 - `DefaultAgentResolver` and `ResolvedAgent`
 - `ToolSchemaBuilder` for LLM function schemas
