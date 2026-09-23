@@ -6,6 +6,8 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Str;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Observability\AuditLogger;
+use LimenAi\Contracts\Observability\UsageTracker;
+use LimenAi\Observability\TraceContext;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Contracts\Tools\IdempotencyGuard;
 use LimenAi\Contracts\Tools\ToolDefinition;
@@ -28,6 +30,7 @@ class ToolPipeline
         private readonly ToolExecutor $executor,
         private readonly IdempotencyGuard $idempotency,
         private readonly AuditLogger $audit,
+        private readonly UsageTracker $usage,
         private readonly SensitiveDataRedactor $redactor,
         private readonly Dispatcher $events,
     ) {}
@@ -89,6 +92,10 @@ class ToolPipeline
                 ['duration_ms' => $durationMs],
             ));
 
+            if ($context->runId() !== '') {
+                $this->usage->recordToolExecution($context->runId(), $tool->key(), $durationMs);
+            }
+
             return ToolExecutionResult::fresh($output, $durationMs, $executionId);
         } catch (ApprovalRequiredException $exception) {
             throw $exception;
@@ -124,7 +131,7 @@ class ToolPipeline
         ToolExecutionContext $context,
         string $executionId,
     ): array {
-        return [
+        $payload = [
             'execution_id' => $executionId,
             'tool_key' => $tool->key(),
             'run_id' => $context->runId(),
@@ -133,5 +140,14 @@ class ToolPipeline
             'user_id' => $context->userId(),
             'input' => $this->redactor->redact($input),
         ];
+
+        $traceId = $context->metadata()['trace_id'] ?? null;
+
+        if (is_string($traceId) && $traceId !== '') {
+            $parentSpanId = $context->metadata()['span_id'] ?? null;
+            $payload = array_merge($payload, TraceContext::child($traceId, is_string($parentSpanId) ? $parentSpanId : null)->toArray());
+        }
+
+        return $payload;
     }
 }

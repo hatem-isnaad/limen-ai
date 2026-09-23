@@ -11,6 +11,8 @@ use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
 use LimenAi\Contracts\Memory\MemoryRetriever;
+use LimenAi\Contracts\Observability\UsageTracker;
+use LimenAi\Observability\TraceContext;
 use LimenAi\Contracts\Security\ContentSanitizer;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
@@ -43,6 +45,7 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly MemoryRetriever $memory,
         private readonly AgentKnowledgeRetriever $knowledge,
         private readonly ContentSanitizer $sanitizer,
+        private readonly UsageTracker $usage,
         private readonly Dispatcher $events,
     ) {}
 
@@ -53,6 +56,12 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->authorization->validateRunContext($context, $agent->definition());
 
         $this->conversations->ensure($conversationId, $agentKey, $context);
+
+        $trace = $this->shouldTrace() ? TraceContext::forRun() : null;
+
+        if ($trace !== null && $context instanceof RunContextDataImpl) {
+            $context = $context->withMetadata($trace->toArray());
+        }
 
         $userMessage = $this->sanitizer->sanitize($userMessage);
 
@@ -74,6 +83,8 @@ class DefaultAgentRuntime implements AgentRuntime
             'user_id' => $context->userId(),
             'status' => RunStatus::RUNNING,
             'messages' => $messages,
+            'trace_id' => $trace?->traceId,
+            'span_id' => $trace?->spanId,
         ]);
 
         $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context));
@@ -260,6 +271,12 @@ class DefaultAgentRuntime implements AgentRuntime
             $limits->nextStep();
 
             $response = $agent->chat($messages);
+            $this->usage->recordLlmUsage(
+                $runId,
+                $agent->providerName(),
+                $agent->model(),
+                $response->usage(),
+            );
             $toolCalls = $this->toolCallParser->parse($response);
 
             if ($toolCalls === []) {
@@ -450,6 +467,11 @@ class DefaultAgentRuntime implements AgentRuntime
         }
 
         $this->conversations->appendAgentMessages($conversationId, $newMessages);
+    }
+
+    protected function shouldTrace(): bool
+    {
+        return (bool) config('limen-ai.observability.trace_enabled', true);
     }
 
     /** @return array<string, mixed> */
