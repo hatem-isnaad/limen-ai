@@ -66,6 +66,20 @@ php artisan limen-ai:validate
 
 Global defaults live under `limen-ai.limits` and `limen-ai.conversations.history_limit`. Per-agent limits override globals.
 
+## Multi-agent design
+
+Do **not** attach every tool to one agent. Register all tools in `tools.*`; expose only what each agent needs.
+
+| Agent role | Typical tool count | Example |
+|------------|-------------------|---------|
+| Public widget | 5–8 | `app_assistant` |
+| Staff support | 8–15 | `support_agent` |
+| Admin / privileged | 5–10 + approvals | `admin_agent` |
+
+`php artisan limen-ai:validate` warns above `quality.tool_count_warn` (default 15) and flags critical counts at 25+.
+
+Full guide: [scaling-agents-and-tools.md](scaling-agents-and-tools.md) · Example: [multi-agent.example.php](../examples/limen-host/config/multi-agent.example.php)
+
 ## Memory (strict & scoped)
 
 ```php

@@ -544,6 +544,8 @@ return [
         'output_validator' => env('LIMEN_AI_OUTPUT_VALIDATOR'),
         'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
         'output_moderator' => env('LIMEN_AI_OUTPUT_MODERATOR'),
+        'tool_count_warn' => (int) env('LIMEN_AI_TOOL_COUNT_WARN', 15),
+        'tool_count_critical' => (int) env('LIMEN_AI_TOOL_COUNT_CRITICAL', 25),
     ],
 
     'responses' => [

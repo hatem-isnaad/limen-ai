@@ -452,6 +452,9 @@ Full schema: `docs/configuration-schema.md`
 |----------|------|
 | **This guide** | `AGENTS.md` |
 | Install (all methods) | `docs/installation.md` |
+| Host quickstart | `docs/host-quickstart.md` |
+| Scaling agents & tools | `docs/scaling-agents-and-tools.md` |
+| Host integration audit | `docs/HOST-INTEGRATION-AUDIT.md` |
 | Interactive docs | `docs/index.html` |
 | Doc index | `docs/README.md` |
 | Product spec | `docs/project/AI_SPEC.md` |
@@ -482,6 +485,7 @@ Full schema: `docs/configuration-schema.md`
 - Mark roadmap phases incomplete as "done" without tests
 - Add features without updating docs and CHANGELOG
 - Break architecture boundary tests to "make it work"
+- Put 20+ tools on a single agent (split agents; see `docs/scaling-agents-and-tools.md`)
 
 ---
 

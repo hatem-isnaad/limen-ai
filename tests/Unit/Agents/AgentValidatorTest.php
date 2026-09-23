@@ -31,4 +31,15 @@ class AgentValidatorTest extends TestCase
             fn (string $error): bool => str_contains($error, 'missing_tool'),
         ));
     }
+
+    public function test_it_warns_when_agent_exposes_too_many_tools(): void
+    {
+        config()->set('limen-ai.quality.tool_count_warn', 3);
+        config()->set('limen-ai.agents.example.tools', ['a', 'b', 'c', 'd']);
+
+        $warnings = app(AgentValidator::class)->warnings('example');
+
+        $this->assertNotEmpty($warnings);
+        $this->assertStringContainsString('tools (high)', $warnings[0]);
+    }
 }

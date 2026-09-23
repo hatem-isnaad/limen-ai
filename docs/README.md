@@ -15,6 +15,9 @@ Package documentation is organized by topic. Start with the [interactive hub](in
 | Document | Description |
 |----------|-------------|
 | [installation.md](installation.md) | **Install the package** — Packagist, path repo, VCS, private registry, monorepo |
+| [host-quickstart.md](host-quickstart.md) | **15-minute path** — install → agent → tool → widget |
+| [scaling-agents-and-tools.md](scaling-agents-and-tools.md) | Multi-agent layout, tool limits, when to split |
+| [HOST-INTEGRATION-AUDIT.md](HOST-INTEGRATION-AUDIT.md) | Host integration quality audit (maintainers) |
 | [providers.md](providers.md) | LLM and embedding provider setup |
 | [agent-configuration.md](agent-configuration.md) | Persona, tone, language, memory, quality |
 | [artisan-command-map.md](artisan-command-map.md) | All `limen-ai:*` Artisan commands |

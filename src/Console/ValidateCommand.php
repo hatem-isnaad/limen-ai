@@ -28,10 +28,18 @@ class ValidateCommand extends Command
                 $integrations->validateAll(),
             );
 
+        $warnings = $agentKey
+            ? $validator->warnings((string) $agentKey)
+            : $validator->warningsAll();
+
         if ($errors === []) {
             $this->components->info($agentKey
                 ? "Agent [{$agentKey}] configuration is valid."
                 : 'All Limen AI agent and workflow configurations are valid.');
+
+            foreach ($warnings as $warning) {
+                $this->components->warn($warning);
+            }
 
             return self::SUCCESS;
         }

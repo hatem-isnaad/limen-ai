@@ -65,7 +65,17 @@ $this->app->singleton(
 examples/limen-host/tests/Feature/LimenAiAgentTest.php
 ```
 
-Set `LIMEN_AI_PERSISTENCE_DRIVER=database`, run migrations, then use the template to verify conversation + message HTTP flows against your configured agent.
+Run `php artisan migrate` (persistence auto-detects database), then use the template to verify conversation + message HTTP flows.
+
+## Multi-agent layout
+
+For apps with many tools, split agents instead of one mega-agent:
+
+```
+examples/limen-host/config/multi-agent.example.php
+```
+
+See [docs/scaling-agents-and-tools.md](../../docs/scaling-agents-and-tools.md).
 
 ## Demo Scenarios
 

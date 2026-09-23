@@ -217,22 +217,21 @@ php artisan migrate
 
 ### 4. Persistence (required for web chat)
 
-The package defaults to **in-memory** repositories for fast tests. The chat widget and HTTP API need **database-backed** persistence or conversations are lost between requests (second message returns `403 Conversation access denied`).
+After `php artisan migrate`, persistence **auto-detects database** when `LIMEN_AI_PERSISTENCE_DRIVER` is unset (`LIMEN_AI_PERSISTENCE_AUTO_DETECT=true` by default).
 
-In your host `.env`:
+Optional explicit override:
 
 ```env
 LIMEN_AI_PERSISTENCE_DRIVER=database
 ```
 
-Then migrate and clear config cache:
+Then clear config cache:
 
 ```bash
-php artisan migrate
 php artisan config:clear
 ```
 
-This switches conversation, message, run, checkpoint, and approval storage to the database implementations shipped in the package.
+Without database tables, the package uses in-memory repos (fine for tests; web chat loses state between requests).
 
 ### 5. Validate
 
@@ -282,7 +281,9 @@ Drop the chat widget into a Blade view:
 
 ## Next steps
 
-- [providers.md](providers.md) — configure OpenAI, Anthropic, Gemini, or OpenRouter
+- [host-quickstart.md](host-quickstart.md) — zero to working widget
+- [scaling-agents-and-tools.md](scaling-agents-and-tools.md) — multi-agent layout before you add many tools
+- [providers.md](providers.md) — configure OpenAI, Anthropic, Gemini, or Ollama
 - [agent-configuration.md](agent-configuration.md) — persona and quality settings
 - [artisan-command-map.md](artisan-command-map.md) — CLI reference
 - [index.html](index.html) — interactive documentation hub

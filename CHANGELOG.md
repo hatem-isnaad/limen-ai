@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-09-23
+
+### Added
+
+- [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) — multi-agent layout, tool limits, verdict matrix
+- [docs/host-quickstart.md](docs/host-quickstart.md) — install to working widget in ~15 minutes
+- [examples/limen-host/config/multi-agent.example.php](examples/limen-host/config/multi-agent.example.php) — `app_assistant` / `support_agent` / `admin_agent` pattern
+- `limen-ai:validate` warnings when agents exceed `quality.tool_count_warn` (default 15) or `tool_count_critical` (25)
+
 ## [1.0.2] - 2026-09-23
 
 ### Fixed

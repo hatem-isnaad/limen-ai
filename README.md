@@ -2,7 +2,7 @@
 
 **Limen AI** is a production-ready Laravel package for building AI agents — with tools, skills, workflows, memory, knowledge retrieval (RAG), approvals, chat UI, and observability built in.
 
-> **Current release:** [v1.0.0](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.0)
+> **Current release:** [v1.0.2](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.2)
 
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
@@ -16,6 +16,8 @@
 |----------|-------------|
 | [AGENTS.md](AGENTS.md) | **AI & contributor reference** — architecture, usage, conventions, cookbook |
 | [docs/installation.md](docs/installation.md) | **Install guide** — Packagist, VCS, path repo, private registry, monorepo |
+| [docs/host-quickstart.md](docs/host-quickstart.md) | **Quickstart** — install to working widget in ~15 minutes |
+| [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) | Multi-agent layout and tool-count guidance |
 | [docs/index.html](docs/index.html) | Interactive documentation hub |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
 

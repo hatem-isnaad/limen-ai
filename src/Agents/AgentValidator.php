@@ -32,6 +32,30 @@ class AgentValidator
     }
 
     /** @return list<string> */
+    public function warningsAll(): array
+    {
+        $warnings = [];
+
+        foreach ($this->agents->all() as $agent) {
+            $warnings = array_merge($warnings, $this->warningsForAgent($agent));
+        }
+
+        return $warnings;
+    }
+
+    /** @return list<string> */
+    public function warnings(string $agentKey): array
+    {
+        $agent = $this->agents->find($agentKey);
+
+        if ($agent === null) {
+            return [];
+        }
+
+        return $this->warningsForAgent($agent);
+    }
+
+    /** @return list<string> */
     public function validate(string $agentKey): array
     {
         $agent = $this->agents->find($agentKey);
@@ -93,6 +117,39 @@ class AgentValidator
         $errors = array_merge($errors, $this->validateLimits($key, $agent->limits()));
 
         return $errors;
+    }
+
+    /** @return list<string> */
+    protected function warningsForAgent(AgentDefinition $agent): array
+    {
+        $warnings = [];
+        $key = $agent->key();
+        $toolCount = $this->resolvedToolCount($agent);
+        $warnThreshold = max(1, (int) $this->config->get('limen-ai.quality.tool_count_warn', 15));
+        $criticalThreshold = max($warnThreshold + 1, (int) $this->config->get('limen-ai.quality.tool_count_critical', 25));
+
+        if ($toolCount >= $criticalThreshold) {
+            $warnings[] = "Agent [{$key}] exposes {$toolCount} tools (critical). Split into multiple agents or use workflows. See docs/scaling-agents-and-tools.md.";
+        } elseif ($toolCount >= $warnThreshold) {
+            $warnings[] = "Agent [{$key}] exposes {$toolCount} tools (high). Consider splitting agents or using a stronger model.";
+        }
+
+        return $warnings;
+    }
+
+    protected function resolvedToolCount(AgentDefinition $agent): int
+    {
+        $keys = $agent->tools();
+
+        foreach ($agent->skills() as $skillKey) {
+            $skill = $this->skills->find($skillKey);
+
+            if ($skill !== null) {
+                $keys = array_merge($keys, $skill->allowedTools());
+            }
+        }
+
+        return count(array_unique($keys));
     }
 
     /** @param  array<string, mixed>  $persona

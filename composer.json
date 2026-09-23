@@ -1,7 +1,7 @@
 {
     "name": "limen-ai/limen-ai",
     "description": "A reusable Laravel AI Agent Framework with agents, runtime, tools, skills, workflows, memory, knowledge, and chat UI.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "library",
     "license": "MIT",
     "keywords": [
