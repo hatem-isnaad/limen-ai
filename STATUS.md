@@ -21,7 +21,7 @@
 
 ## Current Phase
 
-**Phase 15 — Queue & Broadcasting** (Complete)
+**Phase 16 — Chat UI** (Complete)
 
 ## Completed
 
@@ -71,6 +71,9 @@
 - `PusherBroadcaster` and `NullBroadcaster` adapters behind `RealtimeBroadcaster`
 - `AgentEventBroadcaster` subscriber for agent, conversation, and approval events
 - `RunStatusReader` for async run status polling hooks
+- Chat UI Blade components (`chatbot`, `widget`) with themed CSS/JS client
+- HTTP API for conversations, messages, runs, and approvals
+- Echo-ready private channel authorization for conversation updates
 
 ## In Progress
 
@@ -82,9 +85,9 @@
 
 ## Next Steps
 
-1. Begin Phase 16 — Chat UI
-2. Add Blade chat components and JS client
-3. Wire Echo subscription to conversation broadcast channels
+1. Begin Phase 17 — Themes
+2. Expand RTL/dark mode theming and publishable asset overrides
+3. Begin Phase 18 — Observability & Audit
 
 ## Risks
 
