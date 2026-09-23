@@ -8,19 +8,37 @@ use RecursiveIteratorIterator;
 
 class PackageBoundaryTest extends TestCase
 {
-    public function test_runtime_directory_does_not_exist_yet_or_has_no_blade_imports(): void
+    public function test_runtime_directory_has_no_blade_or_pusher_imports(): void
     {
-        $runtimePath = dirname(__DIR__, 2).'/src/Runtime';
-
-        if (! is_dir($runtimePath)) {
-            $this->assertTrue(true);
-
-            return;
-        }
-
-        $this->assertNoForbiddenImports($runtimePath, [
+        $this->assertNoForbiddenImports(dirname(__DIR__, 2).'/src/Runtime', [
             'Illuminate\\View',
             'Pusher\\',
+            'App\\Models\\',
+        ]);
+    }
+
+    public function test_definition_repositories_do_not_depend_on_runtime_internals(): void
+    {
+        foreach (['Agents', 'Tools', 'Skills', 'Workflows', 'Knowledge'] as $module) {
+            $this->assertNoForbiddenImports(dirname(__DIR__, 2).'/src/'.$module, [
+                'LimenAi\\Runtime\\AgentRuntime',
+            ]);
+        }
+    }
+
+    public function test_provider_layer_does_not_depend_on_blade_or_host_app(): void
+    {
+        $this->assertNoForbiddenImports(dirname(__DIR__, 2).'/src/Providers', [
+            'Illuminate\\View',
+            'App\\',
+            'Pusher\\',
+        ]);
+    }
+
+    public function test_tool_pipeline_does_not_reference_host_app_models(): void
+    {
+        $this->assertNoForbiddenImports(dirname(__DIR__, 2).'/src/Tools', [
+            'App\\Models\\',
         ]);
     }
 
