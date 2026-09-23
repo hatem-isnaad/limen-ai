@@ -149,4 +149,5 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 05 — Tool pipeline, validation, audit, idempotency
 - [x] Begin Phase 06 — Runtime
 - [x] Phase 06 — Core runtime loop, limits, run state skeleton
-- [ ] Begin Phase 07 — Conversations
+- [x] Begin Phase 07 — Conversations
+- [x] Phase 07 — Conversation/message persistence, history loading, migrations
