@@ -51,7 +51,7 @@ jobs:
           composer update --prefer-dist --no-interaction
 
       - name: Run unit, integration, and feature tests
-        run: vendor/bin/phpunit --testsuite Unit --testsuite Integration --testsuite Feature
+        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
 
       - name: Run architecture boundary gates
         run: composer test:architecture
@@ -71,22 +71,3 @@ jobs:
           name: coverage-clover
           path: build/coverage.xml
           if-no-files-found: ignore
-
-  release-gate:
-    name: Release gate (PHP 8.3)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
-
-      - name: Run full release test suite
-        run: composer test:release

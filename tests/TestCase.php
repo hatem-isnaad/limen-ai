@@ -12,7 +12,7 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        $this->actingAs(new GenericUser(['id' => 1]));
+        $this->actingAs(new GenericUser(['id' => 1, 'remember_token' => null]));
     }
 
     protected function getPackageProviders($app): array
