@@ -10,6 +10,8 @@ The LLM proposes actions. Laravel decides whether they are allowed and executes 
 
 ## Features
 
+- **Multi-provider LLM support** — OpenAI, Anthropic, Gemini, OpenRouter, and custom drivers from config
+- Per-agent `provider` + `model` selection (no code changes to switch models)
 - Config-driven agents, tools, skills, and workflows
 - Multi-step runtime with tool pipeline, approvals, and checkpoints
 - SSRF protection, prompt-injection sanitization, and audit logging
@@ -55,6 +57,7 @@ See [docs/release.md](docs/release.md) for full publish tags, validation, and up
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
 | [SECURITY.md](SECURITY.md) | Threat model and controls |
 | [TESTING.md](TESTING.md) | Test strategy |
+| [docs/providers.md](docs/providers.md) | LLM/embedding providers and models |
 | [docs/release.md](docs/release.md) | Install, publish, and release |
 | [docs/limen-integration.md](docs/limen-integration.md) | Limen 3PL host demo |
 | [docs/ci.md](docs/ci.md) | CI matrix and merge gates |

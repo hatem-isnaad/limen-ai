@@ -7,7 +7,9 @@ Primary file: `config/limen-ai.php`
 | Key | Purpose |
 |-----|---------|
 | `default_agent` | Fallback agent key |
-| `providers` | LLM + embedding provider config |
+| `providers` | LLM provider config + `drivers` registry (see [providers.md](providers.md)) |
+| `embeddings` | Embedding provider config for vector RAG |
+| `performance` | Request-scoped resolver cache toggles |
 | `agents` | Agent definitions |
 | `tools` | Tool definitions (class or HTTP) |
 | `skills` | Skill definitions |

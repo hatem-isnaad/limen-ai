@@ -1,0 +1,40 @@
+<?php
+
+namespace App\LimenAi\Providers;
+
+use LimenAi\Contracts\Providers\LlmProvider;
+use LimenAi\Contracts\Providers\LlmResponse;
+use LimenAi\Providers\LlmResponseData;
+
+class {{ class }} implements LlmProvider
+{
+    /**
+     * @param  array<string, mixed>  $config
+     */
+    public function __construct(
+        private readonly string $name,
+        private readonly array $config,
+    ) {}
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function chat(array $messages, array $tools = [], array $options = []): LlmResponse
+    {
+        // Call your vendor API here using $this->config and $options['model'].
+
+        return LlmResponseData::fromArray([
+            'content' => 'Replace with vendor response text.',
+            'tool_calls' => [],
+            'usage' => ['prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
+            'finish_reason' => 'stop',
+        ]);
+    }
+
+    public function supportsStreaming(): bool
+    {
+        return false;
+    }
+}
