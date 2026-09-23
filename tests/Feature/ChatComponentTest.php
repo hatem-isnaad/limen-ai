@@ -17,6 +17,7 @@ class ChatComponentTest extends TestCase
         $this->assertStringContainsString('data-limen-ai-chat', $html);
         $this->assertStringContainsString('data-limen-ai-messages', $html);
         $this->assertStringContainsString('data-limen-ai-send', $html);
+        $this->assertStringContainsString('data-mode=', $html);
         $this->assertStringContainsString('example', $html);
     }
 
