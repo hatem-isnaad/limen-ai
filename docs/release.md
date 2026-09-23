@@ -83,26 +83,27 @@ Confirm:
 
 See [SECURITY.md](../SECURITY.md) for the full security model.
 
-## Branch promotion (stg → main)
+## Automatic releases on `main`
 
-1. Merge feature work into **`stg`** and ensure CI is green (see [branching.md](branching.md)).
-2. Open a PR from **`stg`** → **`main`** after the staging gate passes.
-3. Merge to **`main`** for go-live. Pushes to `main` do not re-run CI.
+Pushes to `main` trigger [semantic-release](https://semantic-release.gitbook.io/) via `.github/workflows/release.yml`.
 
-## Tagging a release
+1. Merge your release branch into `main` (typically `stg` → `main`).
+2. Use [Conventional Commits](https://www.conventionalcommits.org/) on merge commits and squash messages so the version bump is correct:
 
-1. Confirm **`stg`** CI passed for the code being released.
-2. Merge **`stg`** → **`main`**.
-3. Create and push an annotated tag from **`main`**:
+| Commit prefix | Semver bump |
+|---------------|-------------|
+| `feat:` | MINOR |
+| `fix:`, `perf:`, `revert:` | PATCH |
+| `feat!:` or `BREAKING CHANGE:` footer | MAJOR |
+| `chore:`, `ci:`, `test:` | No release |
 
-```bash
-git tag -a v1.0.0 -m "Limen AI v1.0.0 — initial stable release"
-git push origin v1.0.0
-```
+3. CI runs `composer test:release`, then semantic-release:
+   - Computes the next version from commits since the last tag
+   - Updates `CHANGELOG.md`, `composer.json`, and `README.md`
+   - Creates GitHub release `vX.Y.Z` with generated notes
+   - Pushes the version commit back to `main` (`[skip ci]` avoids loops)
 
-4. Create a GitHub release from the tag with notes from `CHANGELOG.md`.
-
-CI runs on **`stg`** only. Optional manual re-check before tagging: run the **Release** workflow (`workflow_dispatch`) in GitHub Actions.
+Manual tags are not required. To re-validate a version without releasing, use the **Release** workflow dispatch on GitHub Actions.
 
 ## Upgrade notes (v1.0.0)
 

@@ -6,15 +6,25 @@ use LimenAi\Tests\TestCase;
 
 class ReleaseReadinessTest extends TestCase
 {
-    public function test_changelog_documents_v1_release(): void
+    public function test_changelog_documents_current_release(): void
     {
-        $changelog = file_get_contents(dirname(__DIR__, 2).'/CHANGELOG.md');
+        $root = dirname(__DIR__, 2);
+        $changelog = file_get_contents($root.'/CHANGELOG.md');
+        $composer = json_decode(
+            file_get_contents($root.'/composer.json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+
+        $version = $composer['version'] ?? null;
 
         $this->assertIsString($changelog);
-        $this->assertStringContainsString('## [1.0.0]', $changelog);
+        $this->assertIsString($version);
+        $this->assertStringContainsString("## [{$version}]", $changelog);
     }
 
-    public function test_composer_declares_package_version(): void
+    public function test_composer_declares_semver_package_version(): void
     {
         $composer = json_decode(
             file_get_contents(dirname(__DIR__, 2).'/composer.json'),
@@ -23,7 +33,10 @@ class ReleaseReadinessTest extends TestCase
             JSON_THROW_ON_ERROR,
         );
 
-        $this->assertSame('1.0.0', $composer['version'] ?? null);
+        $version = $composer['version'] ?? null;
+
+        $this->assertIsString($version);
+        $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+/', $version);
     }
 
     public function test_release_documentation_exists(): void
