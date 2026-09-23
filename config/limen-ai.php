@@ -76,12 +76,29 @@ return [
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
             'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
+            'persona' => [
+                'display_name' => 'Example Agent',
+                'tone' => 'friendly',
+                'language' => 'en',
+                'response_style' => 'concise',
+                'rules' => [
+                    'Use tools only when they add value.',
+                    'Never invent shipment, order, or account data.',
+                ],
+                'forbidden' => [
+                    'Legal advice',
+                    'Medical advice',
+                ],
+            ],
             'skills' => ['general_assistance'],
             'tools' => ['example_echo'],
             'knowledge' => ['getting_started'],
             'memory' => [
                 'conversation' => true,
                 'user' => false,
+                'limit' => 10,
+                'allowed_keys' => ['preferred_language', 'timezone'],
+                'max_value_length' => 256,
             ],
             'authorization' => [
                 'required' => true,
@@ -90,11 +107,15 @@ return [
             ],
             'output' => [
                 'format' => 'text',
+                'max_response_chars' => 4000,
             ],
             'limits' => [
                 'max_tool_calls' => 10,
                 'max_steps' => 20,
                 'timeout' => 60,
+                'temperature' => 0.2,
+                'max_tokens' => 1200,
+                'max_history_messages' => 30,
             ],
             'version' => '1.0.0',
         ],
@@ -104,12 +125,29 @@ return [
             'model' => env('LIMEN_AI_LIMEN_MODEL', 'gpt-4.1-mini'),
             'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are the Limen 3PL logistics assistant. Use get_shipment_status for lookups and send_customer_message only for approved outbound customer updates.',
+            'persona' => [
+                'display_name' => 'Limen 3PL Assistant',
+                'tone' => 'professional',
+                'language' => env('LIMEN_AI_LIMEN_LANGUAGE', 'auto'),
+                'response_style' => 'concise',
+                'rules' => [
+                    'Reference shipment IDs explicitly.',
+                    'Escalate to a human when data is missing or ambiguous.',
+                ],
+                'forbidden' => [
+                    'Promising delivery dates without tool confirmation',
+                    'Sending customer messages without approval',
+                ],
+            ],
             'skills' => ['logistics_support'],
             'tools' => ['get_shipment_status', 'send_customer_message'],
             'knowledge' => ['limen_3pl_ops'],
             'memory' => [
                 'conversation' => true,
                 'user' => true,
+                'limit' => 15,
+                'allowed_keys' => ['preferred_language', 'timezone', 'warehouse_id'],
+                'max_value_length' => 512,
             ],
             'authorization' => [
                 'required' => true,
@@ -118,11 +156,15 @@ return [
             ],
             'output' => [
                 'format' => 'text',
+                'max_response_chars' => 3000,
             ],
             'limits' => [
                 'max_tool_calls' => 8,
                 'max_steps' => 16,
                 'timeout' => 90,
+                'temperature' => 0.1,
+                'max_tokens' => 1500,
+                'max_history_messages' => 24,
             ],
             'version' => '1.0.0',
         ],
@@ -167,7 +209,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
+            'class' => null,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -203,7 +245,7 @@ return [
         'get_shipment_status' => [
             'name' => 'Get Shipment Status',
             'description' => 'Look up the current status of a shipment by ID.',
-            'class' => null, // Host: App\LimenAi\Tools\GetShipmentStatus::class
+            'class' => null,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
@@ -217,7 +259,7 @@ return [
         'send_customer_message' => [
             'name' => 'Send Customer Message',
             'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
-            'class' => null, // Host: App\LimenAi\Tools\SendCustomerMessage::class
+            'class' => null,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],
@@ -367,6 +409,18 @@ return [
         'store' => LimenAi\Memory\InMemoryMemoryStore::class,
         'retriever' => LimenAi\Memory\DefaultMemoryRetriever::class,
         'limit' => 20,
+        'strict' => [
+            'enforce_allowlist' => env('LIMEN_AI_MEMORY_STRICT', true),
+            'max_key_length' => 64,
+            'max_value_length' => 512,
+            'allowed_key_pattern' => '/^[a-z][a-z0-9_]*$/',
+        ],
+    ],
+
+    'quality' => [
+        'default_tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
+        'default_language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'en'),
+        'save_tokens' => env('LIMEN_AI_SAVE_TOKENS', true),
     ],
 
     'responses' => [

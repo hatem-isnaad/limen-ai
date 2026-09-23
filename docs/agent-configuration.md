@@ -6,10 +6,10 @@ Every agent is fully controlled from `config/limen-ai.php`. No code changes are 
 
 ```php
 'persona' => [
-    'display_name' => 'Limen 3PL Assistant',   // UI + self-introduction
-    'tone' => 'professional',                 // professional|friendly|formal|concise|empathetic
-    'language' => 'en',                       // ISO-639-1 (en, ar) or auto (follow request locale)
-    'response_style' => 'concise',            // concise|detailed|bullet_points|step_by_step
+    'display_name' => 'Limen 3PL Assistant',
+    'tone' => 'professional',
+    'language' => 'en',
+    'response_style' => 'concise',
     'rules' => [
         'Reference shipment IDs explicitly.',
     ],
@@ -32,13 +32,13 @@ php artisan limen-ai:validate
 
 ```php
 'output' => [
-    'format' => 'text',              // text|markdown
-    'max_response_chars' => 3000,    // hard cap on assistant replies
+    'format' => 'text',
+    'max_response_chars' => 3000,
 ],
 'limits' => [
-    'temperature' => 0.1,            // lower = more deterministic
-    'max_tokens' => 1500,            // per LLM completion
-    'max_history_messages' => 24,    // conversation turns loaded
+    'temperature' => 0.1,
+    'max_tokens' => 1500,
+    'max_history_messages' => 24,
     'max_tool_calls' => 8,
     'max_steps' => 16,
     'timeout' => 90,
@@ -54,13 +54,13 @@ Global defaults live under `limen-ai.limits` and `limen-ai.conversations.history
     'conversation' => true,
     'user' => true,
     'agent' => false,
-    'limit' => 15,                   // max entries injected per run
-    'allowed_keys' => [              // allowlist — blocks unknown keys
+    'limit' => 15,
+    'allowed_keys' => [
         'preferred_language',
         'timezone',
         'warehouse_id',
     ],
-    'max_value_length' => 512,       // truncate stored/recalled values
+    'max_value_length' => 512,
 ],
 ```
 
@@ -100,7 +100,7 @@ See [SECURITY.md](../SECURITY.md) for the full threat model.
 'quality' => [
     'default_tone' => 'professional',
     'default_language' => 'en',
-    'save_tokens' => true,   // adds concise-response instruction to every agent
+    'save_tokens' => true,
 ],
 ```
 
