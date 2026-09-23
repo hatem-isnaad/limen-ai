@@ -7,13 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-09-23
+
+### Fixed
+
+- Persistence auto-detects `database` when `limen_ai_conversations` exists (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`, default true)
+- `limen-ai:doctor` fails when migrations exist but persistence is forced to memory
+
+### Added
+
+- Guest mode hardening guide in `SECURITY.md`
+- Semantic scoring documented as host-implemented via `OutputValidator` / `OutputModerator`
+- Persistence auto-detect tests and doctor persistence checks
+
 ## [1.0.1] - 2026-09-23
 
 Host integration release: production-ready web chat persistence, guest sessions, output validation hooks, and chat UI hardening.
 
 ### Fixed
 
-- Persistence auto-detects `database` when `limen_ai_conversations` exists (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`, default true)
 - `LIMEN_AI_PERSISTENCE_DRIVER=database` switches all repos to database implementations (fixes web chat `403` on second request)
 - Widget and chatbot apply `LIMEN_AI_UI_*` theme env vars over agent persona UI and presets
 - Conversation sync persists only final assistant text; tool JSON hidden from user-visible history
@@ -23,7 +35,7 @@ Host integration release: production-ready web chat persistence, guest sessions,
 ### Added
 
 - `PersistenceConfig`, `EnvironmentDoctor`, and `limen-ai:doctor` persistence checks
-- Guest sessions API, `CacheGuestSessionValidator`, and guest hardening guide in `SECURITY.md`
+- Guest sessions API and `CacheGuestSessionValidator`
 - `OutputValidator` / `OutputModerator` contracts with `StructuredOutputValidator` and `BasicOutputModerator`
 - `limen-ai:skill:test` and `limen-ai:agent:test --expect-contains`
 - Skill metrics in audit logs; published UI `VERSION` stamp and stale-view doctor warning
