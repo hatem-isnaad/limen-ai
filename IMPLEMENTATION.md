@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 14 — Security Hardening**
+**Phase 15 — Queue & Broadcasting**
 
 ## Phase 01 Scope
 
@@ -187,8 +187,18 @@ At the end of each phase:
 5. `HttpIntegrationValidator` wired into `limen-ai:validate`
 6. Unit, integration, and feature tests with `Http::fake()`
 
-## Next Implementation Tasks (Phase 14)
+## Phase 14 Completed
 
-1. Expand SSRF validation (redirects, DNS rebinding hooks)
-2. Prompt-injection sanitization helpers
-3. Security-focused unit and feature tests
+1. `SsrfUrlValidator` expanded with DNS resolution checks and `assertAllowed()` API
+2. `SecurityException` for SSRF and security policy violations
+3. HTTP tool executor uses `assertAllowed()` and disables redirects by default
+4. `ContentSanitizer` contract with `PromptInjectionSanitizer` and `NullContentSanitizer`
+5. Untrusted content wrapping integrated into `KnowledgeFormatter`, `MemoryFormatter`, and `DefaultAgentRuntime`
+6. Security config for SSRF and injection patterns in `config/limen-ai.php`
+7. Unit, integration, and feature security tests
+
+## Next Implementation Tasks (Phase 15)
+
+1. Queue-dispatched runtime job skeleton
+2. Broadcast channel adapter for agent lifecycle events
+3. Async run status polling or event subscription hooks

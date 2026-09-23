@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 14 security hardening with DNS-aware SSRF validation, redirect blocking, and prompt-injection sanitization
+- `ContentSanitizer`, `PromptInjectionSanitizer`, `SecurityException`, and `UrlValidator::assertAllowed()`
+- Sanitization integrated into knowledge, memory formatters, and runtime user messages
+- Security unit, integration, and feature tests
+
+### Added (Phase 13)
+
 - Phase 13 declarative HTTP integrations with connector config, SSRF validation, and Http::fake tests
 - `DeclarativeHttpToolExecutor`, `HttpRequestBuilder`, `SsrfUrlValidator`, and `EnvSecretResolver`
 - HTTP integration unit, integration, and feature tests
