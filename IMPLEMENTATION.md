@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 19 — Artisan Developer Tools**
+**Phase 20 — Testing & Architecture Validation**
 
 ## Phase 01 Scope
 
@@ -230,8 +230,15 @@ At the end of each phase:
 5. `RunObservabilityReporter` and `GET /runs/{id}/observability` API endpoint
 6. Observability unit, integration, and feature tests plus `docs/observability.md`
 
-## Next Implementation Tasks (Phase 19)
+## Phase 19 Completed
 
-1. `limen-ai:doctor` environment validation command
-2. `make:agent`, `make:tool`, and related stubs
-3. Developer tooling tests
+1. `limen-ai:doctor` for config, bindings, queue, and broadcasting checks
+2. `limen-ai:make:agent`, `make:tool`, and `make:skill` generator commands
+3. `limen-ai:list` inspection command and publishable `stubs/` directory
+4. `StubGenerator` helper and developer tooling unit/feature tests
+
+## Next Implementation Tasks (Phase 20)
+
+1. Expand architecture boundary tests across all modules
+2. Full test matrix documentation and CI recommendations
+3. Coverage gates for security-critical paths
