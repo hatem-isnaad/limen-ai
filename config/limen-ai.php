@@ -5,12 +5,20 @@ return [
     'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'example'),
 
     'providers' => [
-        'default' => env('LIMEN_AI_PROVIDER', 'openai'),
+        'default' => env('LIMEN_AI_PROVIDER', 'fake'),
+        'drivers' => [
+            'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
+            'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+        ],
+        'fake' => [
+            'driver' => 'fake',
+        ],
         'openai' => [
             'driver' => 'openai',
             'api_key' => env('OPENAI_API_KEY'),
             'organization' => env('OPENAI_ORGANIZATION'),
             'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'timeout' => 60,
         ],
         'anthropic' => [
             'driver' => 'anthropic',
@@ -26,16 +34,28 @@ return [
         ],
     ],
 
+    'embeddings' => [
+        'default' => env('LIMEN_AI_EMBEDDING_PROVIDER', 'fake'),
+        'drivers' => [
+            'fake' => LimenAi\Providers\Fake\FakeEmbeddingProvider::class,
+        ],
+        'providers' => [
+            'fake' => [
+                'driver' => 'fake',
+            ],
+        ],
+    ],
+
     'agents' => [
         'example' => [
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
-            'provider' => env('LIMEN_AI_PROVIDER', 'openai'),
+            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
-            'skills' => [],
+            'skills' => ['general_assistance'],
             'tools' => ['example_echo'],
-            'knowledge' => [],
+            'knowledge' => ['getting_started'],
             'memory' => [
                 'conversation' => true,
                 'user' => false,
@@ -55,6 +75,69 @@ return [
             ],
             'version' => '1.0.0',
         ],
+        'limen_3pl' => [
+            'name' => 'Limen 3PL Assistant',
+            'description' => 'Helps operators look up shipments and send approved customer updates.',
+            'model' => env('LIMEN_AI_LIMEN_MODEL', 'gpt-4.1-mini'),
+            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
+            'instructions' => 'You are the Limen 3PL logistics assistant. Use get_shipment_status for lookups and send_customer_message only for approved outbound customer updates.',
+            'skills' => ['logistics_support'],
+            'tools' => ['get_shipment_status', 'send_customer_message'],
+            'knowledge' => ['limen_3pl_ops'],
+            'memory' => [
+                'conversation' => true,
+                'user' => true,
+            ],
+            'authorization' => [
+                'required' => true,
+                'abilities' => [],
+                'guest_allowed' => false,
+            ],
+            'output' => [
+                'format' => 'text',
+            ],
+            'limits' => [
+                'max_tool_calls' => 8,
+                'max_steps' => 16,
+                'timeout' => 90,
+            ],
+            'version' => '1.0.0',
+        ],
+    ],
+
+    'runtime' => [
+        'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
+        'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
+        'approval_repository' => LimenAi\Authorization\InMemoryApprovalRepository::class,
+    ],
+
+    'conversations' => [
+        'repository' => LimenAi\Conversations\InMemoryConversationRepository::class,
+        'message_repository' => LimenAi\Conversations\InMemoryMessageRepository::class,
+        'history_limit' => 50,
+        'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
+    ],
+
+    'tool_pipeline' => [
+        'idempotency' => [
+            'driver' => env('LIMEN_AI_IDEMPOTENCY_DRIVER', 'cache'),
+            'ttl' => 3600,
+        ],
+    ],
+
+    'integrations' => [
+        'connectors' => [
+            'example_api' => [
+                'base_url' => env('LIMEN_EXAMPLE_API_URL', 'https://api.example.com'),
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'authentication' => [
+                    'type' => 'bearer',
+                    'token' => env('LIMEN_EXAMPLE_API_TOKEN'),
+                ],
+            ],
+        ],
     ],
 
     'tools' => [
@@ -72,19 +155,195 @@ return [
             'timeout' => 5,
             'version' => '1.0.0',
         ],
+        'example_http_status' => [
+            'name' => 'Example HTTP Status',
+            'description' => 'Fetch a resource status from the example API connector.',
+            'integration' => [
+                'connector' => 'example_api',
+                'method' => 'GET',
+                'path' => '/status/{{ input.resource }}',
+                'query' => [
+                    'include' => '{{ input.include }}',
+                ],
+            ],
+            'input_schema' => [
+                'resource' => ['type' => 'string', 'required' => true],
+                'include' => ['type' => 'string', 'required' => false],
+            ],
+            'authorization' => [
+                'abilities' => [],
+            ],
+            'confirmation' => false,
+            'timeout' => 10,
+            'version' => '1.0.0',
+        ],
+        'get_shipment_status' => [
+            'name' => 'Get Shipment Status',
+            'description' => 'Look up the current status of a shipment by ID.',
+            'class' => null, // Host: App\LimenAi\Tools\GetShipmentStatus::class
+            'input_schema' => [
+                'shipment_id' => ['type' => 'string', 'required' => true],
+            ],
+            'authorization' => [
+                'abilities' => [],
+            ],
+            'confirmation' => false,
+            'timeout' => 10,
+            'version' => '1.0.0',
+        ],
+        'send_customer_message' => [
+            'name' => 'Send Customer Message',
+            'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
+            'class' => null, // Host: App\LimenAi\Tools\SendCustomerMessage::class
+            'input_schema' => [
+                'shipment_id' => ['type' => 'string', 'required' => true],
+                'message' => ['type' => 'string', 'required' => true],
+            ],
+            'authorization' => [
+                'abilities' => [],
+            ],
+            'confirmation' => true,
+            'timeout' => 15,
+            'version' => '1.0.0',
+        ],
     ],
 
-    'skills' => [],
+    'skills' => [
+        'general_assistance' => [
+            'name' => 'General Assistance',
+            'instructions' => 'Provide helpful, concise responses.',
+            'tools' => ['example_echo'],
+            'knowledge' => [],
+            'version' => '1.0.0',
+        ],
+        'logistics_support' => [
+            'name' => 'Logistics Support',
+            'instructions' => 'Be concise, operational, and accurate. Reference shipment IDs explicitly.',
+            'tools' => ['get_shipment_status', 'send_customer_message'],
+            'knowledge' => ['limen_3pl_ops'],
+            'version' => '1.0.0',
+        ],
+    ],
 
-    'workflows' => [],
+    'workflows' => [
+        'example_flow' => [
+            'name' => 'Example Workflow',
+            'version' => '1.0.0',
+            'start' => 'greet',
+            'steps' => [
+                'greet' => [
+                    'type' => 'agent',
+                    'agent' => 'example',
+                    'message' => 'Reply with a short greeting.',
+                    'next' => 'check_mode',
+                ],
+                'check_mode' => [
+                    'type' => 'branch',
+                    'condition' => [
+                        'field' => 'input.mode',
+                        'operator' => 'equals',
+                        'value' => 'tool',
+                    ],
+                    'then' => 'echo',
+                    'else' => 'finish',
+                ],
+                'echo' => [
+                    'type' => 'tool',
+                    'tool' => 'example_echo',
+                    'input' => ['message' => 'workflow tool branch'],
+                    'next' => 'finish',
+                ],
+                'finish' => [
+                    'type' => 'agent',
+                    'agent' => 'example',
+                    'message' => 'Summarize the workflow in one sentence.',
+                ],
+            ],
+        ],
+        'shipment_notify' => [
+            'name' => 'Shipment Delay Notification',
+            'version' => '1.1.0',
+            'start' => 'draft',
+            'steps' => [
+                'draft' => [
+                    'type' => 'agent',
+                    'agent' => 'limen_3pl',
+                    'message' => 'Draft a short, professional customer delay notification.',
+                    'next' => 'approve_send',
+                ],
+                'approve_send' => [
+                    'type' => 'approval',
+                    'message' => 'Approve sending the customer notification?',
+                    'next' => 'send',
+                ],
+                'send' => [
+                    'type' => 'tool',
+                    'tool' => 'send_customer_message',
+                    'input' => [
+                        'shipment_id' => '{{ input.shipment_id }}',
+                        'message' => '{{ step_outputs.draft.output }}',
+                    ],
+                ],
+            ],
+        ],
+    ],
 
     'knowledge' => [
-        'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'null'),
-        'collections' => [],
+        'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
+        'vector_store' => LimenAi\Knowledge\InMemoryVectorStore::class,
+        'limit' => 5,
+        'collections' => [
+            'getting_started' => [
+                'name' => 'Getting Started',
+                'description' => 'Introductory knowledge for the example agent.',
+                'documents' => [
+                    [
+                        'content' => 'Limen AI is a Laravel-native agent framework. Tools require Laravel authorization before execution.',
+                        'metadata' => ['source' => 'docs'],
+                    ],
+                    [
+                        'content' => 'Use the example_echo tool to echo messages during development and testing.',
+                        'metadata' => ['source' => 'docs'],
+                    ],
+                ],
+            ],
+            'limen_3pl_ops' => [
+                'name' => 'Limen 3PL Operations',
+                'description' => 'Operational guidance for shipment support agents.',
+                'documents' => [
+                    [
+                        'content' => 'Shipment statuses include: pending, in_transit, delayed, delivered, and cancelled.',
+                        'metadata' => ['source' => 'ops-handbook'],
+                    ],
+                    [
+                        'content' => 'Customer notifications must be approved by an authenticated operator before send_customer_message executes.',
+                        'metadata' => ['source' => 'ops-handbook'],
+                    ],
+                ],
+            ],
+        ],
+    ],
+
+    'repositories' => [
+        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
+        'tool' => LimenAi\Tools\ConfigToolRepository::class,
+        'skill' => LimenAi\Skills\ConfigSkillRepository::class,
+        'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
+        'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
+    ],
+
+    'authorization' => [
+        'enforce_context_user_match' => true,
+        'guest' => [
+            'validator' => LimenAi\Authorization\NullGuestSessionValidator::class,
+            'cache_prefix' => 'limen-ai:guest:',
+        ],
     ],
 
     'memory' => [
-        'driver' => env('LIMEN_AI_MEMORY_DRIVER', 'database'),
+        'store' => LimenAi\Memory\InMemoryMemoryStore::class,
+        'retriever' => LimenAi\Memory\DefaultMemoryRetriever::class,
+        'limit' => 20,
     ],
 
     'responses' => [
@@ -106,26 +365,47 @@ return [
         'max_attachments' => 5,
     ],
 
+    'performance' => [
+        'cache_resolved_agents' => env('LIMEN_AI_CACHE_RESOLVED_AGENTS', true),
+    ],
+
     'broadcasting' => [
-        'driver' => env('LIMEN_AI_BROADCAST_DRIVER', 'pusher'),
-        'channel_prefix' => 'limen-ai.conversation',
+        'enabled' => env('LIMEN_AI_BROADCASTING_ENABLED', true),
+        'driver' => env('LIMEN_AI_BROADCAST_DRIVER', 'null'),
+        'connection' => env('LIMEN_AI_BROADCAST_CONNECTION'),
+        'channel_prefix' => env('LIMEN_AI_BROADCAST_CHANNEL_PREFIX', 'limen-ai.conversation'),
     ],
 
     'queue' => [
         'connection' => env('LIMEN_AI_QUEUE_CONNECTION'),
         'name' => env('LIMEN_AI_QUEUE', 'default'),
+        'agent_runs' => env('LIMEN_AI_QUEUE_AGENT_RUNS', false),
     ],
 
     'observability' => [
-        'audit_enabled' => true,
-        'usage_tracking_enabled' => true,
+        'audit_enabled' => env('LIMEN_AI_AUDIT_ENABLED', true),
+        'usage_tracking_enabled' => env('LIMEN_AI_USAGE_TRACKING_ENABLED', true),
+        'trace_enabled' => env('LIMEN_AI_TRACE_ENABLED', true),
     ],
 
     'security' => [
         'ssrf' => [
             'block_private_ips' => true,
+            'resolve_dns' => true,
+            'allow_redirects' => false,
+            'max_redirects' => 0,
             'allowed_domains' => [],
             'blocked_domains' => [],
+        ],
+        'injection' => [
+            'enabled' => true,
+            'wrap_untrusted' => true,
+            'patterns' => [
+                '/ignore\s+(all\s+)?(previous|prior)\s+instructions/i',
+                '/^system\s*:/im',
+                '/^assistant\s*:/im',
+                '/\[INST\]/i',
+            ],
         ],
         'redaction' => [
             'keys' => ['password', 'token', 'secret', 'api_key'],
@@ -133,15 +413,51 @@ return [
     ],
 
     'ui' => [
-        'enabled' => true,
+        'enabled' => env('LIMEN_AI_UI_ENABLED', true),
+        'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
+        'middleware' => ['web', 'auth'],
+        'palettes' => [
+            'light' => [
+                'primary' => '#4F46E5',
+                'background' => '#FFFFFF',
+                'text' => '#111827',
+                'surface' => '#F9FAFB',
+                'border' => 'rgba(17, 24, 39, 0.08)',
+                'muted' => 'rgba(17, 24, 39, 0.65)',
+            ],
+            'dark' => [
+                'primary' => '#818CF8',
+                'background' => '#0F172A',
+                'text' => '#F8FAFC',
+                'surface' => '#1E293B',
+                'border' => 'rgba(148, 163, 184, 0.18)',
+                'muted' => 'rgba(148, 163, 184, 0.85)',
+            ],
+        ],
+        'presets' => [
+            'default' => [
+                'radius' => '12px',
+                'position' => 'bottom-right',
+                'direction' => 'ltr',
+                'font_family' => 'ui-sans-serif, system-ui, sans-serif',
+                'title' => 'Limen AI Assistant',
+                'welcome_message' => 'How can I help you today?',
+            ],
+            'arabic' => [
+                'direction' => 'rtl',
+                'font_family' => '"Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif',
+                'title' => 'مساعد Limen AI',
+                'welcome_message' => 'كيف يمكنني مساعدتك اليوم؟',
+            ],
+        ],
         'theme' => [
-            'primary' => '#4F46E5',
-            'background' => '#FFFFFF',
-            'text' => '#111827',
+            'preset' => env('LIMEN_AI_THEME_PRESET', 'default'),
+            'mode' => env('LIMEN_AI_THEME_MODE', 'light'),
+            'allow_mode_toggle' => env('LIMEN_AI_THEME_TOGGLE', false),
+            'overrides' => [],
             'radius' => '12px',
             'position' => 'bottom-right',
             'direction' => 'ltr',
-            'mode' => 'light',
             'title' => 'Limen AI Assistant',
             'welcome_message' => 'How can I help you today?',
         ],

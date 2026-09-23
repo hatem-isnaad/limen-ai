@@ -138,5 +138,46 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Produce SaaS migration strategy
 - [x] Document contradictions / ambiguities
 - [x] Create project documentation files
-- [ ] Architecture approval
-- [ ] Begin Phase 02 implementation
+- [x] Architecture approval
+- [x] Begin Phase 02 implementation
+- [x] Phase 02 — DTOs, config repositories, bindings, tests
+- [x] Begin Phase 03 — Provider System
+- [x] Phase 03 — Fake/OpenAI providers, managers, tests
+- [x] Begin Phase 04 — Agent System
+- [x] Phase 04 — Agent resolver, tool schemas, validation command
+- [x] Begin Phase 05 — Tool System
+- [x] Phase 05 — Tool pipeline, validation, audit, idempotency
+- [x] Begin Phase 06 — Runtime
+- [x] Phase 06 — Core runtime loop, limits, run state skeleton
+- [x] Begin Phase 07 — Conversations
+- [x] Phase 07 — Conversation/message persistence, history loading, migrations
+- [x] Begin Phase 08 — Auth & Authorization
+- [x] Phase 08 — Gate/policy integration, guest sessions, context validation
+- [x] Begin Phase 09 — State & Checkpoints
+- [x] Phase 09 — Run/checkpoint/approval persistence, resume/reject/cancel hardening
+- [x] Begin Phase 10 — Memory
+- [x] Phase 10 — Scoped memory stores, retrieval hooks, runtime integration
+- [x] Begin Phase 11 — Knowledge / RAG
+- [x] Phase 11 — Config/vector retrievers, vector store abstraction, runtime integration
+- [x] Begin Phase 12 — Workflow Engine
+- [x] Phase 12 — Step runner, branching, approval pause/resume, checkpoint integration
+- [x] Begin Phase 13 — HTTP Integrations
+- [x] Phase 13 — Declarative HTTP tools, connectors, SSRF hooks, Http::fake tests
+- [x] Begin Phase 14 — Security Hardening
+- [x] Phase 14 — DNS-aware SSRF, redirect blocking, prompt-injection sanitization
+- [x] Begin Phase 15 — Queue & Broadcasting
+- [x] Phase 15 — Agent run jobs, Pusher broadcaster, event subscription hooks
+- [x] Begin Phase 16 — Chat UI
+- [x] Phase 16 — Blade components, HTTP API, JS client with Echo hooks
+- [x] Begin Phase 17 — Themes
+- [x] Phase 17 — Palettes, presets, RTL/dark mode, ThemeResolver
+- [x] Begin Phase 18 — Observability & Audit
+- [x] Phase 18 — Trace IDs, usage tracking, audit export, observability API
+- [x] Begin Phase 19 — Artisan Developer Tools
+- [x] Phase 19 — doctor, make:* generators, list command, publishable stubs
+- [x] Begin Phase 20 — Testing & Architecture Validation
+- [x] Phase 20 — Architecture boundary tests, security gates, CI workflow
+- [x] Begin Phase 21 — Limen Integration
+- [x] Phase 21 — Host app shipment tools, approval demo, integration docs
+- [x] Begin Phase 22 — Final Hardening
+- [x] Phase 22 — Performance cache, release docs, v1.0.0 changelog and tagging prep

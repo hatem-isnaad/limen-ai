@@ -4,7 +4,7 @@ This document tracks how the package will be built, phase by phase.
 
 ## Current Phase
 
-**Phase 01 — Package Foundation**
+**Complete — v1.0.0 released**
 
 ## Phase 01 Scope
 
@@ -79,10 +79,183 @@ At the end of each phase:
 | Multi-tenancy | SaaS phase | DB design prepares for it |
 | Attachment RAG pipeline | Phase 11+ | Security first |
 
-## Next Implementation Tasks (Phase 02)
+## Phase 02 Completed
 
-1. Add DTO/value objects for AgentDefinition, ToolDefinition, etc.
-2. Register contract bindings in service provider
-3. Implement config repository stubs (read-only)
-4. Add architecture tests for namespace boundaries
-5. Add ExampleAgent + ExampleTool config entries
+1. DTO/value objects: `ConfigAgentDefinition`, `ConfigToolDefinition`, `ConfigSkillDefinition`, `ConfigWorkflowDefinition`
+2. Config repositories bound in `LimenAiServiceProvider`
+3. `RunContextData` for execution context
+4. Example skill + knowledge collection wired to example agent
+5. Repository unit/integration tests added
+
+## Phase 03 Completed
+
+1. `LlmProviderManager` and `EmbeddingProviderManager`
+2. `FakeLlmProvider` with queued responses and call recording
+3. `FakeEmbeddingProvider` with deterministic vectors
+4. `OpenAiProvider` skeleton using Laravel HTTP client + `Http::fake()` tests
+5. Default provider switched to `fake` for safe local/test usage
+
+## Phase 04 Completed
+
+1. `DefaultAgentResolver` resolves agent + provider + tools + skills + limits
+2. `ResolvedAgent` exposes tool schemas, chat options, and provider chat helper
+3. `ToolSchemaBuilder` converts tool input schema to OpenAI function format
+4. `InstructionComposer` merges agent and skill instructions
+5. `AgentValidator` and `limen-ai:validate` Artisan command
+
+## Phase 05 Completed
+
+1. `ToolPipeline` orchestrates authorize → validate → approval gate → idempotency → execute
+2. `ToolInputValidator` validates tool arguments via Laravel Validator
+3. `ClassBasedToolExecutor` executes host app tool classes
+4. `LogAuditLogger` + `SensitiveDataRedactor` for audit logging
+5. `CacheIdempotencyGuard` and `NullIdempotencyGuard`
+6. Tool lifecycle events: `ToolStarted`, `ToolCompleted`, `ToolFailed`
+
+## Phase 06 Completed
+
+1. `DefaultAgentRuntime` multi-step LLM ↔ tool execution loop
+2. `ToolCallParser` for OpenAI-style tool calls
+3. `RuntimeLimits` for max steps, tool calls, and timeout
+4. `InMemoryRunRepository` and `ArrayCheckpointStore` skeletons
+5. Approval pause/resume/cancel skeleton with checkpoint state
+6. Feature tests with `FakeLlmProvider`
+
+## Phase 07 Completed
+
+1. `InMemoryConversationRepository` and `InMemoryMessageRepository`
+2. `ConversationService` with ensure, append, history, and approval state
+3. `MessageFormatter` for agent ↔ storage message conversion
+4. `NullConversationSummarizer` hook for future context compression
+5. Runtime integration: history load, message sync, resume fix
+6. Migrations for `limen_ai_conversations` and `limen_ai_messages`
+7. Unit, integration, and multi-turn feature tests
+
+## Phase 08 Completed
+
+1. Hardened `LaravelAuthorizationService` with Gate abilities, policy method checks, and subject arguments
+2. `validateRunContext()` prevents spoofed `user_id` and validates guest sessions
+3. `GuestSessionValidator` contract with `NullGuestSessionValidator` and `CacheGuestSessionValidator`
+4. `UnauthenticatedException` and `RunContextAuthorizationException`
+5. Authorization config section and service provider bindings
+6. Unit, integration, and feature authorization tests
+
+## Phase 09 Completed
+
+1. `DatabaseRunRepository` and `DatabaseCheckpointStore` with query builder persistence
+2. `InMemoryApprovalRepository` and `DatabaseApprovalRepository`
+3. Migrations for `limen_ai_runs`, `limen_ai_run_checkpoints`, `limen_ai_approvals`
+4. Runtime `resume()`, `cancel()`, and `reject()` hardening with auth + approval lifecycle
+5. Approval events: `ApprovalRequested`, `ApprovalGranted`, `ApprovalRejected`
+6. Tool pipeline bypass for `approval_granted` metadata on resume
+7. Database and run-state feature tests
+
+## Phase 10 Completed
+
+1. `MemoryStore` contract with `InMemoryMemoryStore` and `DatabaseMemoryStore`
+2. `DefaultMemoryRetriever` with user/conversation/agent scope support
+3. `MemoryService` helper for host apps
+4. Runtime memory injection before conversation history
+5. Migration for `limen_ai_memories`
+6. Unit, integration, database, and feature memory tests
+
+## Phase 11 Completed
+
+1. `AgentKnowledgeRetriever` contract with `DefaultAgentKnowledgeRetriever`
+2. `ConfigKnowledgeRetriever` keyword scoring and `VectorKnowledgeRetriever` embedding search
+3. `InMemoryVectorStore`, `NullVectorStore`, and `KnowledgeService` upsert helper
+4. `KnowledgeFormatter` marks retrieved content as untrusted system context
+5. Runtime knowledge injection after memory, before conversation history
+6. Config-driven driver bindings (`null`, `config`, `vector`) in service provider
+7. Unit, integration, and feature knowledge tests
+
+## Phase 12 Completed
+
+1. `DefaultWorkflowEngine` with start, resume, cancel, and reject lifecycle
+2. `WorkflowStepRunner` for agent, tool, approval, and branch steps
+3. `WorkflowBranchEvaluator` and `WorkflowVariableResolver` for conditional routing and templating
+4. Workflow lifecycle events and checkpoint integration with approval repository
+5. `WorkflowValidator` wired into `limen-ai:validate`
+6. Example workflows in config and unit/integration/feature tests
+
+## Phase 13 Completed
+
+1. `integrations.connectors` config schema with `ConfigHttpConnectorRepository`
+2. `DeclarativeHttpToolExecutor` with templated paths, query, headers, and auth
+3. `SsrfUrlValidator` and `EnvSecretResolver` security hooks
+4. HTTP tools via `integration` key on tool definitions, delegated from `ClassBasedToolExecutor`
+5. `HttpIntegrationValidator` wired into `limen-ai:validate`
+6. Unit, integration, and feature tests with `Http::fake()`
+
+## Phase 14 Completed
+
+1. `SsrfUrlValidator` expanded with DNS resolution checks and `assertAllowed()` API
+2. `SecurityException` for SSRF and security policy violations
+3. HTTP tool executor uses `assertAllowed()` and disables redirects by default
+4. `ContentSanitizer` contract with `PromptInjectionSanitizer` and `NullContentSanitizer`
+5. Untrusted content wrapping integrated into `KnowledgeFormatter`, `MemoryFormatter`, and `DefaultAgentRuntime`
+6. Security config for SSRF and injection patterns in `config/limen-ai.php`
+7. Unit, integration, and feature security tests
+
+## Phase 15 Completed
+
+1. `RunAgentJob`, `ResumeAgentRunJob`, `CancelAgentRunJob`, and `RejectAgentRunJob` queue skeleton
+2. `AgentRunDispatcher` with sync and queued implementations plus `AgentRunDispatchResult`
+3. `PusherBroadcaster` and `NullBroadcaster` behind `RealtimeBroadcaster`
+4. `AgentEventBroadcaster` subscriber for agent, conversation, and approval lifecycle events
+5. `RunStatusReader` for polling terminal run state
+6. Queue/broadcast config, bindings, and unit/integration/feature tests
+
+## Phase 16 Completed
+
+1. `<x-limen-ai::chatbot />` and `<x-limen-ai::widget />` Blade components with themed CSS variables
+2. Vanilla JS client with fetch API, run polling fallback, and Echo subscription hooks
+3. HTTP API routes for conversations, messages, runs, and approvals
+4. `ConversationAccessGuard` and private broadcast channel authorization
+5. UI unit, integration, and feature tests
+
+## Phase 17 Completed
+
+1. `ThemeResolver` and `ResolvedTheme` with palettes, presets, and overrides
+2. Light/dark palettes, `arabic` RTL preset, and optional mode toggle/auto detection
+3. CSS variable tokens, RTL layout refinements, and client-side mode switching in JS
+4. `docs/theming.md` host override guide and theme unit/feature tests
+
+## Phase 18 Completed
+
+1. `TraceContext` correlation IDs stored on runs and tool audit spans
+2. `LogUsageTracker` with `UsageBuffer` for LLM and tool usage records
+3. `AuditBuffer` and `DefaultAuditExporter` for run-scoped audit export
+4. `AgentObservabilityListener` for agent lifecycle audit events
+5. `RunObservabilityReporter` and `GET /runs/{id}/observability` API endpoint
+6. Observability unit, integration, and feature tests plus `docs/observability.md`
+
+## Phase 19 Completed
+
+1. `limen-ai:doctor` for config, bindings, queue, and broadcasting checks
+2. `limen-ai:make:agent`, `make:tool`, and `make:skill` generator commands
+3. `limen-ai:list` inspection command and publishable `stubs/` directory
+4. `StubGenerator` helper and developer tooling unit/feature tests
+
+## Phase 20 Completed
+
+1. `ModuleBoundaryTest` and shared `ScansPhpSources` concern for per-module rules
+2. `CriticalCoverageGateTest` mapping security-critical classes to required tests
+3. `SecurityCriticalMatrixTest` smoke suite for SSRF, sanitization, and redaction
+4. GitHub Actions workflow (`.github/workflows/tests.yml`) with PHP/Laravel matrix
+5. `docs/ci.md`, updated `TESTING.md`, and `composer test:gates` scripts
+
+## Phase 21 Completed
+
+1. Reference host integration under `examples/limen-host/` with `GetShipmentStatus` and `SendCustomerMessage` tools
+2. Publishable Limen demo stubs (`limen-ai-limen-demo` tag) and `limen_3pl` agent config
+3. In-memory test stubs (`FakeShipmentService`) and `LimenIntegrationTest` for shipment lookup + approval demos
+4. Updated `shipment_notify` workflow to use Limen tools and `docs/limen-integration.md`
+
+## Phase 22 Completed
+
+1. Request-scoped agent resolution cache and tool schema memoization (`performance.cache_resolved_agents`)
+2. Release documentation (`docs/release.md`, `docs/performance.md`) and README v1.0.0 polish
+3. Consolidated `CHANGELOG.md` v1.0.0, `composer.json` version, and release CI workflow
+4. Pre-release security checklist in `SECURITY.md` and `ReleaseReadinessTest` architecture gate
+5. `composer test:release` script combining full test suite and merge gates

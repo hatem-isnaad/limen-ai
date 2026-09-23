@@ -1,0 +1,12 @@
+<?php
+
+return [
+    'key' => '{{ key }}',
+    'config' => [
+        'name' => '{{ title }}',
+        'instructions' => 'Describe the skill behavior.',
+        'tools' => {{ tools }},
+        'knowledge' => [],
+        'version' => '1.0.0',
+    ],
+];

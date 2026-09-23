@@ -3,6 +3,7 @@
 namespace LimenAi\Contracts\Authorization;
 
 use LimenAi\Contracts\Agents\AgentDefinition;
+use LimenAi\Contracts\Runtime\RunContext;
 use LimenAi\Contracts\Tools\ToolDefinition;
 
 interface AuthorizationService
@@ -18,6 +19,8 @@ interface AuthorizationService
     public function authorizeAgent(AgentDefinition $agent): void;
 
     public function authorizeTool(ToolDefinition $tool): void;
+
+    public function validateRunContext(RunContext $context, AgentDefinition $agent): void;
 
     public function isGuestAllowed(AgentDefinition $agent): bool;
 }
