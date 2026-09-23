@@ -23,42 +23,19 @@ class ApprovalController
         private readonly ConversationAccessGuard $accessGuard,
     ) {}
 
-    public function approve(Request $request, string $approvalId): JsonResponse
-    {
-        return $this->resolve($request, $approvalId, approve: true);
-    }
-
-    public function reject(Request $request, string $approvalId): JsonResponse
-    {
-        return $this->resolve($request, $approvalId, approve: false);
-    }
+    public function approve(Request $request, string $approvalId): JsonResponse { return $this->resolve($request, $approvalId, approve: true); }
+    public function reject(Request $request, string $approvalId): JsonResponse { return $this->resolve($request, $approvalId, approve: false); }
 
     protected function resolve(Request $request, string $approvalId, bool $approve): JsonResponse
     {
         $approval = $this->approvals->find($approvalId);
-
         abort_if($approval === null, 404, 'Approval not found.');
-
         $runId = (string) ($approval['run_id'] ?? '');
         $run = $this->runs->find($runId) ?? [];
         $conversationId = (string) ($run['conversation_id'] ?? '');
-
-        abort_unless(
-            $this->accessGuard->canAccess($request->user(), $conversationId),
-            403,
-            'Approval access denied.',
-        );
-
+        abort_unless($this->accessGuard->canAccess($request->user(), $conversationId), 403, 'Approval access denied.');
         $context = $this->runContextFromRequest($request, $this->authorization);
-        $result = $approve
-            ? $this->dispatcher->dispatchResume($runId, $context)
-            : $this->dispatcher->dispatchReject($runId, $context);
-
-        return response()->json([
-            'approval_id' => $approvalId,
-            'run_id' => $runId,
-            'action' => $approve ? 'approved' : 'rejected',
-            'queued' => $result->queued,
-        ]);
+        $result = $approve ? $this->dispatcher->dispatchResume($runId, $context) : $this->dispatcher->dispatchReject($runId, $context);
+        return response()->json(['approval_id' => $approvalId, 'run_id' => $runId, 'action' => $approve ? 'approved' : 'rejected', 'queued' => $result->queued]);
     }
 }
