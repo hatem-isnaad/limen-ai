@@ -61,9 +61,6 @@
         "audit": {
             "block-insecure": false
         },
-        "allow-plugins": {
-            "*": true
-        },
         "policy": {
             "advisories": {
                 "block": false
