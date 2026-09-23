@@ -4,6 +4,7 @@ namespace LimenAi\Security;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Security\UrlValidator;
+use LimenAi\Exceptions\SecurityException;
 
 class SsrfUrlValidator implements UrlValidator
 {
@@ -13,37 +14,97 @@ class SsrfUrlValidator implements UrlValidator
 
     public function isAllowed(string $url): bool
     {
+        try {
+            $this->assertAllowed($url);
+
+            return true;
+        } catch (SecurityException) {
+            return false;
+        }
+    }
+
+    public function assertAllowed(string $url): void
+    {
         $parts = parse_url($url);
 
         if (! is_array($parts)) {
-            return false;
+            throw SecurityException::ssrfBlocked($url, 'invalid url');
         }
 
         $scheme = strtolower((string) ($parts['scheme'] ?? ''));
 
         if (! in_array($scheme, ['http', 'https'], true)) {
-            return false;
+            throw SecurityException::ssrfBlocked($url, 'invalid scheme');
         }
 
         $host = strtolower((string) ($parts['host'] ?? ''));
 
         if ($host === '') {
-            return false;
+            throw SecurityException::ssrfBlocked($url, 'missing host');
         }
 
         if ($this->isBlockedHost($host)) {
-            return false;
+            throw SecurityException::ssrfBlocked($url, 'blocked host');
         }
 
         if (! $this->isAllowedHost($host)) {
-            return false;
+            throw SecurityException::ssrfBlocked($url, 'host not allowlisted');
         }
 
         if ($this->shouldBlockPrivateIps() && filter_var($host, FILTER_VALIDATE_IP)) {
-            return ! $this->isPrivateIp($host);
+            if ($this->isPrivateIp($host)) {
+                throw SecurityException::ssrfBlocked($url, 'private ip');
+            }
+
+            return;
         }
 
-        return true;
+        if ($this->shouldResolveDns()) {
+            $this->assertResolvedHostsAreSafe($url, $host);
+        }
+    }
+
+    protected function assertResolvedHostsAreSafe(string $url, string $host): void
+    {
+        if (! $this->shouldBlockPrivateIps()) {
+            return;
+        }
+
+        foreach ($this->resolveHostAddresses($host) as $ip) {
+            if ($this->isPrivateIp($ip)) {
+                throw SecurityException::ssrfBlocked($url, "dns resolved to private ip {$ip}");
+            }
+        }
+    }
+
+    /** @return list<string> */
+    protected function resolveHostAddresses(string $host): array
+    {
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return [$host];
+        }
+
+        $records = dns_get_record($host, DNS_A + DNS_AAAA);
+
+        if ($records === [] || $records === false) {
+            $fallback = gethostbynamel($host) ?: [];
+
+            return array_values(array_filter($fallback, fn (string $ip): bool => $ip !== ''));
+        }
+
+        $addresses = [];
+
+        foreach ($records as $record) {
+            if (isset($record['ip'])) {
+                $addresses[] = (string) $record['ip'];
+            }
+
+            if (isset($record['ipv6'])) {
+                $addresses[] = (string) $record['ipv6'];
+            }
+        }
+
+        return array_values(array_unique($addresses));
     }
 
     protected function isBlockedHost(string $host): bool
@@ -81,6 +142,11 @@ class SsrfUrlValidator implements UrlValidator
         return (bool) $this->config->get('limen-ai.security.ssrf.block_private_ips', true);
     }
 
+    protected function shouldResolveDns(): bool
+    {
+        return (bool) $this->config->get('limen-ai.security.ssrf.resolve_dns', true);
+    }
+
     /** @return list<string> */
     protected function allowedDomains(): array
     {
@@ -104,7 +170,12 @@ class SsrfUrlValidator implements UrlValidator
         }
 
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            return str_starts_with($ip, 'fc') || str_starts_with($ip, 'fd') || $ip === '::1';
+            $normalized = strtolower($ip);
+
+            return str_starts_with($normalized, 'fc')
+                || str_starts_with($normalized, 'fd')
+                || str_starts_with($normalized, 'fe80')
+                || $normalized === '::1';
         }
 
         return true;
