@@ -2,8 +2,13 @@
 
 namespace LimenAi\Memory;
 
+use LimenAi\Contracts\Security\ContentSanitizer;
+
 class MemoryFormatter
 {
+    public function __construct(
+        private readonly ContentSanitizer $sanitizer,
+    ) {}
     /**
      * @param  list<array<string, mixed>>  $entries
      * @return list<array<string, mixed>>
@@ -19,7 +24,7 @@ class MemoryFormatter
         foreach ($entries as $entry) {
             $key = (string) ($entry['key'] ?? 'memory');
             $value = $this->stringifyValue($entry['value'] ?? null);
-            $lines[] = "- {$key}: {$value}";
+            $lines[] = '- '.$key.': '.$this->sanitizer->sanitize($value);
         }
 
         return [[
