@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Conversations;
 
-use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
+use LimenAi\Conversations\ConversationService;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Tests\TestCase;
 

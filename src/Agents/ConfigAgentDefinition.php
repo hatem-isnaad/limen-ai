@@ -45,19 +45,78 @@ final class ConfigAgentDefinition implements AgentDefinition
         );
     }
 
-    public function key(): string { return $this->key; }
-    public function name(): string { return $this->name; }
-    public function description(): ?string { return $this->description; }
-    public function model(): string { return $this->model; }
-    public function provider(): string { return $this->provider; }
-    public function instructions(): string { return $this->instructions; }
-    public function skills(): array { return $this->skills; }
-    public function tools(): array { return $this->tools; }
-    public function knowledge(): array { return $this->knowledge; }
-    public function memoryConfig(): array { return $this->memoryConfig; }
-    public function personaConfig(): array { return $this->personaConfig; }
-    public function authorizationConfig(): array { return $this->authorizationConfig; }
-    public function outputConfig(): array { return $this->outputConfig; }
-    public function limits(): array { return $this->limits; }
-    public function version(): string { return $this->version; }
+    public function key(): string
+    {
+        return $this->key;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function description(): ?string
+    {
+        return $this->description;
+    }
+
+    public function model(): string
+    {
+        return $this->model;
+    }
+
+    public function provider(): string
+    {
+        return $this->provider;
+    }
+
+    public function instructions(): string
+    {
+        return $this->instructions;
+    }
+
+    public function skills(): array
+    {
+        return $this->skills;
+    }
+
+    public function tools(): array
+    {
+        return $this->tools;
+    }
+
+    public function knowledge(): array
+    {
+        return $this->knowledge;
+    }
+
+    public function memoryConfig(): array
+    {
+        return $this->memoryConfig;
+    }
+
+    public function personaConfig(): array
+    {
+        return $this->personaConfig;
+    }
+
+    public function authorizationConfig(): array
+    {
+        return $this->authorizationConfig;
+    }
+
+    public function outputConfig(): array
+    {
+        return $this->outputConfig;
+    }
+
+    public function limits(): array
+    {
+        return $this->limits;
+    }
+
+    public function version(): string
+    {
+        return $this->version;
+    }
 }

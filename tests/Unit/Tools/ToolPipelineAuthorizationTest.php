@@ -5,8 +5,8 @@ namespace LimenAi\Tests\Unit\Tools;
 use Illuminate\Support\Facades\Gate;
 use LimenAi\Exceptions\ToolAuthorizationException;
 use LimenAi\Runtime\RunContextData;
-use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tests\TestCase;
+use LimenAi\Tools\ToolPipeline;
 
 class ToolPipelineAuthorizationTest extends TestCase
 {

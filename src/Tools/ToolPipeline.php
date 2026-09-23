@@ -7,7 +7,6 @@ use Illuminate\Support\Str;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Observability\UsageTracker;
-use LimenAi\Observability\TraceContext;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Contracts\Tools\IdempotencyGuard;
 use LimenAi\Contracts\Tools\ToolDefinition;
@@ -19,6 +18,7 @@ use LimenAi\Events\ToolStarted;
 use LimenAi\Exceptions\ApprovalRequiredException;
 use LimenAi\Exceptions\ToolExecutionException;
 use LimenAi\Exceptions\ToolNotFoundException;
+use LimenAi\Observability\TraceContext;
 use LimenAi\Security\SensitiveDataRedactor;
 
 class ToolPipeline

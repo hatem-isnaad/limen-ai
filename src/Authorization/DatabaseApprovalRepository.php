@@ -20,21 +20,31 @@ class DatabaseApprovalRepository implements ApprovalRepository
             'status' => ApprovalStatus::PENDING, 'requested_by' => $requestedBy,
             'created_at' => $now, 'updated_at' => $now,
         ]);
+
         return $approvalId;
     }
 
-    public function approve(string $approvalId, int $userId): void { $this->resolve($approvalId, $userId, ApprovalStatus::APPROVED); }
-    public function reject(string $approvalId, int $userId): void { $this->resolve($approvalId, $userId, ApprovalStatus::REJECTED); }
+    public function approve(string $approvalId, int $userId): void
+    {
+        $this->resolve($approvalId, $userId, ApprovalStatus::APPROVED);
+    }
+
+    public function reject(string $approvalId, int $userId): void
+    {
+        $this->resolve($approvalId, $userId, ApprovalStatus::REJECTED);
+    }
 
     public function find(string $approvalId): ?array
     {
         $row = $this->db->table('limen_ai_approvals')->where('id', $approvalId)->first();
+
         return $row === null ? null : $this->mapRow((array) $row);
     }
 
     public function findPendingForRun(string $runId): ?array
     {
         $row = $this->db->table('limen_ai_approvals')->where('run_id', $runId)->where('status', ApprovalStatus::PENDING)->orderBy('created_at')->first();
+
         return $row === null ? null : $this->mapRow((array) $row);
     }
 

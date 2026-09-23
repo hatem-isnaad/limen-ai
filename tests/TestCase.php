@@ -3,7 +3,12 @@
 namespace LimenAi\Tests;
 
 use Illuminate\Auth\GenericUser;
+use LimenAi\Attachments\InMemoryAttachmentStore;
 use LimenAi\LimenAiServiceProvider;
+use LimenAi\Tests\Stubs\EchoTool;
+use LimenAi\Tests\Stubs\Limen\FakeShipmentService;
+use LimenAi\Tests\Stubs\Limen\GetShipmentStatusTool;
+use LimenAi\Tests\Stubs\Limen\SendCustomerMessageTool;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -34,17 +39,17 @@ abstract class TestCase extends Orchestra
     {
         $app['config']->set('limen-ai.persistence.auto_detect', false);
         $app['config']->set('limen-ai.default_agent', 'example');
-        $app['config']->set('limen-ai.tools.example_echo.class', \LimenAi\Tests\Stubs\EchoTool::class);
+        $app['config']->set('limen-ai.tools.example_echo.class', EchoTool::class);
         $app['config']->set('limen-ai.tool_pipeline.idempotency.driver', 'cache');
         $app['config']->set('limen-ai.ui.enabled', true);
         $app['config']->set('limen-ai.ui.middleware', []);
 
-        $app->singleton(\LimenAi\Tests\Stubs\Limen\FakeShipmentService::class);
-        $app['config']->set('limen-ai.tools.get_shipment_status.class', \LimenAi\Tests\Stubs\Limen\GetShipmentStatusTool::class);
-        $app['config']->set('limen-ai.tools.send_customer_message.class', \LimenAi\Tests\Stubs\Limen\SendCustomerMessageTool::class);
+        $app->singleton(FakeShipmentService::class);
+        $app['config']->set('limen-ai.tools.get_shipment_status.class', GetShipmentStatusTool::class);
+        $app['config']->set('limen-ai.tools.send_customer_message.class', SendCustomerMessageTool::class);
         $app['config']->set('limen-ai.agents.example.memory.allowed_keys', ['preferred_language', 'timezone']);
         $app['config']->set('limen-ai.attachments.enabled', true);
-        $app['config']->set('limen-ai.attachments.store', \LimenAi\Attachments\InMemoryAttachmentStore::class);
+        $app['config']->set('limen-ai.attachments.store', InMemoryAttachmentStore::class);
         $app['config']->set('limen-ai.quality.heuristic_validation', false);
         $app['config']->set('limen-ai.quality.enforce_forbidden_topics', false);
     }

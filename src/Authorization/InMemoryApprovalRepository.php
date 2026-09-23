@@ -18,24 +18,41 @@ class InMemoryApprovalRepository implements ApprovalRepository
             'resolved_by' => null, 'resolved_at' => null,
             'created_at' => now()->toIso8601String(), 'updated_at' => now()->toIso8601String(),
         ];
+
         return $approvalId;
     }
 
-    public function approve(string $approvalId, int $userId): void { $this->resolve($approvalId, $userId, ApprovalStatus::APPROVED); }
-    public function reject(string $approvalId, int $userId): void { $this->resolve($approvalId, $userId, ApprovalStatus::REJECTED); }
-    public function find(string $approvalId): ?array { return $this->approvals[$approvalId] ?? null; }
+    public function approve(string $approvalId, int $userId): void
+    {
+        $this->resolve($approvalId, $userId, ApprovalStatus::APPROVED);
+    }
+
+    public function reject(string $approvalId, int $userId): void
+    {
+        $this->resolve($approvalId, $userId, ApprovalStatus::REJECTED);
+    }
+
+    public function find(string $approvalId): ?array
+    {
+        return $this->approvals[$approvalId] ?? null;
+    }
 
     public function findPendingForRun(string $runId): ?array
     {
         foreach ($this->approvals as $approval) {
-            if ($approval['run_id'] === $runId && $approval['status'] === ApprovalStatus::PENDING) { return $approval; }
+            if ($approval['run_id'] === $runId && $approval['status'] === ApprovalStatus::PENDING) {
+                return $approval;
+            }
         }
+
         return null;
     }
 
     protected function resolve(string $approvalId, int $userId, string $status): void
     {
-        if (! isset($this->approvals[$approvalId])) { return; }
+        if (! isset($this->approvals[$approvalId])) {
+            return;
+        }
         $this->approvals[$approvalId] = array_merge($this->approvals[$approvalId], [
             'status' => $status, 'resolved_by' => $userId,
             'resolved_at' => now()->toIso8601String(), 'updated_at' => now()->toIso8601String(),

@@ -2,11 +2,13 @@
 
 namespace LimenAi\Tests\Feature;
 
+use Illuminate\Auth\GenericUser;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
 use LimenAi\Runtime\RunStatus;
+use LimenAi\Tests\Stubs\EchoTool;
 use LimenAi\Tests\TestCase;
 
 class ChatApiTest extends TestCase
@@ -75,7 +77,7 @@ class ChatApiTest extends TestCase
     {
         $conversationId = $this->postJson('/limen-ai/conversations')->json('conversation.id');
 
-        $this->actingAs(new \Illuminate\Auth\GenericUser(['id' => 99]));
+        $this->actingAs(new GenericUser(['id' => 99]));
 
         $this->getJson("/limen-ai/conversations/{$conversationId}")
             ->assertForbidden();
@@ -86,7 +88,7 @@ class ChatApiTest extends TestCase
         config()->set('limen-ai.tools.confirmation_tool', [
             'name' => 'Confirmation Tool',
             'description' => 'Needs approval.',
-            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
+            'class' => EchoTool::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],

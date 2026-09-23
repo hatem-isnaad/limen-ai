@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Workflows;
 
-use LimenAi\Workflows\ConfigWorkflowDefinition;
 use LimenAi\Tests\TestCase;
+use LimenAi\Workflows\ConfigWorkflowDefinition;
 
 class ConfigWorkflowDefinitionTest extends TestCase
 {

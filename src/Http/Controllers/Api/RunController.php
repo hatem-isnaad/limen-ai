@@ -24,6 +24,7 @@ class RunController
         $run = $this->runs->find($runId);
         abort_if($run === null, 404, 'Run not found.');
         $this->authorizeConversationAccess($request, (string) ($run['conversation_id'] ?? ''));
+
         return response()->json(['run' => ['id' => $runId, 'status' => (string) ($run['status'] ?? ''), 'agent_key' => (string) ($run['agent_key'] ?? ''), 'conversation_id' => (string) ($run['conversation_id'] ?? ''), 'final_message' => $run['final_message'] ?? null, 'error' => $run['error'] ?? null, 'trace_id' => $run['trace_id'] ?? null, 'span_id' => $run['span_id'] ?? null, 'terminal' => $this->statusReader->isTerminal($runId)]]);
     }
 

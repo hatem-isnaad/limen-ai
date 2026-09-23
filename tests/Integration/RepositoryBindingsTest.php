@@ -10,9 +10,9 @@ use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Knowledge\ConfigKnowledgeRepository;
 use LimenAi\Skills\ConfigSkillRepository;
+use LimenAi\Tests\TestCase;
 use LimenAi\Tools\CompositeToolRepository;
 use LimenAi\Workflows\ConfigWorkflowRepository;
-use LimenAi\Tests\TestCase;
 
 class RepositoryBindingsTest extends TestCase
 {

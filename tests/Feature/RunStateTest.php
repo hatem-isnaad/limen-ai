@@ -16,6 +16,7 @@ use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Runtime\RunStatus;
+use LimenAi\Tests\Stubs\EchoTool;
 use LimenAi\Tests\TestCase;
 
 class RunStateTest extends TestCase
@@ -27,7 +28,7 @@ class RunStateTest extends TestCase
         config()->set('limen-ai.tools.confirmation_tool', [
             'name' => 'Confirmation Tool',
             'description' => 'Needs approval.',
-            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
+            'class' => EchoTool::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],

@@ -6,7 +6,7 @@ Use this checklist before shipping a host integration or package release.
 
 ```bash
 composer test:release
-vendor/bin/pint --dirty
+vendor/bin/pint --test
 composer audit
 php artisan limen-ai:doctor --json
 php artisan limen-ai:validate --strict

@@ -12,6 +12,7 @@ use LimenAi\Providers\LlmResponseData;
 class OpenAiProvider implements LlmProvider
 {
     use BuildsHttpClient;
+
     /**
      * @param  array<string, mixed>  $config
      */

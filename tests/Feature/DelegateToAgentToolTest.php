@@ -5,8 +5,8 @@ namespace LimenAi\Tests\Feature;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
 use LimenAi\Runtime\RunContextData;
-use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tests\TestCase;
+use LimenAi\Tools\ToolPipeline;
 
 class DelegateToAgentToolTest extends TestCase
 {

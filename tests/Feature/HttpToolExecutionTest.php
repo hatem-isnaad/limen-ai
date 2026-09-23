@@ -4,9 +4,10 @@ namespace LimenAi\Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use LimenAi\Contracts\Tools\ToolRepository;
+use LimenAi\Exceptions\ToolExecutionException;
 use LimenAi\Runtime\RunContextData;
-use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tests\TestCase;
+use LimenAi\Tools\ToolPipeline;
 
 class HttpToolExecutionTest extends TestCase
 {
@@ -41,7 +42,7 @@ class HttpToolExecutionTest extends TestCase
         config()->set('limen-ai.tools.example_http_status.integration.path', '/status/{{ input.resource }}');
         config()->set('limen-ai.integrations.connectors.example_api.base_url', 'http://127.0.0.1');
 
-        $this->expectException(\LimenAi\Exceptions\ToolExecutionException::class);
+        $this->expectException(ToolExecutionException::class);
         $this->expectExceptionMessage('not allowed');
 
         app(ToolPipeline::class)->execute(

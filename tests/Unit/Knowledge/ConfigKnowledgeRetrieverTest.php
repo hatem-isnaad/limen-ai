@@ -9,7 +9,7 @@ class ConfigKnowledgeRetrieverTest extends TestCase
 {
     public function test_it_scores_documents_by_keyword_overlap(): void
     {
-        $retriever = new ConfigKnowledgeRetriever();
+        $retriever = new ConfigKnowledgeRetriever;
 
         $results = $retriever->retrieve('echo tool testing', [[
             'key' => 'getting_started',
@@ -26,7 +26,7 @@ class ConfigKnowledgeRetrieverTest extends TestCase
 
     public function test_it_returns_empty_results_for_empty_query(): void
     {
-        $retriever = new ConfigKnowledgeRetriever();
+        $retriever = new ConfigKnowledgeRetriever;
 
         $results = $retriever->retrieve('', [[
             'key' => 'getting_started',
@@ -40,7 +40,7 @@ class ConfigKnowledgeRetrieverTest extends TestCase
 
     public function test_it_respects_the_result_limit(): void
     {
-        $retriever = new ConfigKnowledgeRetriever();
+        $retriever = new ConfigKnowledgeRetriever;
 
         $results = $retriever->retrieve('limen tool', [[
             'key' => 'docs',

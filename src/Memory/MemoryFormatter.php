@@ -9,6 +9,7 @@ class MemoryFormatter
     public function __construct(
         private readonly ContentSanitizer $sanitizer,
     ) {}
+
     /**
      * @param  list<array<string, mixed>>  $entries
      * @return list<array<string, mixed>>

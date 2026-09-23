@@ -9,7 +9,7 @@ class MessageFormatterTest extends TestCase
 {
     public function test_it_round_trips_agent_messages_with_tool_calls(): void
     {
-        $formatter = new MessageFormatter();
+        $formatter = new MessageFormatter;
 
         $agentMessage = [
             'role' => 'assistant',
@@ -29,7 +29,7 @@ class MessageFormatterTest extends TestCase
 
     public function test_it_skips_empty_messages_without_structured_content(): void
     {
-        $formatter = new MessageFormatter();
+        $formatter = new MessageFormatter;
 
         $messages = $formatter->toAgentMessages([
             ['role' => 'assistant', 'content' => ''],

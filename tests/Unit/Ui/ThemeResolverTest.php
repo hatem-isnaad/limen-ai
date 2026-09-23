@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Ui;
 
-use LimenAi\Ui\ThemeResolver;
 use LimenAi\Tests\TestCase;
+use LimenAi\Ui\ThemeResolver;
 
 class ThemeResolverTest extends TestCase
 {

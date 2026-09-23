@@ -13,7 +13,7 @@ class StructuredOutputValidatorTest extends TestCase
     {
         $agent = $this->agent(['format' => 'json']);
 
-        $result = (new StructuredOutputValidator())->validate($agent, '{"ok":true}');
+        $result = (new StructuredOutputValidator)->validate($agent, '{"ok":true}');
 
         $this->assertSame('{"ok":true}', $result);
     }
@@ -22,7 +22,7 @@ class StructuredOutputValidatorTest extends TestCase
     {
         $agent = $this->agent(['format' => 'text']);
 
-        $result = (new StructuredOutputValidator())->validate($agent, 'not json');
+        $result = (new StructuredOutputValidator)->validate($agent, 'not json');
 
         $this->assertSame('not json', $result);
     }
@@ -33,7 +33,7 @@ class StructuredOutputValidatorTest extends TestCase
 
         $this->expectException(OutputValidationException::class);
 
-        (new StructuredOutputValidator())->validate($agent, '{invalid');
+        (new StructuredOutputValidator)->validate($agent, '{invalid');
     }
 
     /** @param  array<string, mixed>  $output */

@@ -2,6 +2,7 @@
 
 namespace LimenAi\Tests\Feature;
 
+use Illuminate\Support\Facades\Artisan;
 use LimenAi\Tests\TestCase;
 
 class DoctorCommandTest extends TestCase
@@ -46,7 +47,7 @@ class DoctorCommandTest extends TestCase
 
         $this->assertSame(0, $exitCode);
 
-        $report = json_decode(trim((string) \Illuminate\Support\Facades\Artisan::output()), true);
+        $report = json_decode(trim((string) Artisan::output()), true);
 
         $this->assertIsArray($report);
         $this->assertTrue($report['ok']);

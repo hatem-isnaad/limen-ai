@@ -11,7 +11,7 @@ class InMemoryRunRepositoryTest extends TestCase
 {
     public function test_it_creates_finds_and_updates_runs(): void
     {
-        $repo = new InMemoryRunRepository();
+        $repo = new InMemoryRunRepository;
 
         $runId = $repo->create([
             'conversation_id' => 'conv-mem',
@@ -39,11 +39,11 @@ class InMemoryRunRepositoryTest extends TestCase
     {
         $this->expectException(RunNotFoundException::class);
 
-        (new InMemoryRunRepository())->updateStatus('missing', RunStatus::FAILED);
+        (new InMemoryRunRepository)->updateStatus('missing', RunStatus::FAILED);
     }
 
     public function test_find_returns_null_for_missing_run(): void
     {
-        $this->assertNull((new InMemoryRunRepository())->find('missing'));
+        $this->assertNull((new InMemoryRunRepository)->find('missing'));
     }
 }

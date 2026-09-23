@@ -3,8 +3,8 @@
 namespace LimenAi\Tests\Unit\Tools;
 
 use LimenAi\Tests\Stubs\EchoTool;
-use LimenAi\Tools\ConfigToolDefinition;
 use LimenAi\Tests\TestCase;
+use LimenAi\Tools\ConfigToolDefinition;
 
 class ConfigToolDefinitionTest extends TestCase
 {

@@ -1,5 +1,24 @@
 <?php
 
+use LimenAi\Agents\ConfigAgentRepository;
+use LimenAi\Attachments\InMemoryAttachmentStore;
+use LimenAi\Authorization\CacheGuestSessionValidator;
+use LimenAi\Conversations\NullConversationSummarizer;
+use LimenAi\Knowledge\ConfigKnowledgeRepository;
+use LimenAi\Knowledge\InMemoryVectorStore;
+use LimenAi\Memory\DefaultMemoryRetriever;
+use LimenAi\Memory\InMemoryMemoryStore;
+use LimenAi\Providers\Anthropic\AnthropicProvider;
+use LimenAi\Providers\Fake\FakeEmbeddingProvider;
+use LimenAi\Providers\Fake\FakeLlmProvider;
+use LimenAi\Providers\Gemini\GeminiProvider;
+use LimenAi\Providers\OpenAi\OpenAiEmbeddingProvider;
+use LimenAi\Providers\OpenAi\OpenAiProvider;
+use LimenAi\Skills\ConfigSkillRepository;
+use LimenAi\Tools\CompositeToolRepository;
+use LimenAi\Tools\DelegateToAgentTool;
+use LimenAi\Workflows\ConfigWorkflowRepository;
+
 return [
 
     'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'app_assistant'),
@@ -7,11 +26,11 @@ return [
     'providers' => [
         'default' => env('LIMEN_AI_PROVIDER', 'fake'),
         'drivers' => [
-            'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
-            'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
-            'openrouter' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
-            'anthropic' => LimenAi\Providers\Anthropic\AnthropicProvider::class,
-            'gemini' => LimenAi\Providers\Gemini\GeminiProvider::class,
+            'fake' => FakeLlmProvider::class,
+            'openai' => OpenAiProvider::class,
+            'openrouter' => OpenAiProvider::class,
+            'anthropic' => AnthropicProvider::class,
+            'gemini' => GeminiProvider::class,
         ],
         'fake' => [
             'driver' => 'fake',
@@ -51,8 +70,8 @@ return [
     'embeddings' => [
         'default' => env('LIMEN_AI_EMBEDDING_PROVIDER', 'fake'),
         'drivers' => [
-            'fake' => LimenAi\Providers\Fake\FakeEmbeddingProvider::class,
-            'openai' => LimenAi\Providers\OpenAi\OpenAiEmbeddingProvider::class,
+            'fake' => FakeEmbeddingProvider::class,
+            'openai' => OpenAiEmbeddingProvider::class,
         ],
         'providers' => [
             'fake' => [
@@ -301,7 +320,7 @@ return [
         'repository' => env('LIMEN_AI_CONVERSATION_REPOSITORY'),
         'message_repository' => env('LIMEN_AI_MESSAGE_REPOSITORY'),
         'history_limit' => 50,
-        'summarizer' => env('LIMEN_AI_CONVERSATION_SUMMARIZER', LimenAi\Conversations\NullConversationSummarizer::class),
+        'summarizer' => env('LIMEN_AI_CONVERSATION_SUMMARIZER', NullConversationSummarizer::class),
         'summary_threshold' => (int) env('LIMEN_AI_SUMMARY_THRESHOLD', 24),
         'summary_keep_recent' => (int) env('LIMEN_AI_SUMMARY_KEEP_RECENT', 12),
         'summary_refresh_messages' => (int) env('LIMEN_AI_SUMMARY_REFRESH_MESSAGES', 8),
@@ -356,7 +375,7 @@ return [
         'delegate_to_agent' => [
             'name' => 'Delegate To Agent',
             'description' => 'Delegates a message to another configured agent and returns its final reply.',
-            'class' => LimenAi\Tools\DelegateToAgentTool::class,
+            'class' => DelegateToAgentTool::class,
             'input_schema' => [
                 'agent_key' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],
@@ -504,7 +523,7 @@ return [
 
     'knowledge' => [
         'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
-        'vector_store' => LimenAi\Knowledge\InMemoryVectorStore::class,
+        'vector_store' => InMemoryVectorStore::class,
         'limit' => 5,
         'collections' => [
             ...(require __DIR__.'/limen-ai-black-box-defaults.php')['knowledge_collections'],
@@ -540,11 +559,11 @@ return [
     ],
 
     'repositories' => [
-        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
-        'tool' => LimenAi\Tools\CompositeToolRepository::class,
-        'skill' => LimenAi\Skills\ConfigSkillRepository::class,
-        'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
-        'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
+        'agent' => ConfigAgentRepository::class,
+        'tool' => CompositeToolRepository::class,
+        'skill' => ConfigSkillRepository::class,
+        'workflow' => ConfigWorkflowRepository::class,
+        'knowledge' => ConfigKnowledgeRepository::class,
     ],
 
     'authorization' => [
@@ -552,14 +571,14 @@ return [
         'mode' => env('LIMEN_AI_AUTHORIZATION_MODE', 'simple'),
         'enforce_context_user_match' => true,
         'guest' => [
-            'validator' => LimenAi\Authorization\CacheGuestSessionValidator::class,
+            'validator' => CacheGuestSessionValidator::class,
             'cache_prefix' => 'limen-ai:guest:',
         ],
     ],
 
     'memory' => [
-        'store' => LimenAi\Memory\InMemoryMemoryStore::class,
-        'retriever' => LimenAi\Memory\DefaultMemoryRetriever::class,
+        'store' => InMemoryMemoryStore::class,
+        'retriever' => DefaultMemoryRetriever::class,
         'limit' => 20,
         'strict' => [
             'enforce_allowlist' => env('LIMEN_AI_MEMORY_STRICT', true),
@@ -599,7 +618,7 @@ return [
 
     'attachments' => [
         'enabled' => env('LIMEN_AI_ATTACHMENTS_ENABLED', true),
-        'store' => LimenAi\Attachments\InMemoryAttachmentStore::class,
+        'store' => InMemoryAttachmentStore::class,
         'disk' => env('LIMEN_AI_ATTACHMENTS_DISK', 'local'),
         'path' => env('LIMEN_AI_ATTACHMENTS_PATH', 'limen-ai/attachments'),
         'max_size_kb' => (int) env('LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB', 10240),

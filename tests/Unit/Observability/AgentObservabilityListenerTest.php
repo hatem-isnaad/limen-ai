@@ -4,6 +4,7 @@ namespace LimenAi\Tests\Unit\Observability;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use LimenAi\Contracts\Observability\AuditLogger;
+use LimenAi\Contracts\Runtime\RunContext;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentFailed;
 use LimenAi\Events\AgentStarted;
@@ -134,7 +135,7 @@ class AgentObservabilityListenerTest extends TestCase
                 return ! array_key_exists('user_id', $context);
             }));
 
-        $context = Mockery::mock(\LimenAi\Contracts\Runtime\RunContext::class);
+        $context = Mockery::mock(RunContext::class);
 
         $listener = new AgentObservabilityListener($audit);
         $listener->handleAgentStarted(new AgentStarted('run-4', 'example', 'conv-4', $context));

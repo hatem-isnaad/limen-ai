@@ -3,10 +3,10 @@
 namespace LimenAi\Tests\Integration;
 
 use LimenAi\Contracts\Workflows\WorkflowEngine;
+use LimenAi\Tests\TestCase;
 use LimenAi\Workflows\DefaultWorkflowEngine;
 use LimenAi\Workflows\WorkflowStepRunner;
 use LimenAi\Workflows\WorkflowValidator;
-use LimenAi\Tests\TestCase;
 
 class WorkflowBindingTest extends TestCase
 {

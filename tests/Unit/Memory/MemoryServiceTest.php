@@ -6,6 +6,7 @@ use LimenAi\Contracts\Memory\MemoryStore;
 use LimenAi\Exceptions\MemoryPolicyException;
 use LimenAi\Memory\MemoryScope;
 use LimenAi\Memory\MemoryService;
+use LimenAi\Memory\StrictMemoryPolicy;
 use LimenAi\Tests\TestCase;
 
 class MemoryServiceTest extends TestCase
@@ -105,7 +106,7 @@ class MemoryServiceTest extends TestCase
                 ['scope_id' => '7', 'agent_key' => 'example'],
             );
 
-        $service = new MemoryService($store, app(\LimenAi\Memory\StrictMemoryPolicy::class));
+        $service = new MemoryService($store, app(StrictMemoryPolicy::class));
         $service->rememberUser(7, 'preferred_language', 'en', 'example');
     }
 }

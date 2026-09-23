@@ -3,10 +3,10 @@
 namespace LimenAi\Tests\Unit\Providers;
 
 use LimenAi\Exceptions\ProviderConfigurationException;
-use LimenAi\Providers\Fake\FakeLlmProvider;
-use LimenAi\Providers\LlmProviderManager;
 use LimenAi\Providers\Anthropic\AnthropicProvider;
+use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\Gemini\GeminiProvider;
+use LimenAi\Providers\LlmProviderManager;
 use LimenAi\Providers\OpenAi\OpenAiProvider;
 use LimenAi\Tests\TestCase;
 

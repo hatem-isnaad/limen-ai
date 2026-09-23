@@ -23,8 +23,15 @@ class ApprovalController
         private readonly AuthorizationService $authorization,
     ) {}
 
-    public function approve(Request $request, string $approvalId): JsonResponse { return $this->resolve($request, $approvalId, approve: true); }
-    public function reject(Request $request, string $approvalId): JsonResponse { return $this->resolve($request, $approvalId, approve: false); }
+    public function approve(Request $request, string $approvalId): JsonResponse
+    {
+        return $this->resolve($request, $approvalId, approve: true);
+    }
+
+    public function reject(Request $request, string $approvalId): JsonResponse
+    {
+        return $this->resolve($request, $approvalId, approve: false);
+    }
 
     protected function resolve(Request $request, string $approvalId, bool $approve): JsonResponse
     {
@@ -36,6 +43,7 @@ class ApprovalController
         $this->authorizeConversationAccess($request, $conversationId);
         $context = $this->runContextFromRequest($request, $this->authorization);
         $result = $approve ? $this->dispatcher->dispatchResume($runId, $context) : $this->dispatcher->dispatchReject($runId, $context);
+
         return response()->json(['approval_id' => $approvalId, 'run_id' => $runId, 'action' => $approve ? 'approved' : 'rejected', 'queued' => $result->queued]);
     }
 }

@@ -10,7 +10,7 @@ class FakeLlmProviderTest extends TestCase
 {
     public function test_it_returns_default_fake_response(): void
     {
-        $provider = new FakeLlmProvider();
+        $provider = new FakeLlmProvider;
 
         $response = $provider->chat([
             ['role' => 'user', 'content' => 'Hello'],
@@ -22,7 +22,7 @@ class FakeLlmProviderTest extends TestCase
 
     public function test_it_returns_queued_responses_in_order(): void
     {
-        $provider = new FakeLlmProvider();
+        $provider = new FakeLlmProvider;
         $provider->queueResponse(LlmResponseData::fromArray(['content' => 'First']));
         $provider->queueResponse(LlmResponseData::fromArray(['content' => 'Second']));
 
@@ -32,7 +32,7 @@ class FakeLlmProviderTest extends TestCase
 
     public function test_it_records_chat_calls(): void
     {
-        $provider = new FakeLlmProvider();
+        $provider = new FakeLlmProvider;
 
         $provider->chat([
             ['role' => 'user', 'content' => 'Track me'],

@@ -3,8 +3,8 @@
 namespace LimenAi\Tests\Unit\Tools;
 
 use Illuminate\Support\Facades\Cache;
-use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tests\TestCase;
+use LimenAi\Tools\CacheIdempotencyGuard;
 
 class CacheIdempotencyGuardTest extends TestCase
 {

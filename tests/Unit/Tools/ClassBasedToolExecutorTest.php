@@ -7,9 +7,10 @@ use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Exceptions\ToolException;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Tests\Stubs\EchoTool;
+use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ClassBasedToolExecutor;
 use LimenAi\Tools\ConfigToolDefinition;
-use LimenAi\Tests\TestCase;
+use LimenAi\Tools\ToolInstanceResolver;
 use Mockery;
 
 class ClassBasedToolExecutorTest extends TestCase
@@ -50,7 +51,7 @@ class ClassBasedToolExecutorTest extends TestCase
             )
             ->andReturn(['status' => 200, 'body' => ['ok' => true]]);
 
-        $executor = new ClassBasedToolExecutor($http, app(\LimenAi\Tools\ToolInstanceResolver::class));
+        $executor = new ClassBasedToolExecutor($http, app(ToolInstanceResolver::class));
 
         $tool = ConfigToolDefinition::fromConfig('http_tool', [
             'name' => 'HTTP Tool',

@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Ui;
 
-use LimenAi\Ui\WidgetThemeOptions;
 use LimenAi\Tests\TestCase;
+use LimenAi\Ui\WidgetThemeOptions;
 
 class WidgetThemeOptionsTest extends TestCase
 {

@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Integration;
 
-use LimenAi\Conversations\DatabaseConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationRepository;
+use LimenAi\Conversations\DatabaseConversationRepository;
 use LimenAi\Tests\DatabaseTestCase;
 
 class PersistenceAutoDetectBindingTest extends DatabaseTestCase

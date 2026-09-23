@@ -10,7 +10,7 @@ class InMemoryAttachmentStoreTest extends TestCase
 {
     public function test_it_stores_processes_and_lists_attachments(): void
     {
-        $store = new InMemoryAttachmentStore();
+        $store = new InMemoryAttachmentStore;
 
         $id = $store->store('conv-1', [
             'original_name' => 'invoice.txt',

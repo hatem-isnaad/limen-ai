@@ -24,6 +24,7 @@ class ObservabilityController
         $this->authorizeConversationAccess($request, (string) ($run['conversation_id'] ?? ''));
         $report = $this->reporter->forRun($runId);
         abort_if($report === null, 404, 'Run not found.');
+
         return response()->json(['observability' => $report]);
     }
 }

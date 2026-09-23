@@ -30,9 +30,10 @@
         "illuminate/validation": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
+        "laravel/pint": "^1.0",
+        "mockery/mockery": "^1.6",
         "orchestra/testbench": "^9.0|^10.0|^11.0",
-        "phpunit/phpunit": "^11.0",
-        "mockery/mockery": "^1.6"
+        "phpunit/phpunit": "^11.0"
     },
     "autoload": {
         "psr-4": {
@@ -70,9 +71,11 @@
             "@test:architecture",
             "@test:security"
         ],
+        "test:style": "pint --test",
         "test:release": [
             "@test",
-            "@test:gates"
+            "@test:gates",
+            "@test:style"
         ]
     }
 }

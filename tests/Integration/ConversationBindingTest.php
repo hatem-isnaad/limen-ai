@@ -2,13 +2,13 @@
 
 namespace LimenAi\Tests\Integration;
 
+use LimenAi\Contracts\Conversations\ConversationRepository;
+use LimenAi\Contracts\Conversations\ConversationSummarizer;
+use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Conversations\ConversationService;
 use LimenAi\Conversations\InMemoryConversationRepository;
 use LimenAi\Conversations\InMemoryMessageRepository;
 use LimenAi\Conversations\NullConversationSummarizer;
-use LimenAi\Contracts\Conversations\ConversationRepository;
-use LimenAi\Contracts\Conversations\ConversationSummarizer;
-use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Tests\TestCase;
 
 class ConversationBindingTest extends TestCase

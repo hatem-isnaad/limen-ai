@@ -47,7 +47,48 @@ if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null 2>&1 || gh release vi
   exit 0
 fi
 
-PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+PREV_TAG="$(python3 - <<'PY'
+import json
+import pathlib
+import re
+import subprocess
+
+composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
+current = composer.get("version")
+if not isinstance(current, str):
+    raise SystemExit(0)
+
+def semver_key(version: str) -> tuple[int, ...]:
+    parts = []
+    for part in version.split("."):
+        match = re.match(r"(\d+)", part)
+        if not match:
+            raise ValueError(version)
+        parts.append(int(match.group(1)))
+    return tuple(parts)
+
+current_key = semver_key(current)
+tags = subprocess.check_output(["git", "tag", "-l", "v*", "--merged", "HEAD"], text=True).splitlines()
+best_tag = ""
+best_key: tuple[int, ...] | None = None
+
+for tag in tags:
+    version = tag[1:] if tag.startswith("v") else tag
+    try:
+        key = semver_key(version)
+    except ValueError:
+        continue
+
+    if key >= current_key:
+        continue
+
+    if best_key is None or key > best_key:
+        best_key = key
+        best_tag = tag
+
+print(best_tag)
+PY
+)"
 if [[ -n "$PREV_TAG" ]]; then
   RANGE="${PREV_TAG}..HEAD"
   collect_commit_subjects "${RANGE}"

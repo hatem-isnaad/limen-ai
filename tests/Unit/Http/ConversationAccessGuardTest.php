@@ -3,6 +3,7 @@
 namespace LimenAi\Tests\Unit\Http;
 
 use Illuminate\Auth\GenericUser;
+use LimenAi\Authorization\CacheGuestSessionValidator;
 use LimenAi\Authorization\GuestSessionService;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Http\Services\ConversationAccessGuard;
@@ -26,7 +27,7 @@ class ConversationAccessGuardTest extends TestCase
 
     public function test_it_allows_guest_access_with_matching_token(): void
     {
-        config()->set('limen-ai.authorization.guest.validator', \LimenAi\Authorization\CacheGuestSessionValidator::class);
+        config()->set('limen-ai.authorization.guest.validator', CacheGuestSessionValidator::class);
 
         $session = app(GuestSessionService::class)->register([
             'name' => 'Guest',

@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Ui;
 
-use LimenAi\Ui\ChatUiConfig;
 use LimenAi\Tests\TestCase;
+use LimenAi\Ui\ChatUiConfig;
 
 class ChatUiConfigTest extends TestCase
 {

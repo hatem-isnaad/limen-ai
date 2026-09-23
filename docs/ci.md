@@ -45,7 +45,8 @@ composer test                  # full suite
 composer test:architecture     # boundary gates only
 composer test:security         # security gates only
 composer test:gates            # architecture + security (merge gate)
-composer test:release          # full suite + merge gates (pre-go-live)
+composer test:release          # full suite + merge gates + Pint (pre-go-live)
+composer test:style            # Pint style check only
 ```
 
 ## Merge Gates (Required on `stg`)

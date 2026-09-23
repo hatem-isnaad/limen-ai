@@ -13,7 +13,7 @@ class AgentEventBroadcastTest extends TestCase
 {
     public function test_it_broadcasts_agent_lifecycle_events_to_conversation_channel(): void
     {
-        $broadcaster = new FakeRealtimeBroadcaster();
+        $broadcaster = new FakeRealtimeBroadcaster;
         $listener = new AgentEventBroadcaster($broadcaster);
         $context = RunContextData::make(['user_id' => 1]);
 

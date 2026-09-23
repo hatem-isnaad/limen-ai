@@ -13,7 +13,7 @@ class AttachmentValidatorTest extends TestCase
     {
         config()->set('limen-ai.attachments.max_size_kb', 1);
 
-        $validator = new AttachmentValidator(config(), new InMemoryAttachmentStore());
+        $validator = new AttachmentValidator(config(), new InMemoryAttachmentStore);
 
         $this->expectException(AttachmentValidationException::class);
         $validator->validateUpload('conv-1', 2048, 'text/plain');
@@ -23,7 +23,7 @@ class AttachmentValidatorTest extends TestCase
     {
         config()->set('limen-ai.attachments.max_count', 1);
 
-        $store = new InMemoryAttachmentStore();
+        $store = new InMemoryAttachmentStore;
         $store->store('conv-1', ['original_name' => 'a.txt', 'mime_type' => 'text/plain'], 'existing');
 
         $validator = new AttachmentValidator(config(), $store);

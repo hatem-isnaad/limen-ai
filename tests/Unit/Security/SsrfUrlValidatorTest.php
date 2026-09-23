@@ -3,6 +3,7 @@
 namespace LimenAi\Tests\Unit\Security;
 
 use LimenAi\Contracts\Security\UrlValidator;
+use LimenAi\Exceptions\SecurityException;
 use LimenAi\Tests\TestCase;
 
 class SsrfUrlValidatorTest extends TestCase
@@ -43,7 +44,7 @@ class SsrfUrlValidatorTest extends TestCase
     {
         $validator = app(UrlValidator::class);
 
-        $this->expectException(\LimenAi\Exceptions\SecurityException::class);
+        $this->expectException(SecurityException::class);
 
         $validator->assertAllowed('http://127.0.0.1/internal');
     }

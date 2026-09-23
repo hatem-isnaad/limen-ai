@@ -2,12 +2,13 @@
 
 namespace LimenAi\Tests\Unit\Tools;
 
+use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Exceptions\ToolAuthorizationException;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Tests\Stubs\DenyEchoTool;
+use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ToolInstanceAuthorizer;
 use LimenAi\Tools\ToolPipeline;
-use LimenAi\Tests\TestCase;
 
 class ToolInstanceAuthorizerTest extends TestCase
 {
@@ -25,7 +26,7 @@ class ToolInstanceAuthorizerTest extends TestCase
         $this->expectException(ToolAuthorizationException::class);
 
         app(ToolInstanceAuthorizer::class)->authorize(
-            app(\LimenAi\Contracts\Tools\ToolRepository::class)->find('deny_echo'),
+            app(ToolRepository::class)->find('deny_echo'),
             ['message' => 'nope'],
             RunContextData::make(['user_id' => 1]),
         );

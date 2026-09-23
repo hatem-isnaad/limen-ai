@@ -7,13 +7,13 @@ use LimenAi\Agents\AgentValidator;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
-use LimenAi\Support\EnvironmentDoctor;
-use LimenAi\Support\LimenAiManager;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Integrations\HttpIntegrationValidator;
+use LimenAi\Support\EnvironmentDoctor;
+use LimenAi\Support\LimenAiManager;
 use LimenAi\Workflows\WorkflowValidator;
 
 class DoctorCommand extends Command
@@ -66,6 +66,7 @@ class DoctorCommand extends Command
             if (! app()->bound($contract)) {
                 $failures[] = "Binding missing for {$contract}.";
                 $bindings[$key] = 'missing';
+
                 continue;
             }
 

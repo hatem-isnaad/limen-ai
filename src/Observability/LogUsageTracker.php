@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 use LimenAi\Contracts\Observability\UsageReader;
 use LimenAi\Contracts\Observability\UsageTracker;
 
-class LogUsageTracker implements UsageTracker, UsageReader
+class LogUsageTracker implements UsageReader, UsageTracker
 {
     public function __construct(
         private readonly ConfigRepository $config,

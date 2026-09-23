@@ -3,9 +3,9 @@
 namespace LimenAi\Tests\Feature;
 
 use Illuminate\Support\Facades\Event;
-use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\RunRepository;
+use LimenAi\Conversations\ConversationService;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentStarted;
 use LimenAi\Events\MessageCreated;
@@ -14,6 +14,7 @@ use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Runtime\RunStatus;
+use LimenAi\Tests\Stubs\EchoTool;
 use LimenAi\Tests\TestCase;
 
 class AgentRuntimeTest extends TestCase
@@ -105,7 +106,7 @@ class AgentRuntimeTest extends TestCase
         config()->set('limen-ai.tools.confirmation_tool', [
             'name' => 'Confirmation Tool',
             'description' => 'Needs approval.',
-            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
+            'class' => EchoTool::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],

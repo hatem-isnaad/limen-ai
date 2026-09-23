@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Agents;
 
-use LimenAi\Agents\HeuristicOutputValidator;
 use LimenAi\Agents\ConfigAgentDefinition;
+use LimenAi\Agents\HeuristicOutputValidator;
 use LimenAi\Exceptions\OutputValidationException;
 use LimenAi\Tests\TestCase;
 
@@ -19,7 +19,7 @@ class HeuristicOutputValidatorTest extends TestCase
 
         $this->expectException(OutputValidationException::class);
 
-        (new HeuristicOutputValidator())->validate($agent, '   ');
+        (new HeuristicOutputValidator)->validate($agent, '   ');
     }
 
     public function test_it_rejects_prompt_marker_leaks(): void
@@ -32,7 +32,7 @@ class HeuristicOutputValidatorTest extends TestCase
 
         $this->expectException(OutputValidationException::class);
 
-        (new HeuristicOutputValidator())->validate($agent, 'Leak [INST] secret');
+        (new HeuristicOutputValidator)->validate($agent, 'Leak [INST] secret');
     }
 
     public function test_it_accepts_normal_text_replies(): void
@@ -43,7 +43,7 @@ class HeuristicOutputValidatorTest extends TestCase
             'provider' => 'fake',
         ]);
 
-        $result = (new HeuristicOutputValidator())->validate($agent, 'Shipping takes 3–5 business days.');
+        $result = (new HeuristicOutputValidator)->validate($agent, 'Shipping takes 3–5 business days.');
 
         $this->assertSame('Shipping takes 3–5 business days.', $result);
     }

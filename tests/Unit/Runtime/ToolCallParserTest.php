@@ -20,7 +20,7 @@ class ToolCallParserTest extends TestCase
             ]],
         ]);
 
-        $parsed = (new ToolCallParser())->parse($response);
+        $parsed = (new ToolCallParser)->parse($response);
 
         $this->assertCount(1, $parsed);
         $this->assertSame('example_echo', $parsed[0]['name']);

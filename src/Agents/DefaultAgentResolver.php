@@ -6,7 +6,9 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentDefinition;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Agents\AgentResolver;
+use LimenAi\Contracts\Skills\SkillDefinition;
 use LimenAi\Contracts\Skills\SkillRepository;
+use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Exceptions\AgentConfigurationException;
 use LimenAi\Exceptions\AgentNotFoundException;
@@ -52,10 +54,14 @@ class DefaultAgentResolver implements AgentResolver
         if ($this->shouldCacheResolvedAgents()) {
             $this->resolvedCache[$agentKey] = $resolved;
         }
+
         return $resolved;
     }
 
-    public function exists(string $agentKey): bool { return $this->agents->exists($agentKey); }
+    public function exists(string $agentKey): bool
+    {
+        return $this->agents->exists($agentKey);
+    }
 
     protected function assertAgentIsConfigured(AgentDefinition $agent): void
     {
@@ -74,6 +80,7 @@ class DefaultAgentResolver implements AgentResolver
     protected function resolveLimits(AgentDefinition $agent): array
     {
         $global = $this->config->get('limen-ai.limits', []);
+
         return array_merge(is_array($global) ? $global : [], $agent->limits());
     }
 
@@ -83,9 +90,9 @@ class DefaultAgentResolver implements AgentResolver
     }
 
     /**
-     * @param  list<\LimenAi\Contracts\Tools\ToolDefinition>  $tools
-     * @param  list<\LimenAi\Contracts\Skills\SkillDefinition>  $skills
-     * @return list<\LimenAi\Contracts\Tools\ToolDefinition>
+     * @param  list<ToolDefinition>  $tools
+     * @param  list<SkillDefinition>  $skills
+     * @return list<ToolDefinition>
      */
     protected function filterToolsBySkills(array $tools, array $skills): array
     {

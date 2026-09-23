@@ -2,26 +2,19 @@
 
 namespace LimenAi;
 
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
-use LimenAi\Agents\AgentValidator;
-use LimenAi\Agents\ConfigAgentRepository;
-use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\AgentPersonaComposer;
 use LimenAi\Agents\AgentResponseGuard;
+use LimenAi\Agents\AgentValidator;
 use LimenAi\Agents\ChainedOutputValidator;
+use LimenAi\Agents\ConfigAgentRepository;
+use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\ForbiddenTopicsOutputValidator;
 use LimenAi\Agents\HeuristicOutputValidator;
-use LimenAi\Agents\StructuredOutputValidator;
-use LimenAi\Contracts\Agents\OutputModerator;
-use LimenAi\Contracts\Agents\OutputValidator;
-use LimenAi\Security\BasicOutputModerator;
-use LimenAi\Security\NullOutputModerator;
 use LimenAi\Agents\InstructionComposer;
-use LimenAi\Authorization\CacheGuestSessionValidator;
-use LimenAi\Authorization\DatabaseApprovalRepository;
-use LimenAi\Authorization\InMemoryApprovalRepository;
-use LimenAi\Authorization\LaravelAuthorizationService;
-use LimenAi\Authorization\NullGuestSessionValidator;
+use LimenAi\Agents\StructuredOutputValidator;
 use LimenAi\Attachments\AttachmentFormatter;
 use LimenAi\Attachments\AttachmentService;
 use LimenAi\Attachments\AttachmentValidator;
@@ -31,8 +24,15 @@ use LimenAi\Attachments\DefaultAgentAttachmentRetriever;
 use LimenAi\Attachments\DefaultAttachmentTextExtractor;
 use LimenAi\Attachments\InMemoryAttachmentStore;
 use LimenAi\Attachments\NullAttachmentStore;
-use LimenAi\Console\AgentTestCommand;
+use LimenAi\Authorization\CacheGuestSessionValidator;
+use LimenAi\Authorization\DatabaseApprovalRepository;
+use LimenAi\Authorization\LaravelAuthorizationService;
+use LimenAi\Authorization\NullGuestSessionValidator;
+use LimenAi\Broadcasting\AgentEventBroadcaster;
+use LimenAi\Broadcasting\NullBroadcaster;
+use LimenAi\Broadcasting\PusherBroadcaster;
 use LimenAi\Console\AgentsCommand;
+use LimenAi\Console\AgentTestCommand;
 use LimenAi\Console\ChecklistCommand;
 use LimenAi\Console\DoctorCommand;
 use LimenAi\Console\ImportKnowledgeCommand;
@@ -48,39 +48,31 @@ use LimenAi\Console\MakeSkillCommand;
 use LimenAi\Console\MakeToolCommand;
 use LimenAi\Console\MakeWorkflowCommand;
 use LimenAi\Console\RunCommand;
-use LimenAi\Console\SkillTestCommand;
 use LimenAi\Console\SkillsCommand;
+use LimenAi\Console\SkillTestCommand;
 use LimenAi\Console\StubGenerator;
-use LimenAi\Console\ToolTestCommand;
 use LimenAi\Console\ToolsCommand;
+use LimenAi\Console\ToolTestCommand;
 use LimenAi\Console\ValidateCommand;
-use LimenAi\Console\WorkflowTestCommand;
 use LimenAi\Console\WorkflowsCommand;
+use LimenAi\Console\WorkflowTestCommand;
+use LimenAi\Contracts\Agents\AgentRepository;
+use LimenAi\Contracts\Agents\AgentResolver;
+use LimenAi\Contracts\Agents\OutputModerator;
+use LimenAi\Contracts\Agents\OutputValidator;
 use LimenAi\Contracts\Attachments\AgentAttachmentRetriever;
 use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Attachments\AttachmentTextExtractor;
-use LimenAi\Support\LimenAiManager;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Broadcast;
-use LimenAi\Broadcasting\AgentEventBroadcaster;
-use LimenAi\Http\Services\ConversationAccessGuard;
-use LimenAi\Broadcasting\NullBroadcaster;
-use LimenAi\Broadcasting\PusherBroadcaster;
-use LimenAi\Contracts\Agents\AgentRepository;
-use LimenAi\Contracts\Agents\AgentResolver;
-use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Authorization\GuestSessionValidator;
+use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Contracts\Integrations\HttpConnectorRepository;
 use LimenAi\Contracts\Integrations\HttpToolExecutor;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
-use LimenAi\Contracts\Security\ContentSanitizer;
-use LimenAi\Contracts\Security\SecretResolver;
-use LimenAi\Contracts\Security\UrlValidator;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
 use LimenAi\Contracts\Knowledge\KnowledgeRetriever;
 use LimenAi\Contracts\Knowledge\VectorStore;
@@ -92,36 +84,26 @@ use LimenAi\Contracts\Observability\UsageReader;
 use LimenAi\Contracts\Observability\UsageTracker;
 use LimenAi\Contracts\Providers\EmbeddingProvider;
 use LimenAi\Contracts\Providers\LlmProvider;
-use LimenAi\Contracts\Skills\SkillRepository;
-use LimenAi\Contracts\Tools\IdempotencyGuard;
-use LimenAi\Contracts\Tools\ToolExecutor;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Contracts\Runtime\RunStatusReader;
+use LimenAi\Contracts\Security\ContentSanitizer;
+use LimenAi\Contracts\Security\SecretResolver;
+use LimenAi\Contracts\Security\UrlValidator;
+use LimenAi\Contracts\Skills\SkillRepository;
+use LimenAi\Contracts\Tools\IdempotencyGuard;
+use LimenAi\Contracts\Tools\ToolExecutor;
 use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Conversations\ConversationService;
 use LimenAi\Conversations\DatabaseConversationRepository;
 use LimenAi\Conversations\DatabaseMessageRepository;
-use LimenAi\Conversations\InMemoryConversationRepository;
-use LimenAi\Conversations\InMemoryMessageRepository;
-use LimenAi\Observability\SkillAdherenceReporter;
-use LimenAi\Support\EnvironmentDoctor;
-use LimenAi\Support\PersistenceConfig;
 use LimenAi\Conversations\MessageFormatter;
 use LimenAi\Conversations\NullConversationSummarizer;
-use LimenAi\Runtime\ArrayCheckpointStore;
-use LimenAi\Runtime\DatabaseCheckpointStore;
-use LimenAi\Runtime\DatabaseRunRepository;
-use LimenAi\Runtime\DefaultAgentRuntime;
-use LimenAi\Runtime\DefaultRunStatusReader;
-use LimenAi\Runtime\InMemoryRunRepository;
-use LimenAi\Runtime\QueuedAgentRunDispatcher;
-use LimenAi\Runtime\SyncAgentRunDispatcher;
-use LimenAi\Runtime\ToolCallParser;
+use LimenAi\Http\Services\ConversationAccessGuard;
 use LimenAi\Integrations\ConfigHttpConnectorRepository;
 use LimenAi\Integrations\DeclarativeHttpToolExecutor;
 use LimenAi\Integrations\HttpIntegrationValidator;
@@ -137,10 +119,10 @@ use LimenAi\Knowledge\NullVectorStore;
 use LimenAi\Knowledge\VectorKnowledgeRetriever;
 use LimenAi\Memory\DatabaseMemoryStore;
 use LimenAi\Memory\DefaultMemoryRetriever;
-use LimenAi\Memory\StrictMemoryPolicy;
 use LimenAi\Memory\InMemoryMemoryStore;
 use LimenAi\Memory\MemoryFormatter;
 use LimenAi\Memory\MemoryService;
+use LimenAi\Memory\StrictMemoryPolicy;
 use LimenAi\Observability\AgentObservabilityListener;
 use LimenAi\Observability\AuditBuffer;
 use LimenAi\Observability\DefaultAuditExporter;
@@ -148,28 +130,42 @@ use LimenAi\Observability\LogAuditLogger;
 use LimenAi\Observability\LogUsageTracker;
 use LimenAi\Observability\NullUsageTracker;
 use LimenAi\Observability\RunObservabilityReporter;
+use LimenAi\Observability\SkillAdherenceReporter;
 use LimenAi\Observability\UsageBuffer;
 use LimenAi\Providers\EmbeddingProviderManager;
 use LimenAi\Providers\Fake\FakeEmbeddingProvider;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmProviderManager;
+use LimenAi\Runtime\DatabaseCheckpointStore;
+use LimenAi\Runtime\DatabaseRunRepository;
+use LimenAi\Runtime\DefaultAgentRuntime;
+use LimenAi\Runtime\DefaultRunStatusReader;
+use LimenAi\Runtime\QueuedAgentRunDispatcher;
+use LimenAi\Runtime\SyncAgentRunDispatcher;
+use LimenAi\Runtime\ToolCallParser;
+use LimenAi\Security\BasicOutputModerator;
 use LimenAi\Security\EnvSecretResolver;
 use LimenAi\Security\NullContentSanitizer;
+use LimenAi\Security\NullOutputModerator;
 use LimenAi\Security\PromptInjectionSanitizer;
 use LimenAi\Security\SensitiveDataRedactor;
 use LimenAi\Security\SsrfUrlValidator;
 use LimenAi\Skills\ConfigSkillRepository;
+use LimenAi\Support\EnvironmentDoctor;
+use LimenAi\Support\LimenAiManager;
+use LimenAi\Support\PersistenceConfig;
 use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tools\ClassBasedToolExecutor;
 use LimenAi\Tools\CompositeToolRepository;
 use LimenAi\Tools\ConfigToolRepository;
-use LimenAi\Tools\RuntimeToolRegistry;
 use LimenAi\Tools\NullIdempotencyGuard;
+use LimenAi\Tools\RuntimeToolRegistry;
 use LimenAi\Tools\ToolInputValidator;
 use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tools\ToolSchemaBuilder;
 use LimenAi\Ui\ChatUiConfig;
 use LimenAi\Ui\ThemeResolver;
+use LimenAi\Ui\WidgetThemeOptions;
 use LimenAi\Workflows\ConfigWorkflowRepository;
 use LimenAi\Workflows\DefaultWorkflowEngine;
 use LimenAi\Workflows\WorkflowBranchEvaluator;
@@ -296,7 +292,7 @@ class LimenAiServiceProvider extends ServiceProvider
     protected function registerAgents(): void
     {
         $this->app->singleton(OutputValidator::class, function ($app): OutputValidator {
-            $validators = [new StructuredOutputValidator()];
+            $validators = [new StructuredOutputValidator];
 
             if ((bool) $app['config']->get('limen-ai.quality.heuristic_validation', false)) {
                 $validators[] = $app->make(HeuristicOutputValidator::class);
@@ -317,7 +313,7 @@ class LimenAiServiceProvider extends ServiceProvider
 
         $this->app->singleton(OutputModerator::class, function ($app): OutputModerator {
             if (! (bool) $app['config']->get('limen-ai.quality.output_moderation_enabled', false)) {
-                return new NullOutputModerator();
+                return new NullOutputModerator;
             }
 
             $custom = $app['config']->get('limen-ai.quality.output_moderator');
@@ -348,7 +344,7 @@ class LimenAiServiceProvider extends ServiceProvider
             $driver = $app['config']->get('limen-ai.tool_pipeline.idempotency.driver', 'cache');
 
             if ($driver === 'null') {
-                return new NullIdempotencyGuard();
+                return new NullIdempotencyGuard;
             }
 
             return new CacheIdempotencyGuard(
@@ -493,7 +489,7 @@ class LimenAiServiceProvider extends ServiceProvider
                 return $app->make($knowledge['vector_store'] ?? InMemoryVectorStore::class);
             }
 
-            return new NullVectorStore();
+            return new NullVectorStore;
         });
 
         $this->app->singleton(KnowledgeRetriever::class, function ($app): KnowledgeRetriever {
@@ -506,7 +502,7 @@ class LimenAiServiceProvider extends ServiceProvider
             return match ($knowledge['driver'] ?? 'null') {
                 'config' => $app->make(ConfigKnowledgeRetriever::class),
                 'vector' => $app->make(VectorKnowledgeRetriever::class),
-                default => new NullKnowledgeRetriever(),
+                default => new NullKnowledgeRetriever,
             };
         });
 
@@ -537,7 +533,7 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ContentSanitizer::class, function ($app): ContentSanitizer {
             if (! (bool) $app['config']->get('limen-ai.security.injection.enabled', true)) {
-                return new NullContentSanitizer();
+                return new NullContentSanitizer;
             }
 
             return $app->make(PromptInjectionSanitizer::class);
@@ -576,7 +572,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(ConversationAccessGuard::class);
         $this->app->singleton(ThemeResolver::class);
         $this->app->singleton(ChatUiConfig::class);
-        $this->app->singleton(\LimenAi\Ui\WidgetThemeOptions::class);
+        $this->app->singleton(WidgetThemeOptions::class);
     }
 
     protected function registerAttachments(): void
@@ -592,7 +588,7 @@ class LimenAiServiceProvider extends ServiceProvider
             $attachments = $app['config']->get('limen-ai.attachments', []);
 
             if (! ($attachments['enabled'] ?? true)) {
-                return new NullAttachmentStore();
+                return new NullAttachmentStore;
             }
 
             $implementation = $attachments['store'] ?? InMemoryAttachmentStore::class;
@@ -698,7 +694,7 @@ class LimenAiServiceProvider extends ServiceProvider
 
         $this->app->singleton(UsageTracker::class, function ($app): UsageTracker {
             if (! (bool) $app['config']->get('limen-ai.observability.usage_tracking_enabled', true)) {
-                return new NullUsageTracker();
+                return new NullUsageTracker;
             }
 
             return $app->make(LogUsageTracker::class);

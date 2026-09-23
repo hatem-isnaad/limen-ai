@@ -2,10 +2,10 @@
 
 namespace LimenAi\Tests\Unit\Conversations;
 
+use Illuminate\Support\Facades\DB;
 use LimenAi\Conversations\DatabaseConversationRepository;
 use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Tests\DatabaseTestCase;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseMessageRepositoryTest extends DatabaseTestCase
 {

@@ -2,11 +2,10 @@
 
 namespace LimenAi\Tests\Unit\Conversations;
 
-use LimenAi\Conversations\LlmConversationSummarizer;
 use LimenAi\Contracts\Conversations\ConversationRepository;
+use LimenAi\Conversations\LlmConversationSummarizer;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmResponseData;
-use LimenAi\Runtime\RunContextData;
 use LimenAi\Tests\TestCase;
 
 class LlmConversationSummarizerTest extends TestCase

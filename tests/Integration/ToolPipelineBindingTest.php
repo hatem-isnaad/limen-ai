@@ -8,10 +8,10 @@ use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Tools\IdempotencyGuard;
 use LimenAi\Contracts\Tools\ToolExecutor;
 use LimenAi\Observability\LogAuditLogger;
+use LimenAi\Tests\TestCase;
 use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tools\ClassBasedToolExecutor;
 use LimenAi\Tools\ToolPipeline;
-use LimenAi\Tests\TestCase;
 
 class ToolPipelineBindingTest extends TestCase
 {

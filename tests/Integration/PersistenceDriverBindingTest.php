@@ -3,13 +3,13 @@
 namespace LimenAi\Tests\Integration;
 
 use LimenAi\Authorization\DatabaseApprovalRepository;
-use LimenAi\Conversations\DatabaseConversationRepository;
-use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
+use LimenAi\Conversations\DatabaseConversationRepository;
+use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Runtime\DatabaseCheckpointStore;
 use LimenAi\Runtime\DatabaseRunRepository;
 use LimenAi\Support\PersistenceConfig;

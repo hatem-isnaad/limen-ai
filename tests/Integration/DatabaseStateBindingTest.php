@@ -3,14 +3,11 @@
 namespace LimenAi\Tests\Integration;
 
 use LimenAi\Authorization\DatabaseApprovalRepository;
-use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunRepository;
-use LimenAi\Runtime\ArrayCheckpointStore;
 use LimenAi\Runtime\DatabaseCheckpointStore;
 use LimenAi\Runtime\DatabaseRunRepository;
-use LimenAi\Runtime\InMemoryRunRepository;
 use LimenAi\Runtime\RunStatus;
 use LimenAi\Tests\DatabaseTestCase;
 

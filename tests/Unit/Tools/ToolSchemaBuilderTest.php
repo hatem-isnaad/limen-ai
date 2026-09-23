@@ -2,9 +2,9 @@
 
 namespace LimenAi\Tests\Unit\Tools;
 
+use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ConfigToolDefinition;
 use LimenAi\Tools\ToolSchemaBuilder;
-use LimenAi\Tests\TestCase;
 
 class ToolSchemaBuilderTest extends TestCase
 {
@@ -18,7 +18,7 @@ class ToolSchemaBuilderTest extends TestCase
             ],
         ]);
 
-        $schema = (new ToolSchemaBuilder())->build($tool);
+        $schema = (new ToolSchemaBuilder)->build($tool);
 
         $this->assertSame('function', $schema['type']);
         $this->assertSame('example_echo', $schema['function']['name']);

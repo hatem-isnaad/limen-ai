@@ -3,8 +3,8 @@
 namespace LimenAi\Console;
 
 use Illuminate\Console\Command;
-use LimenAi\Console\Concerns\InteractsWithGeneratorNames;
 use Illuminate\Support\Str;
+use LimenAi\Console\Concerns\InteractsWithGeneratorNames;
 
 class MakeConnectorCommand extends Command
 {

@@ -50,5 +50,4 @@ class InMemoryRunRepository implements RunRepository
 
         $this->runs[$runId] = $run;
     }
-
 }

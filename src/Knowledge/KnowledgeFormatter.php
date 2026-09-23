@@ -9,6 +9,7 @@ class KnowledgeFormatter
     public function __construct(
         private readonly ContentSanitizer $sanitizer,
     ) {}
+
     /**
      * @param  list<array<string, mixed>>  $chunks
      * @return list<array<string, mixed>>

@@ -10,7 +10,7 @@ class NullAttachmentStoreTest extends TestCase
 {
     public function test_it_rejects_uploads_when_attachments_are_disabled(): void
     {
-        $store = new NullAttachmentStore();
+        $store = new NullAttachmentStore;
 
         $this->expectException(AttachmentValidationException::class);
         $this->expectExceptionMessage('Attachment uploads are disabled');
@@ -23,7 +23,7 @@ class NullAttachmentStoreTest extends TestCase
 
     public function test_it_returns_empty_lists_and_null_records(): void
     {
-        $store = new NullAttachmentStore();
+        $store = new NullAttachmentStore;
 
         $this->assertNull($store->find('missing'));
         $this->assertSame([], $store->listForConversation('conv-1'));

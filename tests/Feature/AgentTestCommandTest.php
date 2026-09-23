@@ -26,7 +26,7 @@ class AgentTestCommandTest extends TestCase
 
     public function test_it_fails_when_expected_substring_is_missing(): void
     {
-        app(\LimenAi\Providers\Fake\FakeLlmProvider::class)->setDefaultResponse(\LimenAi\Providers\LlmResponseData::fromArray([
+        app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
             'content' => 'Unexpected response.',
             'finish_reason' => 'stop',
         ]));
@@ -68,7 +68,7 @@ class AgentTestCommandTest extends TestCase
 
     public function test_it_passes_when_expected_substring_is_present(): void
     {
-        app(\LimenAi\Providers\Fake\FakeLlmProvider::class)->setDefaultResponse(\LimenAi\Providers\LlmResponseData::fromArray([
+        app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
             'content' => 'Hello from Limen AI.',
             'finish_reason' => 'stop',
         ]));

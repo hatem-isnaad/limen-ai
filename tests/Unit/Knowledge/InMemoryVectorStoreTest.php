@@ -10,8 +10,8 @@ class InMemoryVectorStoreTest extends TestCase
 {
     public function test_it_searches_vectors_by_cosine_similarity(): void
     {
-        $embeddings = new FakeEmbeddingProvider();
-        $store = new InMemoryVectorStore();
+        $embeddings = new FakeEmbeddingProvider;
+        $store = new InMemoryVectorStore;
 
         $store->upsert('getting_started', [[
             'id' => 'doc-1',
@@ -37,8 +37,8 @@ class InMemoryVectorStoreTest extends TestCase
 
     public function test_it_upserts_vectors_by_id(): void
     {
-        $embeddings = new FakeEmbeddingProvider();
-        $store = new InMemoryVectorStore();
+        $embeddings = new FakeEmbeddingProvider;
+        $store = new InMemoryVectorStore;
 
         $store->upsert('docs', [[
             'id' => 'doc-1',

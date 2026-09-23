@@ -22,6 +22,6 @@ class ForbiddenTopicsOutputValidatorTest extends TestCase
 
         $this->expectException(OutputValidationException::class);
 
-        (new ForbiddenTopicsOutputValidator())->validate($agent, 'Your password is abc123');
+        (new ForbiddenTopicsOutputValidator)->validate($agent, 'Your password is abc123');
     }
 }

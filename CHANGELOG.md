@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `laravel/pint` dev dependency and `composer test:style` gate in `test:release`
+- `.github/scripts/prune-stray-tags.sh` to remove experimental tags newer than `composer.json` version
+
+### Changed
+
+- Release script resolves previous tag from semver (ignores stray `v1.3+` experimental tags)
+- Pint formatting applied across `src/`, `tests/`, and `config/`
+
 ## [1.2.0] - 2026-09-23
 
 ### Added

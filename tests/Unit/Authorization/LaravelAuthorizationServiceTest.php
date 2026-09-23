@@ -12,6 +12,7 @@ use LimenAi\Exceptions\AgentAuthorizationException;
 use LimenAi\Exceptions\RunContextAuthorizationException;
 use LimenAi\Exceptions\UnauthenticatedException;
 use LimenAi\Runtime\RunContextData;
+use LimenAi\Tests\Stubs\EchoTool;
 use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ConfigToolDefinition;
 
@@ -34,7 +35,7 @@ class LaravelAuthorizationServiceTest extends TestCase
     {
         return ConfigToolDefinition::fromConfig('test_tool', [
             'name' => 'Test Tool',
-            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
+            'class' => EchoTool::class,
             'authorization' => $authorization,
         ]);
     }
@@ -104,7 +105,7 @@ class LaravelAuthorizationServiceTest extends TestCase
     {
         $service = new LaravelAuthorizationService(
             app('auth'),
-            new NullGuestSessionValidator(),
+            new NullGuestSessionValidator,
             app('config'),
         );
 
