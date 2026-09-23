@@ -25,7 +25,7 @@ LIMEN_AI_AUTHORIZATION_MODE=simple
 <x-limen-ai::widget />
 ```
 
-**Start here:** [docs/black-box-host-guide.md](docs/black-box-host-guide.md) · [docs/knowledge-base-setup.md](docs/knowledge-base-setup.md) · [docs/index.html](docs/index.html)
+**Start here:** [docs/index.html](docs/index.html) (interactive hub) · [docs/black-box-host-guide.md](docs/black-box-host-guide.md) · [docs/knowledge-base-setup.md](docs/knowledge-base-setup.md)
 
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
@@ -43,7 +43,7 @@ LIMEN_AI_AUTHORIZATION_MODE=simple
 | [docs/installation.md](docs/installation.md) | Packagist, VCS, path repo, private registry |
 | [AGENTS.md](AGENTS.md) | AI & contributor reference (architecture, conventions) |
 | [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) | Multi-agent layout and tool-count guidance |
-| [docs/index.html](docs/index.html) | Interactive documentation hub |
+| [docs/index.html](docs/index.html) | **Interactive hub** — learning paths, snippets, tutorial, full reference |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
 
 ```bash
@@ -97,6 +97,50 @@ User identity, permissions, data scoping, and side effects never come from model
 | **API** | REST endpoints for custom frontends (React, Vue, mobile) |
 | **Observability** | Trace IDs, token usage, and per-run audit trails |
 | **Testing** | `FakeLlmProvider` for deterministic CI — zero LLM API spend |
+| **Quality** | Heuristic + optional LLM judge semantic scoring (`LIMEN_AI_SEMANTIC_VALIDATION`) |
+| **Streaming** | SSE run stream + EventSource fallback; Reverb/Pusher broadcasting |
+
+---
+
+## Learning paths
+
+Open [docs/index.html](docs/index.html) for the full interactive hub. Three curated tracks:
+
+| Path | Time | Goal |
+|------|------|------|
+| **A — Widget only** | ~30 min | FAQ bot: knowledge + `<x-limen-ai::widget />`, no tools |
+| **B — Tools + auth** | ~2 hours | `limen-ai:make:tool`, `authorize()`, split public vs staff agents |
+| **C — Workflows + ops** | ~1 day | Approvals, queue, observability, multi-step flows |
+
+Copy-ready snippets (install, `.env`, agent, tool, widget, Ollama, verify): [docs/index.html#snippets](docs/index.html#snippets)
+
+---
+
+## Multi-agent layout (recommended)
+
+| Agent | Where | Tools | Access |
+|-------|-------|-------|--------|
+| `app_assistant` | Public widget | 0–2 `guest_safe` tools | Guests + authenticated |
+| `support_agent` | Staff chat | 5–10 lookup tools | Authenticated staff |
+| `admin_agent` | Admin chat | Mutations + `confirmation: true` | Privileged users |
+
+Details: [docs/index.html#agents](docs/index.html#agents) · [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md)
+
+---
+
+## Local LLM (Ollama + qwen3:8b)
+
+```env
+LIMEN_AI_PROVIDER=openai
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434/v1
+LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
+LIMEN_AI_HEURISTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_MIN_SCORE=0.6
+```
+
+Keep **5–8 tools** per agent and ground answers with knowledge collections. See [docs/providers.md](docs/providers.md) and [docs/QUALITY-GATE.md](docs/QUALITY-GATE.md).
 
 ---
 
@@ -352,6 +396,7 @@ Default prefix: `/limen-ai` (configurable via `LIMEN_AI_ROUTE_PREFIX`).
 | POST | `/conversations/{id}/attachments` | Upload a file (`multipart/form-data`, field `file`) |
 | DELETE | `/attachments/{id}` | Delete an attachment |
 | GET | `/runs/{id}` | Poll run status and output |
+| GET | `/runs/{id}/stream` | SSE stream (status, deltas, completion) |
 | GET | `/runs/{id}/observability` | Audit trace and token usage |
 | POST | `/approvals/{id}/approve` | Approve a paused tool action |
 | POST | `/approvals/{id}/reject` | Reject a paused tool action |
@@ -390,6 +435,7 @@ Primary file: `config/limen-ai.php`
 | `knowledge` | RAG collections and vector store driver |
 | `memory` | Memory store, retriever, and strict policy |
 | `attachments` | Upload limits, storage driver, text extraction, optional vector RAG |
+| `quality` | Heuristic + semantic validation, output validator hooks |
 | `security` | SSRF rules, injection patterns, redaction keys |
 | `observability` | Audit, usage tracking, trace toggles |
 | `ui` | Chat widget, themes, route prefix, middleware |
@@ -405,6 +451,8 @@ Full schema: [docs/configuration-schema.md](docs/configuration-schema.md)
 | Command | Description |
 |---------|-------------|
 | `limen-ai:install` | Publish config, env example, views, assets, and stubs |
+| `limen-ai:checklist` | First-run host integration checklist |
+| `limen-ai:import:knowledge` | Import FAQ documents from JSON/CSV |
 | `limen-ai:doctor` | Health check: config, providers, queue, broadcasting |
 | `limen-ai:validate` | Validate all agent/tool/skill/workflow definitions |
 | `limen-ai:list` | Summary of registered components |
@@ -450,7 +498,7 @@ $fake->queueResponse(LlmResponseData::fromArray([
 ]));
 ```
 
-CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) · [docs/development/TESTING.md](docs/development/TESTING.md)
+CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12 / 13 (L13 requires PHP ^8.3). Details: [docs/ci.md](docs/ci.md) · [docs/development/TESTING.md](docs/development/TESTING.md)
 
 ---
 
@@ -460,7 +508,7 @@ CI matrix: PHP 8.2 / 8.3 × Laravel 11 / 12. Details: [docs/ci.md](docs/ci.md) �
 |----------|-------------|
 | **[AGENTS.md](AGENTS.md)** | **AI agent & contributor reference (start here for coding)** |
 | **[docs/installation.md](docs/installation.md)** | **Install via Packagist, VCS, path repo, or private registry** |
-| [docs/index.html](docs/index.html) | Interactive documentation hub |
+| [docs/index.html](docs/index.html) | **Interactive hub** — learning paths, snippets, tutorial, full reference |
 | [docs/README.md](docs/README.md) | Full markdown documentation index |
 | [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md) | System architecture and module map |
 | [docs/project/AI_SPEC.md](docs/project/AI_SPEC.md) | Master specification |
