@@ -173,4 +173,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 17 — Palettes, presets, RTL/dark mode, ThemeResolver
 - [x] Begin Phase 18 — Observability & Audit
 - [x] Phase 18 — Trace IDs, usage tracking, audit export, observability API
-- [ ] Begin Phase 19 — Artisan Developer Tools
+- [x] Begin Phase 19 — Artisan Developer Tools
+- [x] Phase 19 — doctor, make:* generators, list command, publishable stubs
+- [ ] Begin Phase 20 — Testing & Architecture Validation

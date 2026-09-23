@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 19 Artisan developer tools with doctor, list, and make:agent/tool/skill generators
+- Publishable code stubs and StubGenerator for host app scaffolding
+- Developer tooling unit and feature tests
+
+### Added (Phase 18)
+
 - Phase 18 observability with trace correlation, usage tracking, audit export, and run report API
 - `TraceContext`, `LogUsageTracker`, `AuditExporter`, `RunObservabilityReporter`, and agent audit listener
 - Observability unit, integration, feature tests, and docs/observability.md
