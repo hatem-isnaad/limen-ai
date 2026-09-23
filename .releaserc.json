@@ -22,23 +22,6 @@
     ],
     "@semantic-release/release-notes-generator",
     [
-      "semantic-release-replace-plugin",
-      {
-        "replacements": [
-          {
-            "files": ["composer.json"],
-            "from": "\"version\": \".*\"",
-            "to": "\"version\": \"${nextRelease.version}\""
-          },
-          {
-            "files": ["README.md"],
-            "from": "> \\*\\*Current release:\\*\\* \\[v[0-9.]+\\]\\([^)]+\\)",
-            "to": "> **Current release:** [v${nextRelease.version}](https://github.com/hatem-isnaad/limen-ai/releases/tag/v${nextRelease.version})"
-          }
-        ]
-      }
-    ],
-    [
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md"
