@@ -22,6 +22,38 @@ Each agent run receives:
 - `span_id` — root span for the run
 - Child tool spans include `parent_span_id` linking back to the run span
 
+Trace IDs are stored on the run record and included in audit context.
+
+## Audit Logging
+
+`AuditLogger` writes to Laravel logs and an in-memory `AuditBuffer` for export.
+
+| Action | When |
+|--------|------|
+| `agent.started` | Run begins |
+| `agent.completed` | Run finishes successfully |
+| `agent.failed` | Run fails |
+| `tool.started` | Tool execution begins |
+| `tool.completed` | Tool succeeds |
+| `tool.failed` | Tool throws |
+
+Export audit entries:
+
+```php
+app(AuditExporter::class)->export($runId);
+```
+
+## Usage Tracking
+
+`UsageTracker` records:
+
+- LLM token usage per provider/model
+- Tool execution duration in milliseconds
+
+```php
+app(UsageReader::class)->recordsForRun($runId);
+```
+
 ## Run Report API
 
 ```
@@ -29,3 +61,9 @@ GET /limen-ai/runs/{runId}/observability
 ```
 
 Returns trace IDs, audit entries, and usage records for the run (requires conversation access).
+
+## Host App Integration
+
+- Subscribe to Laravel log channels filtering `[limen-ai]` prefix
+- Use `RunObservabilityReporter` for admin dashboards
+- Forward `trace_id` to APM tools (OpenTelemetry integration deferred)
