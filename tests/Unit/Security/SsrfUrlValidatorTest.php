@@ -38,4 +38,13 @@ class SsrfUrlValidatorTest extends TestCase
         $this->assertTrue($validator->isAllowed('https://api.example.com/status'));
         $this->assertFalse($validator->isAllowed('https://evil.test/status'));
     }
+
+    public function test_assert_allowed_throws_for_blocked_urls(): void
+    {
+        $validator = app(UrlValidator::class);
+
+        $this->expectException(\LimenAi\Exceptions\SecurityException::class);
+
+        $validator->assertAllowed('http://127.0.0.1/internal');
+    }
 }

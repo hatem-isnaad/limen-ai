@@ -37,6 +37,7 @@ class HttpToolExecutionTest extends TestCase
 
     public function test_it_blocks_ssrf_targets_before_requesting(): void
     {
+        config()->set('limen-ai.security.ssrf.resolve_dns', false);
         config()->set('limen-ai.tools.example_http_status.integration.path', '/status/{{ input.resource }}');
         config()->set('limen-ai.integrations.connectors.example_api.base_url', 'http://127.0.0.1');
 
