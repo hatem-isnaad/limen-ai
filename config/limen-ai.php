@@ -2,7 +2,7 @@
 
 return [
 
-    'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'example'),
+    'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'app_assistant'),
 
     'providers' => [
         'default' => env('LIMEN_AI_PROVIDER', 'fake'),
@@ -168,6 +168,7 @@ return [
     ],
 
     'agents' => [
+        ...(require __DIR__.'/limen-ai-black-box-defaults.php')['agents'],
         'example' => [
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
@@ -337,7 +338,24 @@ return [
                 'abilities' => [],
             ],
             'confirmation' => false,
+            'guest_safe' => true,
             'timeout' => 5,
+            'version' => '1.0.0',
+        ],
+        'delegate_to_agent' => [
+            'name' => 'Delegate To Agent',
+            'description' => 'Delegates a message to another configured agent and returns its final reply.',
+            'class' => LimenAi\Tools\DelegateToAgentTool::class,
+            'input_schema' => [
+                'agent_key' => ['type' => 'string', 'required' => true],
+                'message' => ['type' => 'string', 'required' => true],
+            ],
+            'authorization' => [
+                'abilities' => [],
+            ],
+            'confirmation' => false,
+            'guest_safe' => false,
+            'timeout' => 120,
             'version' => '1.0.0',
         ],
         'example_http_status' => [
@@ -478,6 +496,7 @@ return [
         'vector_store' => LimenAi\Knowledge\InMemoryVectorStore::class,
         'limit' => 5,
         'collections' => [
+            ...(require __DIR__.'/limen-ai-black-box-defaults.php')['knowledge_collections'],
             'getting_started' => [
                 'name' => 'Getting Started',
                 'description' => 'Introductory knowledge for the example agent.',
@@ -511,7 +530,7 @@ return [
 
     'repositories' => [
         'agent' => LimenAi\Agents\ConfigAgentRepository::class,
-        'tool' => LimenAi\Tools\ConfigToolRepository::class,
+        'tool' => LimenAi\Tools\CompositeToolRepository::class,
         'skill' => LimenAi\Skills\ConfigSkillRepository::class,
         'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
         'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
@@ -543,11 +562,19 @@ return [
         'default_tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
         'default_language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'en'),
         'save_tokens' => env('LIMEN_AI_SAVE_TOKENS', true),
+        'heuristic_validation' => env('LIMEN_AI_HEURISTIC_VALIDATION', ! in_array(env('APP_ENV', 'production'), ['local', 'testing'], true)),
+        'heuristic_concise_max_sentences' => (int) env('LIMEN_AI_HEURISTIC_CONCISE_MAX_SENTENCES', 12),
+        'enforce_forbidden_topics' => env('LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS', false),
+        'skill_adherence_check' => env('LIMEN_AI_SKILL_ADHERENCE_CHECK', false),
         'output_validator' => env('LIMEN_AI_OUTPUT_VALIDATOR'),
         'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
         'output_moderator' => env('LIMEN_AI_OUTPUT_MODERATOR'),
         'tool_count_warn' => (int) env('LIMEN_AI_TOOL_COUNT_WARN', 15),
         'tool_count_critical' => (int) env('LIMEN_AI_TOOL_COUNT_CRITICAL', 25),
+    ],
+
+    'router' => [
+        'delegates' => array_values(array_filter(explode(',', (string) env('LIMEN_AI_ROUTER_DELEGATES', '')))),
     ],
 
     'responses' => [
@@ -736,6 +763,12 @@ return [
             'show_avatars' => env('LIMEN_AI_UI_AVATARS', true),
             'show_role_labels' => env('LIMEN_AI_UI_ROLE_LABELS', false),
             'time_format' => env('LIMEN_AI_UI_TIME_FORMAT', 'short'),
+        ],
+
+        'rate_limit' => [
+            'enabled' => env('LIMEN_AI_UI_RATE_LIMIT_ENABLED', false),
+            'max_attempts' => (int) env('LIMEN_AI_UI_RATE_LIMIT_MAX', 60),
+            'decay_minutes' => (int) env('LIMEN_AI_UI_RATE_LIMIT_DECAY', 1),
         ],
 
         'guest' => [

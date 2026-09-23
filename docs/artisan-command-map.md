@@ -7,8 +7,10 @@ All commands registered under `limen-ai:*` namespace.
 | Command | Purpose |
 |---------|---------|
 | `limen-ai:install` | Publish config, env example, views, assets, and stubs |
-| `limen-ai:doctor` | Validate config, providers, queue, broadcasting |
-| `limen-ai:validate` | Validate agents, tools, skills, workflows definitions |
+| `limen-ai:doctor` | Validate config, providers, queue, broadcasting (`--json` for CI) |
+| `limen-ai:import:knowledge` | Import JSON/CSV FAQ documents into `config/limen-ai-knowledge.php` |
+| `limen-ai:validate` | Validate agents, tools, skills, workflows (`--strict` for tool-count failures) |
+| `limen-ai:checklist` | First-run host checklist (migrate, persistence, doctor, UI version) |
 
 ## Generators
 

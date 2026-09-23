@@ -13,6 +13,7 @@ class AgentObservabilityListener
 {
     public function __construct(
         private readonly AuditLogger $audit,
+        private readonly ?SkillAdherenceReporter $skillAdherence = null,
     ) {}
 
     public function subscribe(Dispatcher $events): void
@@ -37,6 +38,13 @@ class AgentObservabilityListener
             $this->skillContext($event->skillKeys),
             ['final_message' => $event->finalMessage],
         ));
+
+        $this->skillAdherence?->report(
+            $event->runId,
+            $event->agentKey,
+            $event->skillKeys,
+            $event->finalMessage,
+        );
     }
 
     public function handleAgentFailed(AgentFailed $event): void

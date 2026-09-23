@@ -7,7 +7,8 @@ use Illuminate\Console\Command;
 class InstallCommand extends Command
 {
     protected $signature = 'limen-ai:install
-                            {--force : Overwrite existing published files}';
+                            {--force : Overwrite existing published files}
+                            {--migrate : Run Limen AI database migrations after publishing}';
 
     protected $description = 'Publish Limen AI config, env example, views, assets, and stubs';
 
@@ -17,6 +18,7 @@ class InstallCommand extends Command
 
         $tags = [
             'limen-ai-config',
+            'limen-ai-knowledge',
             'limen-ai-env',
             'limen-ai-stubs',
             'limen-ai-ui',
@@ -29,14 +31,21 @@ class InstallCommand extends Command
             ]));
         }
 
+        if ($this->option('migrate')) {
+            $this->components->info('Running Limen AI migrations...');
+            $this->call('migrate', ['--force' => true]);
+        }
+
         $this->newLine();
         $this->components->info('Limen AI installed successfully.');
         $this->line('Next steps:');
         $this->line('  1. Copy variables from .env.limen-ai.example into your .env');
-        $this->line('  2. php artisan migrate');
-        $this->line('  3. php artisan limen-ai:doctor  (persistence auto-detects database after migrate)');
-        $this->line('  4. php artisan limen-ai:validate');
-        $this->line('  5. php artisan limen-ai:make:tool YourTool  (authorize + handle in BaseTool)');
+        $this->line('  2. php artisan migrate'.($this->option('migrate') ? '  (already run with --migrate)' : ''));
+        $this->line('  3. php artisan limen-ai:import:knowledge storage/faq.csv --collection=product_help  (optional)');
+        $this->line('  4. php artisan limen-ai:doctor  (persistence auto-detects database after migrate)');
+        $this->line('  5. php artisan limen-ai:validate');
+        $this->line('  6. php artisan vendor:publish --tag=limen-ai-middleware  (rate limiting for public widgets)');
+        $this->line('  7. <x-limen-ai::widget />  — default agent is app_assistant with sample product_help KB');
 
         return self::SUCCESS;
     }

@@ -254,7 +254,7 @@ HTTP tools pass through `HttpIntegrationValidator` (SSRF protection).
 
 | Category | Commands |
 |----------|----------|
-| Install | `limen-ai:install`, `limen-ai:doctor`, `limen-ai:validate` |
+| Install | `limen-ai:install`, `limen-ai:doctor`, `limen-ai:validate`, `limen-ai:import:knowledge` |
 | Inspect | `limen-ai:list`, `limen-ai:agents`, `:tools`, `:skills`, `:workflows`, `:logs` |
 | Test | `limen-ai:agent:test`, `:tool:test`, `:workflow:test`, `limen-ai:run` |
 | Generate | `limen-ai:make:agent`, `:tool`, `:skill`, `:workflow`, `:connector`, `:provider`, `:memory`, `:knowledge` |

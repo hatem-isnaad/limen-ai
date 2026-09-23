@@ -9,7 +9,11 @@ class InstructionComposer
 {
     public function __construct(private readonly AgentPersonaComposer $personaComposer) {}
 
-    public function compose(AgentDefinition $agent, array $skills): string
+    /**
+     * @param  list<\LimenAi\Contracts\Skills\SkillDefinition>  $skills
+     * @param  list<\LimenAi\Contracts\Tools\ToolDefinition>  $activeTools
+     */
+    public function compose(AgentDefinition $agent, array $skills, array $activeTools = []): string
     {
         $sections = [];
         $persona = trim($this->personaComposer->composeStatic($agent));
@@ -20,6 +24,12 @@ class InstructionComposer
             $skillInstructions = trim($skill->instructions());
             if ($skillInstructions !== '') { $sections[] = "## Skill: {$skill->name()}\n{$skillInstructions}"; }
         }
+
+        if ($activeTools !== []) {
+            $toolKeys = implode(', ', array_map(fn ($tool) => $tool->key(), $activeTools));
+            $sections[] = "# Active tools this turn\n{$toolKeys}";
+        }
+
         return trim(implode("\n\n", $sections));
     }
 }

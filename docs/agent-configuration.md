@@ -142,11 +142,13 @@ Host apps can plug custom validators into the post-LLM pipeline:
 Built-in behavior:
 
 - `StructuredOutputValidator` — when `output.format` is `json`, rejects invalid JSON before persisting
+- `HeuristicOutputValidator` — when `LIMEN_AI_HEURISTIC_VALIDATION=true` (default in production), rejects empty replies, prompt-marker leaks, JSON-as-text, and overly long concise replies
+- `ForbiddenTopicsOutputValidator` — when `LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS=true`, blocks replies matching `persona.forbidden` / `persona.forbidden_topics`
 - `BasicOutputModerator` — optional pattern redaction when `LIMEN_AI_OUTPUT_MODERATION=true`
 
 ### Semantic quality scoring (host responsibility)
 
-Limen AI does **not** ship semantic reply scoring (correctness, hallucination risk, brand-tone fit, or task completion). That is intentional: scoring depends on your domain, models, and policies.
+Limen AI ships **heuristic** guards only. Semantic scoring (correctness, hallucination risk, brand-tone fit) remains host-implemented via `quality.output_validator`.
 
 Use the extension hooks instead:
 
@@ -160,7 +162,10 @@ Example: call your own evaluator service inside `BrandOutputValidator::validate(
 Smoke-test agent replies from CI:
 
 ```bash
-php artisan limen-ai:agent:test example --message="Hello" --expect-contains="help"
+php artisan limen-ai:agent:test example --message="Hello" \
+  --expect-contains="help" \
+  --expect-not-contains="password" \
+  --min-length=10
 ```
 
 Preview skill instructions:

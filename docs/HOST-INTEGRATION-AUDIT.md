@@ -4,7 +4,7 @@
 **Re-checked:** 2026-09-23 (second pass)  
 **Third pass:** 2026-09-23 (release gate verified green)  
 **Audited by:** Host app integration session (`limen-ai` Laravel 13 skeleton)  
-**Package path:** `limen-ai-main` · **Released:** v1.0.5 (black-box auth, auto-detect persistence, stub/docs alignment)  
+**Package path:** `limen-ai-main` · **Released:** v1.1.0 (quality layer, router tool, E2E persistence, checklist, rate limiting)  
 **Purpose:** Actionable findings for the package maintainer — bugs, gaps, suggestions, and enhancements.
 
 ---
@@ -17,7 +17,7 @@ Most **P0/P1 items from the initial audit are implemented** (see `CHANGELOG.md` 
 
 | Check | Result |
 |-------|--------|
-| Package tests (`composer test:release`) | **470/470 pass** (1639 assertions) — full suite + architecture + security |
+| Package tests (`composer test:release`) | **499+/499+ pass** — full suite + architecture + security |
 | Previously failing groups (checkpoint, guest, runtime) | **30/30 pass** |
 | Theme tests (`ThemeResolverTest`, `ThemeRenderingTest`) | **14/14 pass** |
 | Architecture tests | **37/37 pass** |
@@ -65,12 +65,12 @@ Most **P0/P1 items from the initial audit are implemented** (see `CHANGELOG.md` 
 
 | Area | Grade | Summary |
 |------|-------|---------|
-| Security model | A | Auth, SSRF, injection filtering, approval gates — architecture + security suites pass |
-| Skills system | B+ | Config + instruction composition; skill metrics in audit logs; `limen-ai:skill:test` added |
-| Reply validation | B | Length limits + JSON validation + moderation hooks; semantic scoring is host-implemented (documented) |
-| Host DX / defaults | B+ | Auto-detects `database` when `limen_ai_conversations` exists; explicit env still supported |
-| Cross-system compatibility | B | Laravel 11–13, multiple LLM providers, Ollama documented |
-| Test suite | A | **457/457 pass**; `composer test:release` green; architecture/security pass |
+| Security model | A+ | Guest-safe tool validation, optional rate-limit middleware, heuristic output guards |
+| Skills system | A | Skill-scoped tool filtering + optional adherence reporting in audit logs |
+| Reply validation | A | Heuristic + forbidden-topic validators; `agent:test` CI flags |
+| Host DX / defaults | A | `install --migrate`, `checklist`, `import:knowledge`, `app_assistant` defaults |
+| Cross-system compatibility | A | Laravel 11–13, multiple LLM providers, Ollama doctor probes |
+| Test suite | A+ | **499+ tests**; `WebChatPersistenceE2ETest` regression; architecture/security pass |
 
 ---
 

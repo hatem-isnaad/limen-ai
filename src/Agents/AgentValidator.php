@@ -115,6 +115,40 @@ class AgentValidator
         $errors = array_merge($errors, $this->validatePersona($key, $agent->personaConfig()));
         $errors = array_merge($errors, $this->validateMemory($key, $agent->memoryConfig()));
         $errors = array_merge($errors, $this->validateLimits($key, $agent->limits()));
+        $errors = array_merge($errors, $this->validateGuestToolSafety($key, $agent));
+
+        return $errors;
+    }
+
+    /** @return list<string> */
+    protected function validateGuestToolSafety(string $agentKey, AgentDefinition $agent): array
+    {
+        $authorization = $agent->authorizationConfig();
+        $guestAllowed = (bool) ($authorization['guest_allowed'] ?? false);
+
+        if (! $guestAllowed) {
+            return [];
+        }
+
+        $errors = [];
+
+        foreach ($agent->tools() as $toolKey) {
+            $tool = $this->tools->find($toolKey);
+
+            if ($tool === null) {
+                continue;
+            }
+
+            if ($tool->requiresConfirmation()) {
+                $errors[] = "Agent [{$agentKey}] allows guests but tool [{$toolKey}] requires confirmation.";
+            }
+
+            $toolConfig = $this->config->get("limen-ai.tools.{$toolKey}");
+
+            if (! is_array($toolConfig) || ! (bool) ($toolConfig['guest_safe'] ?? false)) {
+                $errors[] = "Agent [{$agentKey}] allows guests but tool [{$toolKey}] is not marked guest_safe.";
+            }
+        }
 
         return $errors;
     }

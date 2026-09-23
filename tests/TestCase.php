@@ -45,5 +45,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('limen-ai.agents.example.memory.allowed_keys', ['preferred_language', 'timezone']);
         $app['config']->set('limen-ai.attachments.enabled', true);
         $app['config']->set('limen-ai.attachments.store', \LimenAi\Attachments\InMemoryAttachmentStore::class);
+        $app['config']->set('limen-ai.quality.heuristic_validation', false);
+        $app['config']->set('limen-ai.quality.enforce_forbidden_topics', false);
     }
 }

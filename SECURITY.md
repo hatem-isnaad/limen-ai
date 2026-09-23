@@ -121,7 +121,8 @@ When `LIMEN_AI_UI_GUEST_ENABLED=true` and `LIMEN_AI_UI_REQUIRE_AUTH=false`, unau
 
 - Keep `guest_allowed` **false** on agents that can call privileged tools unless you add separate guest-safe agents
 - Use `CacheGuestSessionValidator` (default) so guest tokens expire and cannot be reused indefinitely
-- Rate-limit conversation and message endpoints at the web server or Laravel middleware layer
+- Publish `ThrottleAgentRequests` (`php artisan vendor:publish --tag=limen-ai-middleware`) and enable `LIMEN_AI_UI_RATE_LIMIT_ENABLED=true`
+- Mark read-only widget tools with `guest_safe: true`; `limen-ai:validate` fails guest agents with unsafe tools
 - Disable tools that mutate data, send messages, or reach internal APIs for guest-facing agents
 - Run `php artisan limen-ai:doctor` — in-memory persistence with UI enabled is reported as a failure
 - Run `php artisan migrate` so persistence auto-detects database (or set `LIMEN_AI_PERSISTENCE_DRIVER=database`)

@@ -37,4 +37,21 @@ class DoctorCommandTest extends TestCase
             ->expectsOutputToContain('in-memory repositories')
             ->assertFailed();
     }
+
+    public function test_doctor_json_outputs_structured_report(): void
+    {
+        $this->withoutMockingConsoleOutput();
+
+        $exitCode = $this->artisan('limen-ai:doctor --json');
+
+        $this->assertSame(0, $exitCode);
+
+        $report = json_decode(trim((string) \Illuminate\Support\Facades\Artisan::output()), true);
+
+        $this->assertIsArray($report);
+        $this->assertTrue($report['ok']);
+        $this->assertTrue($report['healthy']);
+        $this->assertSame('example', $report['checks']['default_agent']);
+        $this->assertSame('valid', $report['checks']['definitions']);
+    }
 }

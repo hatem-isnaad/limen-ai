@@ -11,6 +11,7 @@ use LimenAi\Support\LimenAiManager;
  * @method static \LimenAi\Contracts\Agents\AgentRepository agents()
  * @method static \LimenAi\Contracts\Tools\ToolRepository tools()
  * @method static \LimenAi\Contracts\Workflows\WorkflowRepository workflows()
+ * @method static void registerTool(string $key, string $class, array $config = [])
  *
  * @see LimenAiManager
  */

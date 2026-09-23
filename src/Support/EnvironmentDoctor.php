@@ -35,6 +35,7 @@ final class EnvironmentDoctor
         $this->inspectMigrations($warnings);
         $this->inspectProviderCredentials($warnings);
         $this->inspectOllamaEndpoint($warnings);
+        $this->inspectCloudLlmEndpoints($warnings);
         $this->inspectPublishedUiVersion($warnings);
 
         return [
@@ -56,22 +57,26 @@ final class EnvironmentDoctor
         $usesInMemoryConversations = PersistenceConfig::isInMemoryClass($conversationRepository)
             || PersistenceConfig::isInMemoryClass($messageRepository);
 
+        $tableExists = false;
+
+        try {
+            $tableExists = $this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
+        } catch (\Throwable) {
+            $tableExists = false;
+        }
+
         if ($usesInMemoryConversations) {
             $message = 'Conversation persistence uses in-memory repositories. Web chat will fail on the second HTTP request. Run php artisan migrate (auto-detects database) or set LIMEN_AI_PERSISTENCE_DRIVER=database.';
 
-            $tableExists = false;
-
-            try {
-                $tableExists = $this->database->connection()->getSchemaBuilder()->hasTable('limen_ai_conversations');
-            } catch (\Throwable) {
-                $tableExists = false;
-            }
-
-            if (in_array($environment, ['production', 'staging'], true) || $tableExists) {
+            if ($this->shouldFailPersistenceIssues($environment) || in_array($environment, ['production', 'staging'], true) || $tableExists) {
                 $failures[] = $message;
             } else {
                 $warnings[] = $message;
             }
+        }
+
+        if ((bool) $this->config->get('limen-ai.ui.enabled', true) && ! $tableExists && $this->shouldFailPersistenceIssues($environment)) {
+            $failures[] = 'Limen AI UI is enabled but table [limen_ai_conversations] is missing. Run php artisan migrate or php artisan limen-ai:install --migrate.';
         }
 
         if (PersistenceConfig::isInMemoryClass($runRepository) && ! (bool) $this->config->get('limen-ai.queue.agent_runs', false)) {
@@ -170,11 +175,7 @@ final class EnvironmentDoctor
      */
     protected function inspectOllamaEndpoint(array &$warnings): void
     {
-        $defaultAgent = (string) $this->config->get('limen-ai.default_agent', '');
-        $agent = is_array($this->config->get("limen-ai.agents.{$defaultAgent}"))
-            ? $this->config->get("limen-ai.agents.{$defaultAgent}")
-            : [];
-        $provider = (string) ($agent['provider'] ?? $this->config->get('limen-ai.providers.default', 'fake'));
+        ['provider' => $provider, 'agent' => $agent] = $this->defaultAgentContext();
 
         if ($provider !== 'openai') {
             return;
@@ -229,6 +230,222 @@ final class EnvironmentDoctor
         if (! in_array($model, $listedModels, true)) {
             $warnings[] = "Ollama is reachable but model [{$model}] is not installed. Run: ollama pull {$model}";
         }
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
+    protected function inspectCloudLlmEndpoints(array &$warnings): void
+    {
+        ['provider' => $provider, 'model' => $model] = $this->defaultAgentContext();
+
+        if (in_array($provider, ['fake', ''], true)) {
+            return;
+        }
+
+        $apiKey = (string) ($this->config->get("limen-ai.providers.{$provider}.api_key") ?? '');
+
+        if ($apiKey === '') {
+            return;
+        }
+
+        if ($provider === 'openai') {
+            $baseUrl = rtrim((string) ($this->config->get('limen-ai.providers.openai.base_url') ?? ''), '/');
+
+            if ($this->looksLikeOllamaEndpoint($baseUrl, $apiKey)) {
+                return;
+            }
+
+            $this->probeOpenAiCompatibleEndpoint($warnings, 'OpenAI', $baseUrl, $apiKey, $model);
+
+            return;
+        }
+
+        if ($provider === 'openrouter') {
+            $baseUrl = rtrim((string) ($this->config->get('limen-ai.providers.openrouter.base_url') ?? 'https://openrouter.ai/api/v1'), '/');
+            $this->probeOpenAiCompatibleEndpoint($warnings, 'OpenRouter', $baseUrl, $apiKey, $model);
+
+            return;
+        }
+
+        if ($provider === 'anthropic') {
+            $this->probeAnthropicEndpoint($warnings, $apiKey, $model);
+
+            return;
+        }
+
+        if ($provider === 'gemini') {
+            $this->probeGeminiEndpoint($warnings, $apiKey, $model);
+        }
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
+    protected function probeOpenAiCompatibleEndpoint(
+        array &$warnings,
+        string $label,
+        string $baseUrl,
+        string $apiKey,
+        string $model,
+    ): void {
+        if ($baseUrl === '') {
+            $warnings[] = "{$label} provider is selected but no base URL is configured.";
+
+            return;
+        }
+
+        try {
+            $response = Http::timeout(5)
+                ->withToken($apiKey)
+                ->acceptJson()
+                ->get($baseUrl.'/models');
+        } catch (\Throwable $exception) {
+            $warnings[] = "{$label} endpoint [{$baseUrl}] is not reachable: {$exception->getMessage()}";
+
+            return;
+        }
+
+        if (! $response->successful()) {
+            $warnings[] = "{$label} endpoint [{$baseUrl}] returned HTTP {$response->status()}. Check API credentials and network access.";
+
+            return;
+        }
+
+        $this->warnWhenModelMissingFromList($warnings, $label, $model, $response->json('data', []));
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
+    protected function probeAnthropicEndpoint(array &$warnings, string $apiKey, string $model): void
+    {
+        $baseUrl = 'https://api.anthropic.com/v1';
+        $apiVersion = (string) ($this->config->get('limen-ai.providers.anthropic.api_version') ?? '2023-06-01');
+
+        try {
+            $response = Http::timeout(5)
+                ->withHeaders([
+                    'x-api-key' => $apiKey,
+                    'anthropic-version' => $apiVersion,
+                ])
+                ->acceptJson()
+                ->get($baseUrl.'/models');
+        } catch (\Throwable $exception) {
+            $warnings[] = "Anthropic endpoint is not reachable: {$exception->getMessage()}";
+
+            return;
+        }
+
+        if (! $response->successful()) {
+            $warnings[] = "Anthropic API returned HTTP {$response->status()}. Check ANTHROPIC_API_KEY and network access.";
+
+            return;
+        }
+
+        $this->warnWhenModelMissingFromList($warnings, 'Anthropic', $model, $response->json('data', []));
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     */
+    protected function probeGeminiEndpoint(array &$warnings, string $apiKey, string $model): void
+    {
+        $baseUrl = rtrim((string) ($this->config->get('limen-ai.providers.gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta'), '/');
+
+        try {
+            $response = Http::timeout(5)
+                ->acceptJson()
+                ->get($baseUrl.'/models', ['key' => $apiKey]);
+        } catch (\Throwable $exception) {
+            $warnings[] = "Gemini endpoint is not reachable: {$exception->getMessage()}";
+
+            return;
+        }
+
+        if (! $response->successful()) {
+            $warnings[] = "Gemini API returned HTTP {$response->status()}. Check GEMINI_API_KEY and network access.";
+
+            return;
+        }
+
+        $models = collect($response->json('models', []))
+            ->map(function (mixed $entry): ?string {
+                if (! is_array($entry)) {
+                    return null;
+                }
+
+                $name = (string) ($entry['name'] ?? '');
+
+                if ($name === '') {
+                    return null;
+                }
+
+                return str_starts_with($name, 'models/') ? substr($name, 7) : $name;
+            })
+            ->filter(fn (?string $name): bool => is_string($name) && $name !== '')
+            ->map(fn (string $name): array => ['id' => $name])
+            ->values()
+            ->all();
+
+        $this->warnWhenModelMissingFromList($warnings, 'Gemini', $model, $models);
+    }
+
+    /**
+     * @param  list<string>  $warnings
+     * @param  list<mixed>  $models
+     */
+    protected function warnWhenModelMissingFromList(array &$warnings, string $label, string $model, array $models): void
+    {
+        if ($model === '') {
+            return;
+        }
+
+        $listedModels = collect($models)
+            ->map(function (mixed $entry): ?string {
+                if (is_string($entry) && $entry !== '') {
+                    return $entry;
+                }
+
+                if (! is_array($entry)) {
+                    return null;
+                }
+
+                $id = $entry['id'] ?? $entry['name'] ?? null;
+
+                return is_string($id) && $id !== '' ? $id : null;
+            })
+            ->filter(fn (?string $id): bool => is_string($id) && $id !== '')
+            ->values()
+            ->all();
+
+        if ($listedModels === []) {
+            return;
+        }
+
+        $matches = in_array($model, $listedModels, true)
+            || collect($listedModels)->contains(fn (string $listed): bool => str_ends_with($listed, $model) || str_contains($listed, $model));
+
+        if (! $matches) {
+            $warnings[] = "{$label} is reachable but model [{$model}] was not found in the provider model list.";
+        }
+    }
+
+    /**
+     * @return array{provider: string, model: string, agent: array<string, mixed>}
+     */
+    protected function defaultAgentContext(): array
+    {
+        $defaultAgent = (string) $this->config->get('limen-ai.default_agent', '');
+        $agent = is_array($this->config->get("limen-ai.agents.{$defaultAgent}"))
+            ? $this->config->get("limen-ai.agents.{$defaultAgent}")
+            : [];
+
+        return [
+            'provider' => (string) ($agent['provider'] ?? $this->config->get('limen-ai.providers.default', 'fake')),
+            'model' => (string) ($agent['model'] ?? $this->config->get('limen-ai.agent_defaults.model', '')),
+            'agent' => $agent,
+        ];
     }
 
     protected function looksLikeOllamaEndpoint(string $baseUrl, string $apiKey): bool
@@ -317,5 +534,14 @@ final class EnvironmentDoctor
     {
         return (string) ($this->config->get('limen-ai.runtime.run_repository')
             ?: PersistenceConfig::runRepositoryClass($this->resolvedPersistenceDriver()));
+    }
+
+    protected function shouldFailPersistenceIssues(string $environment): bool
+    {
+        if (! (bool) $this->config->get('limen-ai.ui.enabled', true)) {
+            return false;
+        }
+
+        return ! in_array($environment, ['testing'], true);
     }
 }

@@ -25,11 +25,13 @@ composer require limen-ai/limen-ai
 Then publish assets:
 
 ```bash
-php artisan limen-ai:install
-php artisan migrate
-php artisan limen-ai:doctor
-php artisan limen-ai:validate
+php artisan limen-ai:install --migrate
+php artisan limen-ai:checklist
+php artisan limen-ai:doctor --json
+php artisan limen-ai:validate --strict
 ```
+
+Three commands to a working widget: `composer require` → `limen-ai:install --migrate` → embed `<x-limen-ai::widget />`.
 
 ---
 

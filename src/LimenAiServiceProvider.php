@@ -9,6 +9,8 @@ use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\AgentPersonaComposer;
 use LimenAi\Agents\AgentResponseGuard;
 use LimenAi\Agents\ChainedOutputValidator;
+use LimenAi\Agents\ForbiddenTopicsOutputValidator;
+use LimenAi\Agents\HeuristicOutputValidator;
 use LimenAi\Agents\StructuredOutputValidator;
 use LimenAi\Contracts\Agents\OutputModerator;
 use LimenAi\Contracts\Agents\OutputValidator;
@@ -31,7 +33,9 @@ use LimenAi\Attachments\InMemoryAttachmentStore;
 use LimenAi\Attachments\NullAttachmentStore;
 use LimenAi\Console\AgentTestCommand;
 use LimenAi\Console\AgentsCommand;
+use LimenAi\Console\ChecklistCommand;
 use LimenAi\Console\DoctorCommand;
+use LimenAi\Console\ImportKnowledgeCommand;
 use LimenAi\Console\InstallCommand;
 use LimenAi\Console\ListCommand;
 use LimenAi\Console\LogsCommand;
@@ -104,6 +108,7 @@ use LimenAi\Conversations\DatabaseConversationRepository;
 use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Conversations\InMemoryConversationRepository;
 use LimenAi\Conversations\InMemoryMessageRepository;
+use LimenAi\Observability\SkillAdherenceReporter;
 use LimenAi\Support\EnvironmentDoctor;
 use LimenAi\Support\PersistenceConfig;
 use LimenAi\Conversations\MessageFormatter;
@@ -156,7 +161,9 @@ use LimenAi\Security\SsrfUrlValidator;
 use LimenAi\Skills\ConfigSkillRepository;
 use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tools\ClassBasedToolExecutor;
+use LimenAi\Tools\CompositeToolRepository;
 use LimenAi\Tools\ConfigToolRepository;
+use LimenAi\Tools\RuntimeToolRegistry;
 use LimenAi\Tools\NullIdempotencyGuard;
 use LimenAi\Tools\ToolInputValidator;
 use LimenAi\Tools\ToolPipeline;
@@ -200,13 +207,24 @@ class LimenAiServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->mergeImportedKnowledgeCollections();
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/limen-ai.php' => config_path('limen-ai.php'),
                 __DIR__.'/../config/limen-ai-provider-agents.php' => config_path('limen-ai-provider-agents.php'),
+                __DIR__.'/../config/limen-ai-black-box-defaults.php' => config_path('limen-ai-black-box-defaults.php'),
             ], 'limen-ai-config');
+
+            $this->publishes([
+                __DIR__.'/../stubs/limen-ai-knowledge.php.stub' => config_path('limen-ai-knowledge.php'),
+            ], 'limen-ai-knowledge');
+
+            $this->publishes([
+                __DIR__.'/../src/Http/Middleware/ThrottleAgentRequests.php' => app_path('Http/Middleware/ThrottleAgentRequests.php'),
+            ], 'limen-ai-middleware');
 
             $this->publishes([
                 __DIR__.'/../stubs/limen-ai.env.example' => base_path('.env.limen-ai.example'),
@@ -256,7 +274,9 @@ class LimenAiServiceProvider extends ServiceProvider
         $repositories = $this->app['config']->get('limen-ai.repositories', []);
 
         $this->app->singleton(AgentRepository::class, $repositories['agent'] ?? ConfigAgentRepository::class);
-        $this->app->singleton(ToolRepository::class, $repositories['tool'] ?? ConfigToolRepository::class);
+        $this->app->singleton(ConfigToolRepository::class);
+        $this->app->singleton(RuntimeToolRegistry::class);
+        $this->app->singleton(ToolRepository::class, $repositories['tool'] ?? CompositeToolRepository::class);
         $this->app->singleton(SkillRepository::class, $repositories['skill'] ?? ConfigSkillRepository::class);
         $this->app->singleton(WorkflowRepository::class, $repositories['workflow'] ?? ConfigWorkflowRepository::class);
         $this->app->singleton(KnowledgeRepository::class, $repositories['knowledge'] ?? ConfigKnowledgeRepository::class);
@@ -277,6 +297,15 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(OutputValidator::class, function ($app): OutputValidator {
             $validators = [new StructuredOutputValidator()];
+
+            if ((bool) $app['config']->get('limen-ai.quality.heuristic_validation', false)) {
+                $validators[] = $app->make(HeuristicOutputValidator::class);
+            }
+
+            if ((bool) $app['config']->get('limen-ai.quality.enforce_forbidden_topics', false)) {
+                $validators[] = $app->make(ForbiddenTopicsOutputValidator::class);
+            }
+
             $custom = $app['config']->get('limen-ai.quality.output_validator');
 
             if (is_string($custom) && $custom !== '') {
@@ -590,6 +619,36 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(EnvironmentDoctor::class);
     }
 
+    protected function mergeImportedKnowledgeCollections(): void
+    {
+        if (! function_exists('config_path')) {
+            return;
+        }
+
+        $path = config_path('limen-ai-knowledge.php');
+
+        if (! is_file($path)) {
+            return;
+        }
+
+        $collections = require $path;
+
+        if (! is_array($collections)) {
+            return;
+        }
+
+        $existing = $this->app['config']->get('limen-ai.knowledge.collections', []);
+
+        if (! is_array($existing)) {
+            $existing = [];
+        }
+
+        $this->app['config']->set(
+            'limen-ai.knowledge.collections',
+            array_replace($existing, $collections),
+        );
+    }
+
     protected function registerConsole(): void
     {
         $this->app->singleton(StubGenerator::class, fn ($app): StubGenerator => new StubGenerator(
@@ -599,7 +658,9 @@ class LimenAiServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ImportKnowledgeCommand::class,
                 InstallCommand::class,
+                ChecklistCommand::class,
                 ValidateCommand::class,
                 DoctorCommand::class,
                 ListCommand::class,
@@ -632,6 +693,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(AuditLogger::class, LogAuditLogger::class);
         $this->app->singleton(AuditExporter::class, DefaultAuditExporter::class);
         $this->app->singleton(RunObservabilityReporter::class);
+        $this->app->singleton(SkillAdherenceReporter::class);
         $this->app->singleton(AgentObservabilityListener::class);
 
         $this->app->singleton(UsageTracker::class, function ($app): UsageTracker {

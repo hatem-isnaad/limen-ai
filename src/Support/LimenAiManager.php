@@ -8,6 +8,7 @@ use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Runtime\RunContextData;
+use LimenAi\Tools\RuntimeToolRegistry;
 
 class LimenAiManager
 {
@@ -60,5 +61,16 @@ class LimenAiManager
     public function workflows(): WorkflowRepository
     {
         return $this->workflowRepository;
+    }
+
+    /**
+     * @param  class-string  $class
+     * @param  array<string, mixed>  $config
+     */
+    public function registerTool(string $key, string $class, array $config = []): void
+    {
+        app(RuntimeToolRegistry::class)->register($key, array_merge($config, [
+            'class' => $class,
+        ]));
     }
 }

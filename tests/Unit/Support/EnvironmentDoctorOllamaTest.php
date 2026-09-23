@@ -89,11 +89,16 @@ class EnvironmentDoctorOllamaTest extends TestCase
         config()->set('limen-ai.providers.openai.api_key', 'sk-live-key');
         config()->set('limen-ai.providers.openai.base_url', 'https://api.openai.com/v1');
 
-        Http::fake();
+        Http::fake([
+            'api.openai.com/v1/models' => Http::response([
+                'data' => [
+                    ['id' => 'gpt-4.1-mini'],
+                ],
+            ], 200),
+        ]);
 
         $report = app(EnvironmentDoctor::class)->inspect('local');
 
-        Http::assertNothingSent();
         $this->assertFalse(collect($report['warnings'])->contains(
             fn (string $warning): bool => str_contains(strtolower($warning), 'ollama'),
         ));

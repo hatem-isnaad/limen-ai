@@ -119,6 +119,34 @@ Reply quality is mostly **model + prompts + tool design** — not something the 
 
 ---
 
+## Skill-scoped tool exposure
+
+When a skill defines `tools`, the runtime **intersects** that list with the agent's configured tools before sending schemas to the LLM:
+
+```php
+'skills' => [
+    'logistics_support' => [
+        'tools' => ['get_shipment_status'],
+    ],
+],
+```
+
+Empty `tools` on a skill means all agent tools remain available.
+
+## Router agent pattern
+
+Use `router_agent` with the built-in `delegate_to_agent` tool:
+
+```php
+'router' => [
+    'delegates' => ['support_agent', 'admin_agent'],
+],
+```
+
+See `examples/limen-host/config/multi-agent.example.php`.
+
+---
+
 ## Performance
 
 - Enable **queued runs** for slow tool chains: `LIMEN_AI_QUEUE_AGENT_RUNS=true`
@@ -134,7 +162,7 @@ Reply quality is mostly **model + prompts + tool design** — not something the 
 |-------------|---------|
 | One universal chatbot calling 50 tools | Poor fit — split agents or use workflows |
 | Dynamic MCP/plugin tool discovery | Config-driven only |
-| Built-in semantic quality scoring | Host implements `OutputValidator` / `OutputModerator` |
+| Built-in semantic quality scoring | Heuristics built-in; semantic scoring via custom `OutputValidator` |
 | Non-Laravel deployment | Laravel package only |
 
 ---

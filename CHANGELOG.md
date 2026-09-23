@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-23
+
+### Added
+
+- `limen-ai:install --migrate` — optional migration step after publishing assets
+- `limen-ai:checklist` — first-run host integration checklist
+- `HeuristicOutputValidator` and `ForbiddenTopicsOutputValidator` (configurable quality layer)
+- `SkillAdherenceReporter` for optional skill phrase checks in audit logs
+- Skill-scoped tool filtering when skills define `tools`
+- `ThrottleAgentRequests` middleware (`limen-ai-middleware` publish tag)
+- `CompositeToolRepository` + `LimenAi::registerTool()` for runtime tool registration
+- `delegate_to_agent` router tool and `router.delegates` config
+- `limen-ai:agent:test --expect-not-contains` and `--min-length`
+- `limen-ai:validate --strict` and persistence mode output
+- `limen-ai:doctor --json` `ok` field for CI pipelines
+- `tests/Feature/WebChatPersistenceE2ETest` — full HTTP persistence regression test
+- [docs/QUALITY-GATE.md](docs/QUALITY-GATE.md)
+
+### Changed
+
+- Doctor fails (non-testing) when UI is enabled but persistence tables are missing
+- Guest agents must only expose tools marked `guest_safe: true`
+- Default tool repository is now `CompositeToolRepository`
+
+## [1.0.7] - 2026-09-23
+
+### Added
+
+- `limen-ai:import:knowledge` — import FAQ documents from JSON or CSV into `config/limen-ai-knowledge.php` (merged on boot)
+- `limen-ai:doctor --json` — machine-readable health report for CI and scripts
+- `limen-ai:doctor` cloud provider probes — OpenAI, OpenRouter, Anthropic, and Gemini reachability checks (Ollama probe unchanged)
+- Default black-box install defaults — `app_assistant` agent + `product_help` knowledge collection in package config and install publishables
+
+### Changed
+
+- `limen-ai:install` publishes `config/limen-ai-knowledge.php` stub and documents import/doctor/widget next steps
+- Default `LIMEN_AI_DEFAULT_AGENT` is now `app_assistant` (package tests still pin `example`)
+
 ## [1.0.6] - 2026-09-23
 
 ### Added

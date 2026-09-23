@@ -60,6 +60,20 @@ return [
             ],
         ],
 
+        'router_agent' => [
+            'name' => 'Router Agent',
+            'description' => 'Single chat entry that delegates to specialist agents.',
+            'model' => env('LIMEN_AI_ROUTER_MODEL', 'gpt-4.1-mini'),
+            'provider' => env('LIMEN_AI_PROVIDER', 'openai'),
+            'instructions' => 'Route the user to the best specialist agent using delegate_to_agent.',
+            'tools' => ['delegate_to_agent'],
+            'authorization' => [
+                'required' => true,
+                'guest_allowed' => false,
+                'abilities' => [],
+            ],
+        ],
+
         'admin_agent' => [
             'name' => 'Admin Agent',
             'description' => 'Privileged operations — approvals required.',

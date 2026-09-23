@@ -38,6 +38,34 @@ class AgentTestCommandTest extends TestCase
         ])->assertFailed();
     }
 
+    public function test_it_fails_when_forbidden_substring_is_present(): void
+    {
+        app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
+            'content' => 'This contains a secret token.',
+            'finish_reason' => 'stop',
+        ]));
+
+        $this->artisan('limen-ai:agent:test', [
+            'agent' => 'example',
+            '--message' => 'Hello',
+            '--expect-not-contains' => 'secret',
+        ])->assertFailed();
+    }
+
+    public function test_it_fails_when_min_length_is_not_met(): void
+    {
+        app(FakeLlmProvider::class)->setDefaultResponse(LlmResponseData::fromArray([
+            'content' => 'Hi',
+            'finish_reason' => 'stop',
+        ]));
+
+        $this->artisan('limen-ai:agent:test', [
+            'agent' => 'example',
+            '--message' => 'Hello',
+            '--min-length' => 20,
+        ])->assertFailed();
+    }
+
     public function test_it_passes_when_expected_substring_is_present(): void
     {
         app(\LimenAi\Providers\Fake\FakeLlmProvider::class)->setDefaultResponse(\LimenAi\Providers\LlmResponseData::fromArray([

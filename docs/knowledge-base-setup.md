@@ -15,6 +15,22 @@ Config-driven knowledge works immediately after install. No vector database requ
 
 ---
 
+## Import from CSV or JSON
+
+After `php artisan limen-ai:install`, import bulk FAQ content without hand-editing PHP arrays:
+
+```bash
+# JSON: [{"content": "...", "metadata": {"topic": "shipping"}}]
+php artisan limen-ai:import:knowledge storage/faq.json --collection=product_help
+
+# CSV: content column required; other columns become metadata
+php artisan limen-ai:import:knowledge storage/faq.csv --collection=product_help --append
+```
+
+Imported collections are written to `config/limen-ai-knowledge.php` and merged into `knowledge.collections` on boot.
+
+---
+
 ## Minimal example
 
 ```php

@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Imported Limen AI knowledge collections.
+ *
+ * This file is merged into config('limen-ai.knowledge.collections') on boot.
+ * Import more documents with:
+ *   php artisan limen-ai:import:knowledge storage/faq.csv --collection=product_help
+ */
+return [
+    'product_help' => [
+        'name' => 'Product Help',
+        'description' => 'Public FAQ for the support widget.',
+        'documents' => [
+            [
+                'content' => 'We ship to Saudi Arabia, UAE, and Egypt. Standard delivery takes 3–5 business days.',
+                'metadata' => ['topic' => 'shipping'],
+            ],
+            [
+                'content' => 'Returns are accepted within 14 days of delivery for unused items in original packaging.',
+                'metadata' => ['topic' => 'returns'],
+            ],
+        ],
+    ],
+];

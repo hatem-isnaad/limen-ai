@@ -38,12 +38,12 @@ class DefaultAgentResolver implements AgentResolver
             throw AgentNotFoundException::forKey($agentKey);
         }
         $this->assertAgentIsConfigured($agent);
-        $resolvedTools = $this->tools->forAgent($agentKey);
         $resolvedSkills = $this->skills->forAgent($agentKey);
+        $resolvedTools = $this->filterToolsBySkills($this->tools->forAgent($agentKey), $resolvedSkills);
         $resolved = new ResolvedAgent(
             definition: $agent,
             provider: $this->providers->driver($agent->provider()),
-            instructions: $this->instructionComposer->compose($agent, $resolvedSkills),
+            instructions: $this->instructionComposer->compose($agent, $resolvedSkills, $resolvedTools),
             tools: $resolvedTools,
             skills: $resolvedSkills,
             limits: $this->resolveLimits($agent),
@@ -80,5 +80,34 @@ class DefaultAgentResolver implements AgentResolver
     protected function shouldCacheResolvedAgents(): bool
     {
         return (bool) $this->config->get('limen-ai.performance.cache_resolved_agents', true);
+    }
+
+    /**
+     * @param  list<\LimenAi\Contracts\Tools\ToolDefinition>  $tools
+     * @param  list<\LimenAi\Contracts\Skills\SkillDefinition>  $skills
+     * @return list<\LimenAi\Contracts\Tools\ToolDefinition>
+     */
+    protected function filterToolsBySkills(array $tools, array $skills): array
+    {
+        $scopedKeys = [];
+
+        foreach ($skills as $skill) {
+            $skillTools = $skill->allowedTools();
+
+            if ($skillTools !== []) {
+                $scopedKeys = array_merge($scopedKeys, $skillTools);
+            }
+        }
+
+        if ($scopedKeys === []) {
+            return $tools;
+        }
+
+        $scopedKeys = array_values(array_unique($scopedKeys));
+
+        return array_values(array_filter(
+            $tools,
+            fn ($tool): bool => in_array($tool->key(), $scopedKeys, true),
+        ));
     }
 }
