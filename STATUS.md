@@ -7,34 +7,51 @@
 | Area | Status |
 |------|--------|
 | Repository | Created |
-| Architecture docs | Complete (pending approval) |
-| Contracts | Skeleton complete |
-| Runtime | Not started |
-| Providers | Not started |
-| Tools | Not started |
+| Architecture docs | Complete |
+| Contracts | Complete |
+| Config repositories | Complete |
+| DTOs / value objects | Complete |
+| LLM providers | Fake + OpenAI skeleton |
+| Embedding providers | Fake driver |
+| Runtime | Core loop complete |
+| Conversations | In-memory persistence complete |
+| Tool pipeline | Complete |
 | UI | Not started |
 | Limen integration | Not started |
 
 ## Current Phase
 
-**Phase 01 — Package Foundation** (In Progress)
+**Phase 07 — Conversations** (Complete)
 
 ## Completed
 
-- GitHub repo: https://github.com/hatem-isnaad/limen-ai
-- Master specification documented
-- Architecture proposal written
-- Architecture rules defined
-- Roadmap and implementation guide created
-- Security and testing strategies documented
-- Contract interfaces created
-- Configuration schema drafted
-- `.ai/` agent guidance structure created
-- Package scaffold (composer.json, service provider stub)
+- Phase 01 architecture foundation
+- Config-backed DTOs: Agent, Tool, Skill, Workflow
+- Config repositories with service provider bindings
+- `RunContextData` value object
+- Example skill + knowledge collection in config
+- Unit and integration tests for repositories
+- `FakeLlmProvider` and `FakeEmbeddingProvider`
+- `LlmProviderManager` and `EmbeddingProviderManager`
+- `OpenAiProvider` skeleton with HTTP mapping
+- Provider unit/integration/architecture tests
+- `DefaultAgentResolver` and `ResolvedAgent`
+- `ToolSchemaBuilder` for LLM function schemas
+- `InstructionComposer` for agent + skill prompts
+- `AgentValidator` and `limen-ai:validate` command
+- `ToolPipeline` with authorization, validation, idempotency, audit, events
+- `ClassBasedToolExecutor`, `ToolInputValidator`, `LogAuditLogger`
+- `DefaultAgentRuntime` multi-step LLM ↔ tool loop
+- `InMemoryRunRepository`, `ArrayCheckpointStore`, `RuntimeLimits`
+- Agent lifecycle events and approval pause/resume skeleton
+- `ConversationService` with in-memory conversation/message repositories
+- Conversation history loaded into agent runtime on each run
+- `MessageFormatter`, `NullConversationSummarizer`, conversation events
+- Database migrations for `limen_ai_conversations` and `limen_ai_messages`
 
 ## In Progress
 
-- Architecture review / approval
+- None
 
 ## Blocked
 
@@ -42,9 +59,9 @@
 
 ## Next Steps
 
-1. Review and approve architecture
-2. Begin Phase 02 — Contracts & Architecture (DTOs + bindings)
-3. Begin Phase 03 — Provider System with fakes
+1. Begin Phase 08 — Auth integration hardening
+2. Begin Phase 09 — State & checkpoints (Eloquent repositories)
+3. Add queue-dispatched runtime job skeleton
 
 ## Risks
 

@@ -9,6 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 07 conversation persistence with `ConversationService`, in-memory repositories, and runtime history integration
+- `MessageFormatter`, `NullConversationSummarizer`, and conversation events (`MessageCreated`, `ConversationUpdated`)
+- Database migrations for `limen_ai_conversations` and `limen_ai_messages`
+- Conversation unit, integration, and multi-turn feature tests
+
+### Added (Phase 06)
+
+- Phase 06 core agent runtime with `DefaultAgentRuntime` multi-step loop
+- `ToolCallParser`, `RuntimeLimits`, in-memory run repository and checkpoint store
+- Agent lifecycle events: `AgentStarted`, `AgentCompleted`, `AgentFailed`
+- Runtime feature and integration tests with fake LLM + tool loop
+
+### Added (Phase 05)
+
+- Phase 05 tool execution pipeline with authorization, validation, idempotency, audit, and events
+- `ClassBasedToolExecutor`, `ToolInputValidator`, `LaravelAuthorizationService`, and `LogAuditLogger`
+- Tool exceptions and approval-required gate skeleton
+
+### Added (Phase 04)
+
+- Phase 04 agent resolution with `DefaultAgentResolver`, `ResolvedAgent`, and `InstructionComposer`
+- `ToolSchemaBuilder` for LLM function calling schemas
+- `AgentValidator` and `limen-ai:validate` Artisan command
+- Agent resolution, validation, and feature tests
+
+### Added (Phase 03)
+
+- Phase 03 provider system with `LlmProviderManager` and `EmbeddingProviderManager`
+- `FakeLlmProvider`, `FakeEmbeddingProvider`, and `OpenAiProvider` skeleton
+- `LlmResponseData` value object and provider exceptions
+- Provider unit, integration, and architecture tests
+
+### Added (Phase 02)
+
+- Phase 02 config-backed DTOs and repositories for agents, tools, skills, workflows, and knowledge
+- `RunContextData` execution context value object
+- Service provider bindings for all definition repositories
+- Example skill (`general_assistance`) and knowledge collection (`getting_started`)
+- Repository unit, integration, and architecture tests
+
+### Added (Phase 01)
+
 - Initial repository bootstrap
 - Master specification and architecture documentation
 - Phase 01 contract interfaces (skeleton)

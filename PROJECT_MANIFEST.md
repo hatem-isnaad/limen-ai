@@ -77,6 +77,73 @@ See `src/Contracts/` — skeleton interfaces for all major subsystems.
 
 ## Phase Tracking
 
-Current: **Phase 01**
+Current: **Phase 08 — Auth & Authorization**
 
 See [ROADMAP.md](ROADMAP.md) for full phase list.
+
+## Phase 02 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Agent DTO | `ConfigAgentDefinition` |
+| Tool DTO | `ConfigToolDefinition` |
+| Skill DTO | `ConfigSkillDefinition` |
+| Workflow DTO | `ConfigWorkflowDefinition` |
+| Repositories | Config-backed, read-only |
+| Run context | `RunContextData` |
+
+## Phase 03 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| LLM manager | `LlmProviderManager` |
+| Embedding manager | `EmbeddingProviderManager` |
+| Fake LLM | `FakeLlmProvider` |
+| Fake embeddings | `FakeEmbeddingProvider` |
+| OpenAI adapter | `OpenAiProvider` |
+| LLM response DTO | `LlmResponseData` |
+
+## Phase 04 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Agent resolver | `DefaultAgentResolver` |
+| Resolved agent | `ResolvedAgent` |
+| Instruction composer | `InstructionComposer` |
+| Tool schema builder | `ToolSchemaBuilder` |
+| Agent validator | `AgentValidator` |
+| Validate command | `limen-ai:validate` |
+
+## Phase 05 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Tool pipeline | `ToolPipeline` |
+| Tool executor | `ClassBasedToolExecutor` |
+| Input validator | `ToolInputValidator` |
+| Authorization | `LaravelAuthorizationService` |
+| Audit logger | `LogAuditLogger` |
+| Idempotency | `CacheIdempotencyGuard` |
+| Data redaction | `SensitiveDataRedactor` |
+
+## Phase 06 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Agent runtime | `DefaultAgentRuntime` |
+| Tool call parser | `ToolCallParser` |
+| Runtime limits | `RuntimeLimits` |
+| Run repository | `InMemoryRunRepository` |
+| Checkpoint store | `ArrayCheckpointStore` |
+
+## Phase 07 Additions
+
+| Component | Implementation |
+|-----------|----------------|
+| Conversation service | `ConversationService` |
+| Conversation repo | `InMemoryConversationRepository` |
+| Message repo | `InMemoryMessageRepository` |
+| Message formatter | `MessageFormatter` |
+| Summarizer hook | `NullConversationSummarizer` |
+| Events | `MessageCreated`, `ConversationUpdated` |
+| Migrations | `limen_ai_conversations`, `limen_ai_messages` |
