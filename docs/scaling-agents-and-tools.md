@@ -96,10 +96,11 @@ Use **workflows** when a process has fixed steps (draft → approve → send) in
 Every tool needs:
 
 1. Config entry in `tools.*`
-2. PHP class under `App\LimenAi\Tools\*` (host app)
-3. Gate/policy in `authorization.abilities`
-4. Tests for business-critical behavior
-5. `confirmation: true` on destructive or customer-facing actions
+2. PHP class extending `BaseTool` with `authorize()` + `handle()`
+3. Tests for business-critical behavior
+4. `confirmation: true` on destructive or customer-facing actions
+
+Optional: Laravel Gates via `LIMEN_AI_AUTHORIZATION_MODE=gates` and `authorization.abilities`.
 
 At 50+ tools this is real ops work. Limen structures execution; **you** own domain logic and policies.
 

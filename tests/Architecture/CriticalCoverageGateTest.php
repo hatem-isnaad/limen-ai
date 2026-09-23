@@ -35,7 +35,9 @@ class CriticalCoverageGateTest extends TestCase
                 'Tool authorization pipeline',
                 [
                     'src/Tools/ToolPipeline.php',
+                    'src/Tools/ToolInstanceAuthorizer.php',
                     'tests/Unit/Tools/ToolPipelineAuthorizationTest.php',
+                    'tests/Unit/Tools/ToolInstanceAuthorizerTest.php',
                 ],
             ],
             'Laravel authorization service' => [

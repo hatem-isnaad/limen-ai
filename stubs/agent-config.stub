@@ -33,7 +33,7 @@ return [
             'user' => false,
         ],
         'authorization' => [
-            'required' => true,
+            'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
             'abilities' => [],
             'guest_allowed' => false,
         ],

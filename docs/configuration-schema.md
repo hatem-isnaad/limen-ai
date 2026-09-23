@@ -16,7 +16,8 @@ Primary file: `config/limen-ai.php`
 | `workflows` | Workflow definitions |
 | `knowledge` | Collections and drivers |
 | `memory` | Memory drivers and scopes |
-| `authorization` | Default ability mappings |
+| `persistence` | `driver`, `auto_detect` — database auto-detect after migrate |
+| `authorization` | `mode` (`simple`|`gates`), guest validator, context user match |
 | `responses` | User-facing default messages |
 | `limits` | Global execution limits |
 | `broadcasting` | Realtime adapter config |
@@ -43,8 +44,8 @@ Primary file: `config/limen-ai.php`
         'user' => true,
     ],
     'authorization' => [
-        'required' => true,
-        'abilities' => ['support.use'],
+        'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
+        'abilities' => [], // optional in simple mode — use tool authorize() instead
         'guest_allowed' => false,
     ],
     'output' => [
@@ -69,9 +70,7 @@ Primary file: `config/limen-ai.php`
     'input_schema' => [
         'shipment_id' => ['type' => 'string', 'required' => true],
     ],
-    'authorization' => [
-        'abilities' => ['shipments.read'],
-    ],
+    // authorization.abilities optional in LIMEN_AI_AUTHORIZATION_MODE=simple (default)
     'confirmation' => false,
     'timeout' => 10,
     'rate_limit' => '60,1',
@@ -91,6 +90,35 @@ Primary file: `config/limen-ai.php`
     'response_mapping' => [...],
 ],
 ```
+
+## Authorization
+
+```php
+'authorization' => [
+    'mode' => env('LIMEN_AI_AUTHORIZATION_MODE', 'simple'), // simple | gates
+    'enforce_context_user_match' => true,
+    'guest' => [
+        'validator' => LimenAi\Authorization\CacheGuestSessionValidator::class,
+        'cache_prefix' => 'limen-ai:guest:',
+    ],
+],
+```
+
+| Mode | Behavior |
+|------|----------|
+| `simple` (default) | No Gates when `abilities` empty; use `BaseTool::authorize()` |
+| `gates` | Laravel `Gate::check()` on `authorization.abilities` |
+
+## Quality / tool limits
+
+```php
+'quality' => [
+    'tool_count_warn' => 15,
+    'tool_count_critical' => 25,
+],
+```
+
+`php artisan limen-ai:validate` warns when agents exceed these counts.
 
 ## Response Fallback Order
 

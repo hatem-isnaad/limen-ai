@@ -222,7 +222,7 @@ After `php artisan migrate`, persistence **auto-detects database** when `LIMEN_A
 Optional explicit override:
 
 ```env
-LIMEN_AI_PERSISTENCE_DRIVER=database
+# LIMEN_AI_PERSISTENCE_DRIVER=database
 ```
 
 Then clear config cache:

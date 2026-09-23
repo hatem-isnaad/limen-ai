@@ -2,7 +2,6 @@
 
 namespace LimenAi\Tools;
 
-use Illuminate\Contracts\Container\Container;
 use LimenAi\Contracts\Integrations\HttpToolExecutor;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
 use LimenAi\Contracts\Tools\Tool;
@@ -13,8 +12,8 @@ use LimenAi\Exceptions\ToolException;
 class ClassBasedToolExecutor implements ToolExecutor
 {
     public function __construct(
-        private readonly Container $container,
         private readonly HttpToolExecutor $httpTools,
+        private readonly ToolInstanceResolver $instances,
     ) {}
 
     public function execute(ToolDefinition $tool, array $input, ToolExecutionContext $context): array
@@ -30,13 +29,7 @@ class ClassBasedToolExecutor implements ToolExecutor
             );
         }
 
-        $class = $tool->executorClass();
-
-        if ($class === '') {
-            throw new ToolException("Tool [{$tool->key()}] does not have an executor class configured.");
-        }
-
-        $instance = $this->container->make($class);
+        $instance = $this->instances->resolve($tool);
 
         if ($instance instanceof Tool) {
             return $instance->handle($input, $context);
@@ -46,6 +39,6 @@ class ClassBasedToolExecutor implements ToolExecutor
             return $instance->handle($input, $context);
         }
 
-        throw new ToolException("Tool executor [{$class}] must implement handle().");
+        throw new ToolException("Tool executor [{$tool->executorClass()}] must implement handle().");
     }
 }

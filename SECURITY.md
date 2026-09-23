@@ -124,7 +124,7 @@ When `LIMEN_AI_UI_GUEST_ENABLED=true` and `LIMEN_AI_UI_REQUIRE_AUTH=false`, unau
 - Rate-limit conversation and message endpoints at the web server or Laravel middleware layer
 - Disable tools that mutate data, send messages, or reach internal APIs for guest-facing agents
 - Run `php artisan limen-ai:doctor` — in-memory persistence with UI enabled is reported as a failure
-- Prefer database persistence (`LIMEN_AI_PERSISTENCE_DRIVER=database`) so guest sessions survive HTTP round-trips
+- Run `php artisan migrate` so persistence auto-detects database (or set `LIMEN_AI_PERSISTENCE_DRIVER=database`)
 
 **Do not:**
 

@@ -15,7 +15,7 @@
 | Type | Laravel package (library) — **not** a standalone app |
 | PHP | ^8.2 |
 | Laravel | ^11.0 \| ^12.0 \| ^13.0 |
-| Status | v1.0.0+ — all 22 roadmap phases complete |
+| Status | v1.0.4+ — all 22 roadmap phases complete |
 
 **What it is:** A reusable Laravel AI agent framework with agents, runtime, tools, skills, workflows, memory, knowledge (RAG), attachments, approvals, chat UI, HTTP API, and observability.
 
@@ -146,15 +146,26 @@ Everything is registered via **`config/limen-ai.php`** (published to the host ap
 // app/LimenAi/Tools/MyTool.php
 namespace App\LimenAi\Tools;
 
-use LimenAi\Contracts\Tools\Tool;
-use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Tools\BaseTool;
+use LimenAi\Tools\ConfigToolDefinition;
 
-class MyTool implements Tool
+class MyTool extends BaseTool
 {
-    public function handle(ToolDefinition $definition, array $input, ToolExecutionContext $context): mixed
+    public function key(): string { return 'my_tool'; }
+
+    public function definition(): \LimenAi\Contracts\Tools\ToolDefinition
     {
-        // Use $context->userId — never trust $input for auth
+        return ConfigToolDefinition::fromConfig($this->key(), config('limen-ai.tools.my_tool'));
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context->userId() !== null; // false = tool blocked
+    }
+
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
         return ['ok' => true];
     }
 }
@@ -524,4 +535,4 @@ php artisan limen-ai:agent:test example
 
 ---
 
-*Last updated: 2026-09-23 · Package v1.0.0+ · For questions see `docs/README.md` or open an issue.*
+*Last updated: 2026-09-23 · Package v1.0.4+ · Black-box guide: `docs/black-box-host-guide.md`*

@@ -3,11 +3,11 @@
 namespace LimenAi\Tests\Stubs\Limen;
 
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
-use LimenAi\Contracts\Tools\Tool;
 use LimenAi\Contracts\Tools\ToolDefinition;
+use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class SendCustomerMessageTool implements Tool
+class SendCustomerMessageTool extends BaseTool
 {
     public function __construct(
         private readonly FakeShipmentService $shipments,
@@ -30,6 +30,11 @@ class SendCustomerMessageTool implements Tool
             ],
             'confirmation' => true,
         ]);
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context->userId() !== null;
     }
 
     /**

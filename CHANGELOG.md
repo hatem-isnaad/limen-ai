@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-09-23
+
+### Fixed
+
+- Aligned all tool stubs, examples, and docs with `BaseTool` + `authorize()` black-box pattern
+- `ClassBasedToolExecutor` reuses `ToolInstanceResolver`; install command mentions auto-detect persistence
+- `configuration-schema.md`, `AGENTS.md`, and `README.md` updated for simple auth mode and persistence auto-detect
+- Added `LaravelAuthorizationService` test for simple mode tool access without Gates
+
 ## [1.0.4] - 2026-09-23
 
 ### Added

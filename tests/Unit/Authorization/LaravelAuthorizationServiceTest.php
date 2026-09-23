@@ -146,6 +146,8 @@ class LaravelAuthorizationServiceTest extends TestCase
 
     public function test_it_blocks_tools_when_gate_denies_ability(): void
     {
+        config()->set('limen-ai.authorization.mode', 'gates');
+
         $this->actingAs(new GenericUser(['id' => 1]));
 
         Gate::define('tools.use', fn (): bool => false);
@@ -153,5 +155,16 @@ class LaravelAuthorizationServiceTest extends TestCase
         $service = app(AuthorizationService::class);
 
         $this->assertFalse($service->canUseTool($this->tool(['abilities' => ['tools.use']])));
+    }
+
+    public function test_simple_mode_allows_tools_without_gate_abilities(): void
+    {
+        config()->set('limen-ai.authorization.mode', 'simple');
+
+        $this->actingAs(new GenericUser(['id' => 1]));
+
+        $service = app(AuthorizationService::class);
+
+        $this->assertTrue($service->canUseTool($this->tool()));
     }
 }

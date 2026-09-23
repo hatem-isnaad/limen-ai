@@ -2,7 +2,7 @@
 
 **Limen AI** is a production-ready Laravel package for building AI agents — with tools, skills, workflows, memory, knowledge retrieval (RAG), approvals, chat UI, and observability built in.
 
-> **Current release:** [v1.0.2](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.2)
+> **Current release:** [v1.0.4](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.4)
 
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
@@ -169,18 +169,22 @@ Provider setup: [docs/providers.md](docs/providers.md)
 // app/LimenAi/Tools/ExampleEchoTool.php
 namespace App\LimenAi\Tools;
 
-use LimenAi\Contracts\Tools\Tool;
-use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class ExampleEchoTool implements Tool
+class ExampleEchoTool extends BaseTool
 {
     public function key(): string { return 'example_echo'; }
 
-    public function definition(): ToolDefinition
+    public function definition(): \LimenAi\Contracts\Tools\ToolDefinition
     {
         return ConfigToolDefinition::fromConfig('example_echo', config('limen-ai.tools.example_echo'));
+    }
+
+    public function authorize(array $input, ToolExecutionContext $context): bool
+    {
+        return $context->userId() !== null;
     }
 
     public function handle(array $input, ToolExecutionContext $context): array

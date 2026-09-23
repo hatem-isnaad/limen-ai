@@ -4,7 +4,7 @@
 **Re-checked:** 2026-09-23 (second pass)  
 **Third pass:** 2026-09-23 (release gate verified green)  
 **Audited by:** Host app integration session (`limen-ai` Laravel 13 skeleton)  
-**Package path:** `limen-ai-main` (unreleased changes on top of v1.0.0)  
+**Package path:** `limen-ai-main` · **Released:** v1.0.4+ (black-box auth, auto-detect persistence)  
 **Purpose:** Actionable findings for the package maintainer — bugs, gaps, suggestions, and enhancements.
 
 ---
@@ -278,7 +278,7 @@ The unreleased branch addresses **all critical findings from the initial audit**
 
 **Before release:** commit unreleased changes and tag v1.0.1+ (release gate is green).
 
-**For host integrators:** set `LIMEN_AI_PERSISTENCE_DRIVER=database`, run migrations, use `limen-ai:doctor`, start a fresh conversation after upgrading (old threads may contain pre-fix tool/duplicate rows), and prefer env-driven theme config over hardcoded Blade props.
+**For host integrators:** run `php artisan migrate` (auto-detect persistence), set env + tools via [black-box-host-guide.md](black-box-host-guide.md), use `limen-ai:doctor`, and prefer env-driven theme over hardcoded Blade props.
 
 ---
 

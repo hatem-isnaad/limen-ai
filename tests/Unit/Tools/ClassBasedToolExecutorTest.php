@@ -50,7 +50,7 @@ class ClassBasedToolExecutorTest extends TestCase
             )
             ->andReturn(['status' => 200, 'body' => ['ok' => true]]);
 
-        $executor = new ClassBasedToolExecutor($this->app, $http);
+        $executor = new ClassBasedToolExecutor($http, app(\LimenAi\Tools\ToolInstanceResolver::class));
 
         $tool = ConfigToolDefinition::fromConfig('http_tool', [
             'name' => 'HTTP Tool',

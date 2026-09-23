@@ -34,9 +34,9 @@ class InstallCommand extends Command
         $this->line('Next steps:');
         $this->line('  1. Copy variables from .env.limen-ai.example into your .env');
         $this->line('  2. php artisan migrate');
-        $this->line('  3. Set LIMEN_AI_PERSISTENCE_DRIVER=database for web chat (required in production)');
-        $this->line('  4. php artisan limen-ai:doctor');
-        $this->line('  5. php artisan limen-ai:validate');
+        $this->line('  3. php artisan limen-ai:doctor  (persistence auto-detects database after migrate)');
+        $this->line('  4. php artisan limen-ai:validate');
+        $this->line('  5. php artisan limen-ai:make:tool YourTool  (authorize + handle in BaseTool)');
 
         return self::SUCCESS;
     }
