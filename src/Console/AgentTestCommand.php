@@ -3,6 +3,7 @@
 namespace LimenAi\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\RunRepository;
@@ -28,6 +29,14 @@ class AgentTestCommand extends Command
 
         if ($agents->find($agentKey) === null) {
             $this->components->error("Agent [{$agentKey}] is not registered.");
+
+            return self::FAILURE;
+        }
+
+        $userId = (int) $this->option('user');
+
+        if (! Auth::check() && ! Auth::loginUsingId($userId)) {
+            $this->components->error("User [{$userId}] was not found. Seed a user or pass --user=<id>.");
 
             return self::FAILURE;
         }

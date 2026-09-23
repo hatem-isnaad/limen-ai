@@ -536,11 +536,12 @@ return [
         ],
         'presets' => [
             'default' => [
-                'radius' => '12px',
+                'radius' => '16px',
                 'position' => 'bottom-right',
                 'direction' => 'ltr',
-                'font_family' => 'ui-sans-serif, system-ui, sans-serif',
+                'font_family' => '"Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif',
                 'title' => 'Limen AI Assistant',
+                'subtitle' => 'Typically replies in a few seconds',
                 'welcome_message' => 'How can I help you today?',
             ],
             'arabic' => [
@@ -555,11 +556,52 @@ return [
             'mode' => env('LIMEN_AI_THEME_MODE', 'light'),
             'allow_mode_toggle' => env('LIMEN_AI_THEME_TOGGLE', false),
             'overrides' => [],
-            'radius' => '12px',
+            'radius' => '16px',
             'position' => 'bottom-right',
             'direction' => 'ltr',
             'title' => 'Limen AI Assistant',
+            'subtitle' => 'Typically replies in a few seconds',
             'welcome_message' => 'How can I help you today?',
+            'avatar_url' => null,
+            'user_avatar_url' => null,
+        ],
+
+        'sounds' => [
+            'enabled' => env('LIMEN_AI_UI_SOUNDS_ENABLED', true),
+            'volume' => (float) env('LIMEN_AI_UI_SOUND_VOLUME', 0.35),
+            'on_send' => env('LIMEN_AI_UI_SOUND_SEND', true),
+            'on_receive' => env('LIMEN_AI_UI_SOUND_RECEIVE', true),
+            'on_open' => env('LIMEN_AI_UI_SOUND_OPEN', true),
+            'on_notification' => env('LIMEN_AI_UI_SOUND_NOTIFICATION', true),
+        ],
+
+        'animations' => [
+            'enabled' => env('LIMEN_AI_UI_ANIMATIONS_ENABLED', true),
+            'duration_ms' => (int) env('LIMEN_AI_UI_ANIMATION_MS', 280),
+            'message_entrance' => env('LIMEN_AI_UI_ANIMATE_MESSAGES', true),
+            'typing_indicator' => env('LIMEN_AI_UI_TYPING_INDICATOR', true),
+            'launcher_pulse' => env('LIMEN_AI_UI_LAUNCHER_PULSE', true),
+            'panel_entrance' => env('LIMEN_AI_UI_PANEL_ENTRANCE', true),
+        ],
+
+        'widget' => [
+            'launcher_label' => env('LIMEN_AI_UI_LAUNCHER_LABEL', ''),
+            'show_unread_badge' => env('LIMEN_AI_UI_UNREAD_BADGE', true),
+            'close_on_escape' => env('LIMEN_AI_UI_CLOSE_ON_ESCAPE', true),
+            'show_header_controls' => true,
+        ],
+
+        'composer' => [
+            'max_rows' => (int) env('LIMEN_AI_UI_COMPOSER_ROWS', 4),
+            'show_char_count' => env('LIMEN_AI_UI_CHAR_COUNT', false),
+            'max_length' => (int) env('LIMEN_AI_UI_MAX_MESSAGE_LENGTH', 4000),
+        ],
+
+        'messages' => [
+            'show_timestamps' => env('LIMEN_AI_UI_TIMESTAMPS', true),
+            'show_avatars' => env('LIMEN_AI_UI_AVATARS', true),
+            'show_role_labels' => env('LIMEN_AI_UI_ROLE_LABELS', false),
+            'time_format' => env('LIMEN_AI_UI_TIME_FORMAT', 'short'),
         ],
     ],
 

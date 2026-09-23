@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Professional chat UI redesign: avatars, typing indicator, animations, sounds, unread badge, polished widget launcher
+- Configurable UI preferences (`ui.sounds`, `ui.animations`, `ui.widget`, `ui.messages`, `ui.composer`) via config and env
 - [`AGENTS.md`](AGENTS.md) — complete AI agent and contributor reference guide
 - [`.ai/REFERENCE.md`](.ai/REFERENCE.md) — extended technical reference for AI coding sessions
 - Laravel 13 support (`illuminate/* ^13.0`, `orchestra/testbench ^11.0`)

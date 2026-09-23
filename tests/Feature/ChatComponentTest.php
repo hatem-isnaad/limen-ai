@@ -17,6 +17,8 @@ class ChatComponentTest extends TestCase
         $this->assertStringContainsString('data-limen-ai-chat', $html);
         $this->assertStringContainsString('data-limen-ai-messages', $html);
         $this->assertStringContainsString('data-limen-ai-send', $html);
+        $this->assertStringContainsString('data-limen-ai-typing', $html);
+        $this->assertStringContainsString('data-ui-config', $html);
         $this->assertStringContainsString('data-mode=', $html);
         $this->assertStringContainsString('example', $html);
     }
@@ -29,12 +31,16 @@ class ChatComponentTest extends TestCase
 
         $this->assertStringContainsString('data-limen-ai-widget', $html);
         $this->assertStringContainsString('data-limen-ai-launcher', $html);
+        $this->assertStringContainsString('data-limen-ai-unread', $html);
         $this->assertStringContainsString('data-limen-ai-chat', $html);
+        $this->assertStringContainsString('data-variant="embedded"', $html);
     }
 
     public function test_ui_assets_are_readable(): void
     {
         $this->assertStringContainsString('.limen-ai-chat', UiAssets::css());
         $this->assertStringContainsString('class LimenAiChat', UiAssets::js());
+        $this->assertStringContainsString('LimenAiSoundPlayer', UiAssets::js());
+        $this->assertStringContainsString('limen-ai-chat__typing', UiAssets::css());
     }
 }

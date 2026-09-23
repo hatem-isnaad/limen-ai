@@ -150,6 +150,7 @@ use LimenAi\Tools\NullIdempotencyGuard;
 use LimenAi\Tools\ToolInputValidator;
 use LimenAi\Tools\ToolPipeline;
 use LimenAi\Tools\ToolSchemaBuilder;
+use LimenAi\Ui\ChatUiConfig;
 use LimenAi\Ui\ThemeResolver;
 use LimenAi\Workflows\ConfigWorkflowRepository;
 use LimenAi\Workflows\DefaultWorkflowEngine;
@@ -478,6 +479,7 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ConversationAccessGuard::class);
         $this->app->singleton(ThemeResolver::class);
+        $this->app->singleton(ChatUiConfig::class);
     }
 
     protected function registerAttachments(): void

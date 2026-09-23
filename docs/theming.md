@@ -28,6 +28,28 @@ Limen AI themes combine **palettes** (light/dark colors), **presets** (layout/lo
 ],
 ```
 
+## Sounds & animations
+
+Configure in `config/limen-ai.php` under `ui.sounds` and `ui.animations`, or via env:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `LIMEN_AI_UI_SOUNDS_ENABLED` | `true` | Master sound toggle |
+| `LIMEN_AI_UI_SOUND_VOLUME` | `0.35` | Volume (0–1) |
+| `LIMEN_AI_UI_SOUND_SEND` | `true` | Play on message send |
+| `LIMEN_AI_UI_SOUND_RECEIVE` | `true` | Play on assistant reply |
+| `LIMEN_AI_UI_SOUND_OPEN` | `true` | Play when widget opens |
+| `LIMEN_AI_UI_SOUND_NOTIFICATION` | `true` | Play on approval/errors |
+| `LIMEN_AI_UI_ANIMATIONS_ENABLED` | `true` | Master animation toggle |
+| `LIMEN_AI_UI_ANIMATION_MS` | `280` | Transition duration |
+| `LIMEN_AI_UI_TYPING_INDICATOR` | `true` | Animated typing dots |
+| `LIMEN_AI_UI_LAUNCHER_PULSE` | `true` | Launcher pulse ring |
+| `LIMEN_AI_UI_UNREAD_BADGE` | `true` | Badge when widget closed |
+| `LIMEN_AI_UI_TIMESTAMPS` | `true` | Per-message timestamps |
+| `LIMEN_AI_UI_AVATARS` | `true` | Assistant/system avatars |
+
+Sounds use the Web Audio API (no external files). Animations respect `prefers-reduced-motion`.
+
 ## Environment Variables
 
 | Variable | Purpose |
@@ -71,8 +93,20 @@ Components expose tokens as CSS variables:
 | `--limen-ai-border` | Borders |
 | `--limen-ai-muted` | Status text |
 | `--limen-ai-radius` | Corner radius |
+| `--limen-ai-shadow` | Panel elevation |
+| `--limen-ai-anim-duration` | Animation timing |
 
 Dark/light switching uses `data-mode="light|dark"` on `.limen-ai-chat`. RTL uses `data-direction="rtl"`.
+
+### Theme tokens for copy
+
+| Key | Purpose |
+|-----|---------|
+| `title` | Header title |
+| `subtitle` | Header status line (e.g. "Typically replies in a few seconds") |
+| `welcome_message` | First system message |
+| `avatar_url` | Custom bot avatar image |
+| `position` | Widget position (`bottom-right`, `bottom-left`) |
 
 ## Arabic / RTL Preset
 

@@ -12,6 +12,11 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
+        $publishedViews = dirname(__DIR__).'/vendor/orchestra/testbench-core/laravel/resources/views/vendor/limen-ai';
+        if (is_dir($publishedViews)) {
+            $this->app['files']->deleteDirectory($publishedViews);
+        }
+
         $this->actingAs(new GenericUser(['id' => 1, 'remember_token' => null]));
     }
 

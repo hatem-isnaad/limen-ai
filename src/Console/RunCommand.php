@@ -3,6 +3,7 @@
 namespace LimenAi\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Runtime\AgentRuntime;
@@ -30,6 +31,10 @@ class RunCommand extends Command
         if ($agents->find($agentKey) === null) {
             $this->components->error("Agent [{$agentKey}] is not registered.");
 
+            return self::FAILURE;
+        }
+
+        if (! $this->authenticateCliUser()) {
             return self::FAILURE;
         }
 
@@ -94,5 +99,22 @@ class RunCommand extends Command
         $this->line('<fg=cyan>Assistant:</> '.(string) ($run['final_message'] ?? ''));
 
         return self::SUCCESS;
+    }
+
+    protected function authenticateCliUser(): bool
+    {
+        if (Auth::check()) {
+            return true;
+        }
+
+        $userId = (int) $this->option('user');
+
+        if (Auth::loginUsingId($userId)) {
+            return true;
+        }
+
+        $this->components->error("User [{$userId}] was not found. Seed a user or pass --user=<id>.");
+
+        return false;
     }
 }
