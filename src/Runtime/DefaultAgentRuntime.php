@@ -37,6 +37,7 @@ class DefaultAgentRuntime implements AgentRuntime
     {
         $agent = $this->agentResolver->resolve($agentKey);
         $this->authorization->authorizeAgent($agent->definition());
+        $this->authorization->validateRunContext($context, $agent->definition());
 
         $this->conversations->ensure($conversationId, $agentKey, $context);
 

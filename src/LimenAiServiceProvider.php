@@ -7,11 +7,14 @@ use LimenAi\Agents\AgentValidator;
 use LimenAi\Agents\ConfigAgentRepository;
 use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\InstructionComposer;
+use LimenAi\Authorization\CacheGuestSessionValidator;
 use LimenAi\Authorization\LaravelAuthorizationService;
+use LimenAi\Authorization\NullGuestSessionValidator;
 use LimenAi\Console\ValidateCommand;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Agents\AgentResolver;
 use LimenAi\Contracts\Authorization\AuthorizationService;
+use LimenAi\Contracts\Authorization\GuestSessionValidator;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
@@ -65,6 +68,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerTools();
         $this->registerRuntime();
         $this->registerConversations();
+        $this->registerAuthorization();
     }
 
     public function boot(): void
@@ -118,7 +122,6 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SensitiveDataRedactor::class);
         $this->app->singleton(ToolInputValidator::class);
-        $this->app->singleton(AuthorizationService::class, LaravelAuthorizationService::class);
         $this->app->singleton(AuditLogger::class, LogAuditLogger::class);
         $this->app->singleton(ToolExecutor::class, ClassBasedToolExecutor::class);
         $this->app->singleton(ToolPipeline::class);
@@ -156,5 +159,25 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(MessageFormatter::class);
         $this->app->singleton(ConversationSummarizer::class, $conversations['summarizer'] ?? NullConversationSummarizer::class);
         $this->app->singleton(ConversationService::class);
+    }
+
+    protected function registerAuthorization(): void
+    {
+        $authorization = $this->app['config']->get('limen-ai.authorization', []);
+
+        $this->app->singleton(GuestSessionValidator::class, function ($app) use ($authorization): GuestSessionValidator {
+            $validator = $authorization['guest']['validator'] ?? NullGuestSessionValidator::class;
+
+            if ($validator === CacheGuestSessionValidator::class) {
+                return new CacheGuestSessionValidator(
+                    $app['cache']->store(),
+                    (string) ($authorization['guest']['cache_prefix'] ?? 'limen-ai:guest:'),
+                );
+            }
+
+            return $app->make($validator);
+        });
+
+        $this->app->singleton(AuthorizationService::class, LaravelAuthorizationService::class);
     }
 }
