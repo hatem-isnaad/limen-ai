@@ -12,6 +12,12 @@ use LimenAi\Authorization\DatabaseApprovalRepository;
 use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
+use LimenAi\Console\DoctorCommand;
+use LimenAi\Console\ListCommand;
+use LimenAi\Console\MakeAgentCommand;
+use LimenAi\Console\MakeSkillCommand;
+use LimenAi\Console\MakeToolCommand;
+use LimenAi\Console\StubGenerator;
 use LimenAi\Console\ValidateCommand;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Broadcast;
@@ -143,6 +149,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerQueue();
         $this->registerBroadcasting();
         $this->registerUi();
+        $this->registerConsole();
     }
 
     public function boot(): void
@@ -154,9 +161,9 @@ class LimenAiServiceProvider extends ServiceProvider
                 __DIR__.'/../config/limen-ai.php' => config_path('limen-ai.php'),
             ], 'limen-ai-config');
 
-            $this->commands([
-                ValidateCommand::class,
-            ]);
+            $this->publishes([
+                __DIR__.'/../stubs' => base_path('stubs/limen-ai'),
+            ], 'limen-ai-stubs');
         }
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'limen-ai');
@@ -420,6 +427,25 @@ class LimenAiServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ConversationAccessGuard::class);
         $this->app->singleton(ThemeResolver::class);
+    }
+
+    protected function registerConsole(): void
+    {
+        $this->app->singleton(StubGenerator::class, fn ($app): StubGenerator => new StubGenerator(
+            $app['files'],
+            dirname(__DIR__).'/stubs',
+        ));
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ValidateCommand::class,
+                DoctorCommand::class,
+                ListCommand::class,
+                MakeAgentCommand::class,
+                MakeSkillCommand::class,
+                MakeToolCommand::class,
+            ]);
+        }
     }
 
     protected function registerObservability(): void
