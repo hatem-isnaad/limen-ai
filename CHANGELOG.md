@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 18 observability with trace correlation, usage tracking, audit export, and run report API
+- `TraceContext`, `LogUsageTracker`, `AuditExporter`, `RunObservabilityReporter`, and agent audit listener
+- Observability unit, integration, feature tests, and docs/observability.md
+
+### Added (Phase 17)
+
 - Phase 17 theming with palettes, presets, ThemeResolver, RTL/dark mode, and mode toggle
 - Arabic RTL preset, CSS variable tokens, and docs/theming.md override guide
 - Theme unit and feature tests

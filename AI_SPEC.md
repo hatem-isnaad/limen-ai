@@ -171,4 +171,6 @@ Do **not** implement the entire package in one task. Work phase-by-phase using:
 - [x] Phase 16 — Blade components, HTTP API, JS client with Echo hooks
 - [x] Begin Phase 17 — Themes
 - [x] Phase 17 — Palettes, presets, RTL/dark mode, ThemeResolver
-- [ ] Begin Phase 18 — Observability & Audit
+- [x] Begin Phase 18 — Observability & Audit
+- [x] Phase 18 — Trace IDs, usage tracking, audit export, observability API
+- [ ] Begin Phase 19 — Artisan Developer Tools
