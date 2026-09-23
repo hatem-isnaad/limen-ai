@@ -24,6 +24,7 @@ use LimenAi\Contracts\Conversations\MessageRepository;
 use LimenAi\Contracts\Integrations\HttpConnectorRepository;
 use LimenAi\Contracts\Integrations\HttpToolExecutor;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
+use LimenAi\Contracts\Security\ContentSanitizer;
 use LimenAi\Contracts\Security\SecretResolver;
 use LimenAi\Contracts\Security\UrlValidator;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
@@ -78,6 +79,8 @@ use LimenAi\Providers\Fake\FakeEmbeddingProvider;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmProviderManager;
 use LimenAi\Security\EnvSecretResolver;
+use LimenAi\Security\NullContentSanitizer;
+use LimenAi\Security\PromptInjectionSanitizer;
 use LimenAi\Security\SensitiveDataRedactor;
 use LimenAi\Security\SsrfUrlValidator;
 use LimenAi\Skills\ConfigSkillRepository;
@@ -112,6 +115,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerKnowledge();
         $this->registerWorkflows();
         $this->registerIntegrations();
+        $this->registerSecurity();
     }
 
     public function boot(): void
@@ -320,5 +324,16 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(HttpRequestBuilder::class);
         $this->app->singleton(HttpToolExecutor::class, DeclarativeHttpToolExecutor::class);
         $this->app->singleton(HttpIntegrationValidator::class);
+    }
+
+    protected function registerSecurity(): void
+    {
+        $this->app->singleton(ContentSanitizer::class, function ($app): ContentSanitizer {
+            if (! (bool) $app['config']->get('limen-ai.security.injection.enabled', true)) {
+                return new NullContentSanitizer();
+            }
+
+            return $app->make(PromptInjectionSanitizer::class);
+        });
     }
 }

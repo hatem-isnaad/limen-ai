@@ -11,6 +11,7 @@ use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
 use LimenAi\Contracts\Memory\MemoryRetriever;
+use LimenAi\Contracts\Security\ContentSanitizer;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunContext;
@@ -41,6 +42,7 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly ConversationService $conversations,
         private readonly MemoryRetriever $memory,
         private readonly AgentKnowledgeRetriever $knowledge,
+        private readonly ContentSanitizer $sanitizer,
         private readonly Dispatcher $events,
     ) {}
 
@@ -51,6 +53,8 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->authorization->validateRunContext($context, $agent->definition());
 
         $this->conversations->ensure($conversationId, $agentKey, $context);
+
+        $userMessage = $this->sanitizer->sanitize($userMessage);
 
         $history = $this->conversations->historyForAgent($conversationId);
         $this->conversations->appendUserMessage($conversationId, $userMessage);
@@ -241,6 +245,9 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->conversations->markActive((string) $run['conversation_id']);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     */
     protected function executeLoop(
         ResolvedAgent $agent,
         string $runId,
@@ -293,6 +300,9 @@ class DefaultAgentRuntime implements AgentRuntime
         }
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     */
     protected function saveApprovalCheckpoint(
         string $runId,
         RuntimeLimits $limits,
@@ -334,6 +344,7 @@ class DefaultAgentRuntime implements AgentRuntime
         return $approvalId;
     }
 
+    /** @return array<string, mixed> */
     protected function loadRunWaitingForApproval(string $runId): array
     {
         $run = $this->runs->find($runId);
@@ -349,6 +360,7 @@ class DefaultAgentRuntime implements AgentRuntime
         return $run;
     }
 
+    /** @return array<string, mixed> */
     protected function loadCheckpoint(string $runId): array
     {
         $checkpoint = $this->checkpoints->load($runId);
@@ -420,11 +432,15 @@ class DefaultAgentRuntime implements AgentRuntime
         ])->forToolExecution($runId, $conversationId, $agentKey);
     }
 
+    /** @param  array<string, mixed>  $attributes */
     protected function persistRun(string $runId, string $status, array $attributes): void
     {
         $this->runs->updateStatus($runId, $status, $attributes);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     */
     protected function syncConversationMessages(string $conversationId, array $messages, int $historyCount): void
     {
         $newMessages = array_slice($messages, $historyCount);
@@ -436,6 +452,7 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->conversations->appendAgentMessages($conversationId, $newMessages);
     }
 
+    /** @return array<string, mixed> */
     protected function memoryContext(string $agentKey, string $conversationId, RunContext $context): array
     {
         return [
