@@ -116,7 +116,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
+            'class' => null,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -327,7 +327,9 @@ return [
     ],
 
     'ui' => [
-        'enabled' => true,
+        'enabled' => env('LIMEN_AI_UI_ENABLED', true),
+        'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
+        'middleware' => ['web', 'auth'],
         'theme' => [
             'primary' => '#4F46E5',
             'background' => '#FFFFFF',
