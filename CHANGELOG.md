@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Laravel 13 support (`illuminate/* ^13.0`, `orchestra/testbench ^11.0`)
 - [docs/installation.md](docs/installation.md) — install via Packagist, VCS, path repo, private registry, or monorepo
 - Organized documentation into `docs/architecture/`, `docs/project/`, and `docs/development/`
 - Full attachment pipeline: upload API, validation, text extraction, runtime injection, optional vector RAG

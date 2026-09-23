@@ -5,7 +5,7 @@
 > **Current release:** [v1.0.0](https://github.com/hatem-isnaad/limen-ai/releases/tag/v1.0.0)
 
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
-[![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
+[![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -77,13 +77,13 @@ User identity, permissions, data scoping, and side effects never come from model
 | Requirement | Version |
 |-------------|---------|
 | PHP | ^8.2 |
-| Laravel | ^11.0 or ^12.0 |
+| Laravel | ^11.0, ^12.0, or ^13.0 |
 
 ---
 
 ## Installation
 
-Install into an **existing Laravel 11 or 12 app**. You do not need Packagist — pick any method below.
+Install into an **existing Laravel 11, 12, or 13 app**. You do not need Packagist — pick any method below.
 
 **Full guide:** [docs/installation.md](docs/installation.md)
 

@@ -1,13 +1,13 @@
 # Installation Guide
 
-Limen AI is a **Laravel package** — install it into an existing Laravel 11 or 12 application. You do **not** need to publish to Packagist to use it.
+Limen AI is a **Laravel package** — install it into an existing Laravel 11, 12, or 13 application. You do **not** need to publish to Packagist to use it.
 
 ## Requirements
 
 | Requirement | Version |
 |-------------|---------|
 | PHP | ^8.2 |
-| Laravel | ^11.0 or ^12.0 |
+| Laravel | ^11.0, ^12.0, or ^13.0 |
 | Composer | 2.x |
 
 ---
