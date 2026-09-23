@@ -44,8 +44,8 @@ class InstallCommand extends Command
         $this->line('  3. php artisan limen-ai:import:knowledge storage/faq.csv --collection=product_help  (optional)');
         $this->line('  4. php artisan limen-ai:doctor  (persistence auto-detects database after migrate)');
         $this->line('  5. php artisan limen-ai:validate');
-        $this->line('  6. php artisan vendor:publish --tag=limen-ai-middleware  (rate limiting for public widgets)');
-        $this->line('  7. <x-limen-ai::widget />  — default agent is app_assistant with sample product_help KB');
+        $this->line('  6. Enable LIMEN_AI_SEMANTIC_VALIDATION=true for LLM judge scoring (optional; works with Ollama)');
+        $this->line('  7. <x-limen-ai::widget />  — guest widgets auto-apply rate limiting (no middleware publish needed)');
 
         return self::SUCCESS;
     }

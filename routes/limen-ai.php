@@ -9,9 +9,13 @@ use LimenAi\Http\Controllers\Api\GuestSessionController;
 use LimenAi\Http\Controllers\Api\MessageController;
 use LimenAi\Http\Controllers\Api\ObservabilityController;
 use LimenAi\Http\Controllers\Api\RunController;
+use LimenAi\Http\LimenAiRouteMiddleware;
 
 $prefix = (string) config('limen-ai.ui.route_prefix', 'limen-ai');
-$middleware = config('limen-ai.ui.middleware', ['web']);
+$middleware = array_values(array_unique(array_merge(
+    (array) config('limen-ai.ui.middleware', ['web']),
+    LimenAiRouteMiddleware::forUi(),
+)));
 
 if ((bool) config('limen-ai.ui.auth_middleware', true)) {
     $middleware[] = 'auth';

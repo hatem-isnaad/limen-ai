@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-09-23
+
+### Added
+
+- `LlmJudgeOutputValidator` — optional semantic scoring via `LIMEN_AI_SEMANTIC_VALIDATION=true` (works with Ollama/OpenAI-compatible providers)
+- Auto-applied `ThrottleAgentRequests` for guest/public widgets (no middleware publish required)
+
+### Changed
+
+- `docs/agent-configuration.md` and `docs/providers.md` — Ollama `qwen3:8b` quality guidance
+- Install next-steps updated for semantic validation and automatic guest rate limiting
+- `.env.example` and `stubs/limen-ai.env.example` — semantic validation, guest auto-throttle, Ollama `qwen3:8b` notes
+
 ## [1.2.1] - 2026-09-23
 
 ### Fixed

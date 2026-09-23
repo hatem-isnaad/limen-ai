@@ -144,20 +144,25 @@ Built-in behavior:
 - `StructuredOutputValidator` — when `output.format` is `json`, rejects invalid JSON before persisting
 - `HeuristicOutputValidator` — when `LIMEN_AI_HEURISTIC_VALIDATION=true` (default in production), rejects empty replies, prompt-marker leaks, JSON-as-text, and overly long concise replies
 - `ForbiddenTopicsOutputValidator` — when `LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS=true`, blocks replies matching `persona.forbidden` / `persona.forbidden_topics`
+- `LlmJudgeOutputValidator` — when `LIMEN_AI_SEMANTIC_VALIDATION=true`, runs a second LLM pass (same provider/model as the agent) and scores reply quality via JSON verdict
 - `BasicOutputModerator` — optional pattern redaction when `LIMEN_AI_OUTPUT_MODERATION=true`
 
-### Semantic quality scoring (host responsibility)
+### Semantic quality scoring
 
-Limen AI ships **heuristic** guards only. Semantic scoring (correctness, hallucination risk, brand-tone fit) remains host-implemented via `quality.output_validator`.
+Enable built-in LLM judge scoring (works with OpenAI, Ollama via OpenAI-compatible API, Anthropic, etc.):
 
-Use the extension hooks instead:
+```env
+LIMEN_AI_SEMANTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_MIN_SCORE=0.65
+# LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false  # lenient when judge JSON is malformed (recommended for small local models)
+```
+
+For custom brand or domain rules, add a host class via `quality.output_validator`:
 
 | Hook | Contract | Typical host use |
 |------|----------|------------------|
-| `quality.output_validator` | `OutputValidator` | JSON/schema checks, regex guards, custom brand rules |
-| `quality.output_moderation_enabled` | `OutputModerator` | Pattern redaction or wrapper around a moderation API |
-
-Example: call your own evaluator service inside `BrandOutputValidator::validate()` and throw `OutputValidationException` when a reply fails your score threshold.
+| `quality.output_validator` | `OutputValidator` | Brand tone, domain grounding, external moderation APIs |
+| `quality.output_moderation_enabled` | `OutputModerator` | Pattern redaction |
 
 Smoke-test agent replies from CI:
 

@@ -16,7 +16,7 @@ class ThrottleAgentRequests
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (! (bool) $this->config->get('limen-ai.ui.rate_limit.enabled', false)) {
+        if (! $this->shouldThrottle()) {
             return $next($request);
         }
 
@@ -36,5 +36,14 @@ class ThrottleAgentRequests
         RateLimiter::hit($key, $decayMinutes * 60);
 
         return $next($request);
+    }
+
+    protected function shouldThrottle(): bool
+    {
+        if ((bool) $this->config->get('limen-ai.ui.rate_limit.enabled', false)) {
+            return true;
+        }
+
+        return (bool) $this->config->get('limen-ai.ui.guest.enabled', false);
     }
 }

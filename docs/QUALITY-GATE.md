@@ -32,6 +32,7 @@ php artisan limen-ai:checklist
 
 - `LIMEN_AI_PERSISTENCE_DRIVER=database` (or migrate + auto-detect)
 - `LIMEN_AI_HEURISTIC_VALIDATION=true`
-- Publish and enable `ThrottleAgentRequests` for public widgets
+- Guest widgets auto-apply `ThrottleAgentRequests` (set `LIMEN_AI_UI_RATE_LIMIT_ENABLED=true` for staff routes too)
+- `LIMEN_AI_SEMANTIC_VALIDATION=true` for LLM judge scoring (Ollama/OpenAI-compatible)
 - Mark read-only widget tools with `guest_safe: true`
 - Keep agents under `quality.tool_count_warn` (default 15 tools)

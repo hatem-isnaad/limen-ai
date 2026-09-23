@@ -14,6 +14,7 @@ use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\ForbiddenTopicsOutputValidator;
 use LimenAi\Agents\HeuristicOutputValidator;
 use LimenAi\Agents\InstructionComposer;
+use LimenAi\Agents\LlmJudgeOutputValidator;
 use LimenAi\Agents\StructuredOutputValidator;
 use LimenAi\Attachments\AttachmentFormatter;
 use LimenAi\Attachments\AttachmentService;
@@ -300,6 +301,10 @@ class LimenAiServiceProvider extends ServiceProvider
 
             if ((bool) $app['config']->get('limen-ai.quality.enforce_forbidden_topics', false)) {
                 $validators[] = $app->make(ForbiddenTopicsOutputValidator::class);
+            }
+
+            if ((bool) $app['config']->get('limen-ai.quality.semantic_validation', false)) {
+                $validators[] = $app->make(LlmJudgeOutputValidator::class);
             }
 
             $custom = $app['config']->get('limen-ai.quality.output_validator');

@@ -18,13 +18,13 @@
 | Tool pipeline | Complete |
 | UI | Complete |
 | Limen integration | Reference demo complete |
-| Release | **v1.2.1** |
+| Release | **v1.2.2** |
 
 ## Current Phase
 
 **Phase 22 — Final Hardening** (Complete)
 
-All 22 implementation phases are complete. v1.2.1 adds CI/Pint hardening on top of v1.2.0 (summarization, SSE streaming, Reverb).
+All 22 implementation phases are complete. v1.2.2 adds semantic output validation and automatic guest rate limiting on top of v1.2.1 (CI/Pint) and v1.2.0 (summarization, SSE streaming, Reverb).
 
 ## Completed
 

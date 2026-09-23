@@ -74,6 +74,19 @@ LIMEN_AI_EXAMPLE_MODEL=qwen3:8b
 
 Use the model name exactly as `ollama list` shows it. The API key can be any non-empty string — Ollama does not validate it, but Limen AI requires a value.
 
+### Reply quality with local models (e.g. `qwen3:8b`)
+
+Local models vary in quality. Combine layers:
+
+```env
+LIMEN_AI_HEURISTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_VALIDATION=true
+LIMEN_AI_SEMANTIC_MIN_SCORE=0.6
+LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false
+```
+
+Keep **5–8 tools** on `app_assistant` and ground answers with `product_help` knowledge. Semantic judge uses the same Ollama endpoint (one extra LLM call per reply when enabled).
+
 For agents other than `example`, set the matching `LIMEN_AI_*_MODEL` env key or override `model` in the agent config block.
 
 ## OpenRouter example
