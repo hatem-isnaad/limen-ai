@@ -21,7 +21,11 @@ use LimenAi\Contracts\Authorization\GuestSessionValidator;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
 use LimenAi\Contracts\Conversations\MessageRepository;
+use LimenAi\Contracts\Integrations\HttpConnectorRepository;
+use LimenAi\Contracts\Integrations\HttpToolExecutor;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
+use LimenAi\Contracts\Security\SecretResolver;
+use LimenAi\Contracts\Security\UrlValidator;
 use LimenAi\Contracts\Knowledge\KnowledgeRepository;
 use LimenAi\Contracts\Knowledge\KnowledgeRetriever;
 use LimenAi\Contracts\Knowledge\VectorStore;
@@ -50,6 +54,10 @@ use LimenAi\Runtime\DatabaseRunRepository;
 use LimenAi\Runtime\DefaultAgentRuntime;
 use LimenAi\Runtime\InMemoryRunRepository;
 use LimenAi\Runtime\ToolCallParser;
+use LimenAi\Integrations\ConfigHttpConnectorRepository;
+use LimenAi\Integrations\DeclarativeHttpToolExecutor;
+use LimenAi\Integrations\HttpIntegrationValidator;
+use LimenAi\Integrations\HttpRequestBuilder;
 use LimenAi\Knowledge\ConfigKnowledgeRepository;
 use LimenAi\Knowledge\ConfigKnowledgeRetriever;
 use LimenAi\Knowledge\DefaultAgentKnowledgeRetriever;
@@ -69,7 +77,9 @@ use LimenAi\Providers\EmbeddingProviderManager;
 use LimenAi\Providers\Fake\FakeEmbeddingProvider;
 use LimenAi\Providers\Fake\FakeLlmProvider;
 use LimenAi\Providers\LlmProviderManager;
+use LimenAi\Security\EnvSecretResolver;
 use LimenAi\Security\SensitiveDataRedactor;
+use LimenAi\Security\SsrfUrlValidator;
 use LimenAi\Skills\ConfigSkillRepository;
 use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tools\ClassBasedToolExecutor;
@@ -101,6 +111,7 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerMemory();
         $this->registerKnowledge();
         $this->registerWorkflows();
+        $this->registerIntegrations();
     }
 
     public function boot(): void
@@ -299,5 +310,15 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->app->singleton(WorkflowStepRunner::class);
         $this->app->singleton(WorkflowValidator::class);
         $this->app->singleton(WorkflowEngine::class, DefaultWorkflowEngine::class);
+    }
+
+    protected function registerIntegrations(): void
+    {
+        $this->app->singleton(HttpConnectorRepository::class, ConfigHttpConnectorRepository::class);
+        $this->app->singleton(UrlValidator::class, SsrfUrlValidator::class);
+        $this->app->singleton(SecretResolver::class, EnvSecretResolver::class);
+        $this->app->singleton(HttpRequestBuilder::class);
+        $this->app->singleton(HttpToolExecutor::class, DeclarativeHttpToolExecutor::class);
+        $this->app->singleton(HttpIntegrationValidator::class);
     }
 }
