@@ -7,171 +7,213 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- `docs/host-guide-ar.html` — full Arabic host integration guide (from reference host `/demo/limen-ai`)
-- `docs/sources/` — Blade sources for both doc hubs (synced from reference host)
-- `docs/build-static-docs.py` — rebuild static HTML from running host demo
-
-### Changed
-
-- `docs/index.html` — full interactive EN hub from host demo (learning paths, snippets, advanced tutorial, troubleshooting, reference)
-- `README.md` — learning paths, multi-agent layout, Ollama/qwen3, SSE stream, quality layer, AR guide link
-
-## [1.2.2] - 2026-09-23
+## [3.3.2] - 2026-09-24
 
 ### Added
 
-- `LlmJudgeOutputValidator` — optional semantic scoring via `LIMEN_AI_SEMANTIC_VALIDATION=true` (works with Ollama/OpenAI-compatible providers)
-- Auto-applied `ThrottleAgentRequests` for guest/public widgets (no middleware publish required)
-
-### Changed
-
-- `docs/agent-configuration.md` and `docs/providers.md` — Ollama `qwen3:8b` quality guidance
-- Install next-steps updated for semantic validation and automatic guest rate limiting
-- `.env.example` and `stubs/limen-ai.env.example` — semantic validation, guest auto-throttle, Ollama `qwen3:8b` notes
-
-## [1.2.1] - 2026-09-23
+- OpenAI-compatible **streaming tool-call delta** assembly (`OpenAiStreamingToolCallAssembler`)
+- Live stream tool-loop steps when `streaming.allow_with_tools` is enabled (text deltas + tool-call/result meta)
 
 ### Fixed
 
-- CI matrix excludes PHP 8.2 × Laravel 13 (Laravel 13 requires PHP ^8.3)
+- `FakeLlmProvider` stream preserves whitespace without spurious trailing spaces on sync `run()`
 
-### Added
-
-- `laravel/pint` dev dependency and `composer test:style` gate in `test:release`
-- `.github/scripts/prune-stray-tags.sh` to remove experimental tags newer than `composer.json` version
-
-### Changed
-
-- Release script resolves previous tag from semver (ignores stray `v1.3+` experimental tags)
-- Pint formatting applied across `src/`, `tests/`, and `config/`
-- Removed stray experimental tags `v1.3.0`–`v1.7.1` from origin
-
-## [1.2.0] - 2026-09-23
-
-### Added
-
-- `LlmConversationSummarizer` — optional LLM-backed long-thread compression with metadata cache
-- `GET /runs/{id}/stream` — SSE endpoint for run status, delta chunks, and completion events
-- Chat UI EventSource fallback when Laravel Echo is unavailable (`ui.streaming.enabled`)
-- `LIMEN_AI_BROADCAST_DRIVER=reverb` alias for Laravel Reverb broadcasting
-- Conversation history now keeps only `summary_keep_recent` messages when a summary is active
-- [docs/project/ROADMAP-v1.2.md](docs/project/ROADMAP-v1.2.md)
-
-### Changed
-
-- Guest stream access supports `?guest_token=` query param (for EventSource clients)
-
-## [1.1.0] - 2026-09-23
-
-### Added
-
-- `limen-ai:install --migrate` — optional migration step after publishing assets
-- `limen-ai:checklist` — first-run host integration checklist
-- `HeuristicOutputValidator` and `ForbiddenTopicsOutputValidator` (configurable quality layer)
-- `SkillAdherenceReporter` for optional skill phrase checks in audit logs
-- Skill-scoped tool filtering when skills define `tools`
-- `ThrottleAgentRequests` middleware (`limen-ai-middleware` publish tag)
-- `CompositeToolRepository` + `LimenAi::registerTool()` for runtime tool registration
-- `delegate_to_agent` router tool and `router.delegates` config
-- `limen-ai:agent:test --expect-not-contains` and `--min-length`
-- `limen-ai:validate --strict` and persistence mode output
-- `limen-ai:doctor --json` `ok` field for CI pipelines
-- `tests/Feature/WebChatPersistenceE2ETest` — full HTTP persistence regression test
-- [docs/QUALITY-GATE.md](docs/QUALITY-GATE.md)
-
-### Changed
-
-- Doctor fails (non-testing) when UI is enabled but persistence tables are missing
-- Guest agents must only expose tools marked `guest_safe: true`
-- Default tool repository is now `CompositeToolRepository`
-
-## [1.0.7] - 2026-09-23
-
-### Added
-
-- `limen-ai:import:knowledge` — import FAQ documents from JSON or CSV into `config/limen-ai-knowledge.php` (merged on boot)
-- `limen-ai:doctor --json` — machine-readable health report for CI and scripts
-- `limen-ai:doctor` cloud provider probes — OpenAI, OpenRouter, Anthropic, and Gemini reachability checks (Ollama probe unchanged)
-- Default black-box install defaults — `app_assistant` agent + `product_help` knowledge collection in package config and install publishables
-
-### Changed
-
-- `limen-ai:install` publishes `config/limen-ai-knowledge.php` stub and documents import/doctor/widget next steps
-- Default `LIMEN_AI_DEFAULT_AGENT` is now `app_assistant` (package tests still pin `example`)
-
-## [1.0.6] - 2026-09-23
-
-### Added
-
-- `limen-ai:doctor` Ollama probe — checks `/v1/models` reachability and warns when the configured model is not installed
-- Expanded [black-box-host-guide.md](docs/black-box-host-guide.md) — full env → agent → KB → tools → widget path
-- New [knowledge-base-setup.md](docs/knowledge-base-setup.md) — FAQ/RAG collections cookbook for developers
-- Updated [README.md](README.md), [docs/index.html](docs/index.html), and [host-quickstart.md](docs/host-quickstart.md) for black-box developer onboarding
-
-## [1.0.5] - 2026-09-23
+## [3.3.1] - 2026-09-24
 
 ### Fixed
 
-- Aligned all tool stubs, examples, and docs with `BaseTool` + `authorize()` black-box pattern
-- `ClassBasedToolExecutor` reuses `ToolInstanceResolver`; install command mentions auto-detect persistence
-- `configuration-schema.md`, `AGENTS.md`, and `README.md` updated for simple auth mode and persistence auto-detect
-- Added `LaravelAuthorizationService` test for simple mode tool access without Gates
+- Package config **deep-merge** for `tools`, `agents`, `skills`, and `workflows` so Laravel `config/limen-ai/{section}/*.php` fragments no longer replace entire package sections (restores `example_http_status` and similar defaults in tests and host apps)
+- **Memory** and **knowledge** container bindings resolve driver/store from config at resolve time (supports runtime `config()->set()` in tests)
+- **Null knowledge driver** skips agent knowledge injection
+- Test harness: stale Testbench tool fragments cleanup, `limen_3pl` enabled only in Limen/workflow integration tests, list command assertions via `Artisan::output()`
 
-## [1.0.4] - 2026-09-23
-
-### Added
-
-- **Black-box authorization mode** (`LIMEN_AI_AUTHORIZATION_MODE=simple`, default) — no Laravel Gates required for empty `authorization.abilities`
-- `AuthorizableTool` contract and `BaseTool` host base class with `authorize($input, $context): bool` — return `false` to block execution
-- `ToolInstanceAuthorizer` runs before tool `handle()` in the pipeline
-- [docs/black-box-host-guide.md](docs/black-box-host-guide.md) — env + tool-only setup for host developers
-- `LIMEN_AI_REQUIRE_AUTH` env (default `false`) for agent auth requirement
-
-## [1.0.3] - 2026-09-23
+## [3.3.0] - 2026-09-24
 
 ### Added
 
-- [docs/scaling-agents-and-tools.md](docs/scaling-agents-and-tools.md) — multi-agent layout, tool limits, verdict matrix
-- [docs/host-quickstart.md](docs/host-quickstart.md) — install to working widget in ~15 minutes
-- [examples/limen-host/config/multi-agent.example.php](examples/limen-host/config/multi-agent.example.php) — `app_assistant` / `support_agent` / `admin_agent` pattern
-- `limen-ai:validate` warnings when agents exceed `quality.tool_count_warn` (default 15) or `tool_count_critical` (25)
-
-## [1.0.2] - 2026-09-23
+- Groq and xAI LLM drivers (OpenAI-compatible APIs)
+- Voyage document reranker; ElevenLabs speech-to-text SDK path
+- Gemini Google Search grounding web search driver
+- MCP **SSE** transport (`transport` => `sse`)
+- Live provider streaming in tool-loop steps when tools are omitted/disabled
+- Feature tests for Vercel + AG-UI protocol routes
 
 ### Fixed
 
-- Persistence auto-detects `database` when `limen_ai_conversations` exists (`LIMEN_AI_PERSISTENCE_AUTO_DETECT`, default true)
-- `limen-ai:doctor` fails when migrations exist but persistence is forced to memory
+- Architecture critical coverage data providers (PHPUnit 11)
+- Release readiness version check (semver)
+- Package boundary scan for host `App\` namespace defaults in make commands
+- Risky Pusher boundary test (asserts scan ran)
+
+## [3.2.1] - 2026-09-24
 
 ### Added
 
-- Guest mode hardening guide in `SECURITY.md`
-- Semantic scoring documented as host-implemented via `OutputValidator` / `OutputModerator`
-- Persistence auto-detect tests and doctor persistence checks
+- Bedrock **converse-stream** support with AWS event-stream parsing
+- Unit tests for Bedrock streaming
 
-## [1.0.1] - 2026-09-23
+## [3.2.0] - 2026-09-24
 
-Host integration release: production-ready web chat persistence, guest sessions, output validation hooks, and chat UI hardening.
+### Added
+
+- Vercel AI UI message stream encoder and full `VercelChatController` runtime integration
+- AG-UI event encoder (`RUN_*`, `TEXT_*`, `TOOL_*`) with usage on `RUN_FINISHED`
+- Streaming tool-loop events (`tool-call`, `tool-result`) via `executeLoopStreaming`
+- Agent step middleware applied to non-tool `stream()` path
+- AWS Bedrock Converse LLM provider; ElevenLabs TTS; Gemini Imagen image SDK path
+- MCP HTTP + stdio transports, `McpClient`, auto-registration of remote MCP tools
+- Web search drivers: OpenAI Responses + Anthropic native web search
+- `DeferredToolsUntilSecondStepMiddleware` example
+- `FileClient::upload()` alias
+
+## [3.1.0] - 2026-09-24
+
+### Added
+
+- `AgentStepRunner` pipeline for agent step middleware (wired into `DefaultAgentRuntime`)
+- `LimitToolCallsAfterFirstStepMiddleware` example
+- Cohere and Jina document rerankers; `Ai::rerank()` selects via `LIMEN_AI_RERANK_PROVIDER`
+- SDK-style `Ai::files()` and `Ai::vectorStore()` clients (Limen Knowledge backend)
+- Provider tools: `WebSearchTool`, `WebFetchTool`, `FileSearchTool` (`LIMEN_AI_PROVIDER_TOOLS`)
+- Optional AG-UI chat route (`LIMEN_AI_AG_UI`, `POST .../ag-ui`)
+- Optional LLM conversation summarizer (`LIMEN_AI_LLM_SUMMARIZER`)
+- Message API attachments → multipart user messages; `MessageFormatter` array content support
+- `ResolvedAgent::chat()` supports step options (`omit_tools`, overrides)
+
+## [3.0.0] - 2026-09-24
+
+### Added
+
+- Laravel AI SDK–style toolkit: `Ai` facade / `ai()` helper (images, audio, STT, embeddings, rerank, classify, anonymous agents)
+- Provider failover chain (`LIMEN_AI_FAILOVER`)
+- `Conversational::messages()` merged into agent history
+- Agent step middleware hook (`agent_middleware` config)
+- Tool approval **argument editing** via `tool_input` on approve
+- Optional Vercel chat route (`LIMEN_AI_VERCEL_CHAT`, `POST .../chat`)
+- `SubAgentTool`, `McpBridgeTool`, deferred tool loading flag
+- `make:agent --structured` stub
+- Parity matrix: [docs/LARAVEL-AI-SDK-PARITY.md](docs/LARAVEL-AI-SDK-PARITY.md)
+
+## [2.7.0] - 2026-09-24
+
+### Added
+
+- `DatabaseConversationRepository` and `DatabaseMessageRepository`
+- `LIMEN_AI_DB_PERSISTENCE=true` switches conversations, messages, runs, checkpoints, and approvals to database drivers
+- Usage rows and in-memory records link to `conversation_id` + assistant `message_id` after each reply
+- SSE stream final event includes `run_id` and `usage` (tokens + provider + model)
 
 ### Fixed
 
-- `LIMEN_AI_PERSISTENCE_DRIVER=database` switches all repos to database implementations (fixes web chat `403` on second request)
-- Widget and chatbot apply `LIMEN_AI_UI_*` theme env vars over agent persona UI and presets
-- Conversation sync persists only final assistant text; tool JSON hidden from user-visible history
-- CLI `limen-ai:run` and `limen-ai:agent:test` authenticate via `Auth::loginUsingId()`
-- Release test blockers: checkpoint FK seeding, guest validator alignment, runtime history persistence
+- Repository bindings now read config at resolve time (respects test/app overrides)
+
+## [2.6.0] - 2026-09-24
 
 ### Added
 
-- `PersistenceConfig`, `EnvironmentDoctor`, and `limen-ai:doctor` persistence checks
-- Guest sessions API and `CacheGuestSessionValidator`
-- `OutputValidator` / `OutputModerator` contracts with `StructuredOutputValidator` and `BasicOutputModerator`
-- `limen-ai:skill:test` and `limen-ai:agent:test --expect-contains`
-- Skill metrics in audit logs; published UI `VERSION` stamp and stale-view doctor warning
-- Host integration test template, Ollama guide, synced env templates, and `docs/HOST-INTEGRATION-AUDIT.md`
-- Chat UI: history drawer, bilingual AR/EN, resume-last-conversation, theme/i18n env controls
+- Per-reply `usage` on stored assistant messages (`provider`, `model`, `input_tokens`, `output_tokens`, `total_tokens`, `run_id`)
+- Synchronous `POST /conversations/{id}/messages` returns `usage` when the run completes inline
+- `GET /conversations/{id}` exposes `usage` on each assistant message
+- Webhook `AgentCompleted` payload includes `usage` when available
+
+## [2.5.0] - 2026-09-24
+
+### Added
+
+- Database table `limen_ai_usage_records` and `PersistingUsageTracker` (`LIMEN_AI_USAGE_PERSIST_DB`)
+- `RunUsageFinalizer` — persists `usage_summary` on completed runs; estimates tokens when providers omit usage (streaming)
+- `GET /runs/{id}` returns `usage_summary` and `usage_records`
+- Optional outbound webhooks for `AgentCompleted` / `AgentFailed` (`LIMEN_AI_WEBHOOKS_ENABLED`, `LIMEN_AI_WEBHOOK_URLS`)
+
+### Changed
+
+- LLM usage rows are recorded only when reported `total_tokens` > 0 (avoids empty rows before estimation)
+
+## [2.4.0] - 2026-09-24
+
+### Added
+
+- API routes decoupled from bundled UI (`LIMEN_AI_API_ENABLED`, works with `LIMEN_AI_UI_ENABLED=false`)
+- `GET /health`, `GET /agents`, `GET /agents/{key}` catalog endpoints
+- Configurable `api.middleware` / `api.route_prefix` (Sanctum-ready)
+- Streaming with tools when `LIMEN_AI_STREAMING_WITH_TOOLS=true` (tool loop + streamed final text)
+
+### Changed
+
+- Install creates `app/Ai/Agents` and `app/Ai/Tools`; documents API-only setup
+
+## [2.3.0] - 2026-09-24
+
+### Added
+
+- Anthropic and Gemini `StreamingLlmProvider` implementations
+- REST CRUD for DB agent definitions (`/agent-definitions`) for custom admin UIs
+- `AgentDefinitionStore` with cache invalidation and automatic version bump on update
+- `Promptable::queue()` for async runs
+- [docs/api-custom-frontend.md](docs/api-custom-frontend.md) — HTTP/API guide without bundled UI
+
+### Changed
+
+- `run()` persists `structured_output` on completed runs (JSON agents)
+- `GET /runs/{id}` exposes `structured_output`
+- Default tool generator path/namespace: `App\Ai\Tools`
+
+## [2.2.0] - 2026-09-24
+
+### Added
+
+- LLM streaming via `StreamingLlmProvider`, `AgentRuntime::stream()`, and `LimenAi::stream()`
+- `Promptable::stream()` for class-based agents
+- SSE API: `POST /{prefix}/conversations/{id}/messages/stream` for custom frontends (no bundled UI)
+- `AgentStreamDelta` event + Pusher broadcast hook for realtime custom UIs
+- Structured JSON output helpers (`StructuredOutput`) wired into `ResolvedAgent` chat options (OpenAI `json_schema`)
+
+### Changed
+
+- `FakeLlmProvider` and `OpenAiProvider` implement streaming
+
+## [2.1.0] - 2026-09-24
+
+### Added
+
+- Database-backed agent definitions (`limen_ai_agent_definitions` migration + `AgentDefinitionModel`)
+- `DatabaseAgentRepository` and `CompositeAgentRepository` (default) with `agent_storage.definition_sources` priority
+- `limen-ai:agents:import-config` and `limen-ai:agents:clear-cache` Artisan commands
+- Doctor checks when `LIMEN_AI_DB_AGENTS` storage is enabled
+
+### Changed
+
+- Default `repositories.agent` binding is `CompositeAgentRepository` (config wins over DB for duplicate keys by default)
+
+## [2.0.0] - 2026-09-24
+
+### Added
+
+- Laravel AI SDK–style agent layer under `LimenAi\Ai\` (`Agent`, `Promptable`, `HasTools`, `HasStructuredOutput`, `Message`, `AgentResponse`)
+- Class-based agents via `agent_classes` config, `LimenAi::agent($key, Class::class)`, and `ClassAgentDefinitionFactory`
+- `make:agent` Artisan alias generating PHP agent classes by default (`--config` for legacy stubs)
+- `RuntimeToolCatalog` so tools declared on class agents resolve without duplicate config
+- PHP attributes `UsesModel` and `UsesProvider` for class agent defaults
+- Upgrade guide: [docs/UPGRADE-2.0.md](docs/UPGRADE-2.0.md)
+
+### Changed
+
+- `limen-ai:make:agent` now scaffolds class agents (Laravel AI SDK style); use `--config` for v1 config fragments
+- Default agent class paths: `app/Ai/Agents` and namespace `App\Ai\Agents`
+
+### Deprecated
+
+- Nothing removed in 2.0; config-defined agents remain first-class.
+
+## [1.1.x]
+
+### Added
+
+- First-class `AnthropicProvider`, `GeminiProvider`, and OpenRouter (OpenAI-compatible) LLM drivers
+- `OpenAiEmbeddingProvider` for production vector knowledge
+- Config-driven provider registry (`providers.drivers`) for adding custom LLM adapters without core changes
+- `docs/providers.md` and publishable `custom-llm-provider.stub`
+- Agent validation for registered provider drivers
 
 ## [1.0.0] - 2026-09-23
 
