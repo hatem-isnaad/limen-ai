@@ -11,6 +11,7 @@ use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Tools\ToolRepository;
+use Illuminate\Support\Facades\Schema;
 use LimenAi\Integrations\HttpIntegrationValidator;
 use LimenAi\Workflows\WorkflowValidator;
 
@@ -72,6 +73,43 @@ class DoctorCommand extends Command
         $provider = (string) config('limen-ai.providers.default', 'fake');
         $this->components->twoColumnDetail('Default provider', $provider);
 
+        if ((bool) config('limen-ai.agent_storage.database.enabled', false)) {
+            $connection = config('limen-ai.agent_storage.database.connection');
+            $table = (string) config('limen-ai.agent_storage.database.table', 'limen_ai_agent_definitions');
+
+            if (! Schema::connection($connection)->hasTable($table)) {
+                $failures[] = "Database agent storage enabled but table [{$table}] is missing.";
+            } else {
+                $this->components->twoColumnDetail('DB agent definitions', '<fg=green>OK</>');
+            }
+        } else {
+            $this->components->twoColumnDetail('DB agent definitions', 'disabled');
+        }
+
+        if ((bool) config('limen-ai.persistence.database', false)) {
+            $connection = config('limen-ai.persistence.connection');
+            $tables = [
+                'limen_ai_conversations',
+                'limen_ai_messages',
+                'limen_ai_runs',
+                'limen_ai_run_checkpoints',
+                'limen_ai_approvals',
+                'limen_ai_usage_records',
+            ];
+
+            foreach ($tables as $table) {
+                if (! Schema::connection($connection)->hasTable($table)) {
+                    $failures[] = "Database persistence enabled but table [{$table}] is missing.";
+                }
+            }
+
+            if ($failures === [] || ! str_contains(implode(' ', $failures), 'persistence')) {
+                $this->components->twoColumnDetail('DB persistence', '<fg=green>OK</>');
+            }
+        } else {
+            $this->components->twoColumnDetail('DB persistence', 'disabled (in-memory)');
+        }
+
         foreach ($this->missingProviderEnvVars($provider) as $envVar) {
             $failures[] = "Provider [{$provider}] requires env var [{$envVar}].";
         }
@@ -120,6 +158,7 @@ class DoctorCommand extends Command
         return self::SUCCESS;
     }
 
+    /** @return list<string> */
     protected function missingProviderEnvVars(string $provider): array
     {
         if ($provider === 'fake') {

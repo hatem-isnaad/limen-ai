@@ -30,7 +30,7 @@ class MakeKnowledgeCommand extends Command
                         'type' => 'faq',
                         'question' => 'What can this assistant help with?',
                         'answer' => 'Describe your product support scope here.',
-                        'content' => 'Q: What can this assistant help with?' . "\n" . 'A: Describe your product support scope here.',
+                        'content' => 'Q: What can this assistant help with?'."\n".'A: Describe your product support scope here.',
                         'metadata' => ['source' => 'faq'],
                     ],
                 ],

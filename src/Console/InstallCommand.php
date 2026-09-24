@@ -10,6 +10,7 @@ class InstallCommand extends Command
     protected $signature = 'limen-ai:install
                             {--force : Overwrite published files}
                             {--with-ui : Publish chat UI assets}
+                            {--without-ui : Disable bundled Blade chat UI (API only)}
                             {--with-example : Publish host service provider example}';
 
     protected $description = 'Install Limen AI: publish config, stubs, env guide, and definition folders';
@@ -43,6 +44,16 @@ class InstallCommand extends Command
             }
         }
 
+        foreach ([app_path('Ai/Agents'), app_path('Ai/Tools')] as $directory) {
+            if (! $files->isDirectory($directory)) {
+                $files->makeDirectory($directory, 0755, true);
+            }
+        }
+
+        if ($this->option('without-ui')) {
+            $this->components->info('API-only mode: set LIMEN_AI_UI_ENABLED=false in .env after publishing config.');
+        }
+
         $envExample = base_path('.env.limen-ai.example');
         $stubPath = dirname(__DIR__, 2).'/stubs/env.limen-ai.example';
 
@@ -68,7 +79,9 @@ class InstallCommand extends Command
         $this->line('2. Copy vars from .env.limen-ai.example into .env');
         $this->line('3. php artisan limen-ai:make:tool MyTool --register');
         $this->line('4. Register FAQ/KB in AppServiceProvider using LimenAi::faq(...)');
-        $this->line('5. php artisan limen-ai:doctor');
+        $this->line('5. Define Gate manageLimenAiAgents for /agent-definitions admin API');
+        $this->line('6. php artisan limen-ai:doctor');
+        $this->line('7. Custom UI: see docs/api-custom-frontend.md');
 
         return self::SUCCESS;
     }
