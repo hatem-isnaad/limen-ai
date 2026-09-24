@@ -1,17 +1,26 @@
 <?php
 
+$dbPersistence = filter_var(env('LIMEN_AI_DB_PERSISTENCE', false), FILTER_VALIDATE_BOOLEAN);
+
 return [
 
     'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'example'),
 
     'providers' => [
         'default' => env('LIMEN_AI_PROVIDER', 'fake'),
+        'failover_chain' => array_values(array_filter(array_map(
+            static fn (string $value): string => trim($value),
+            explode(',', (string) env('LIMEN_AI_FAILOVER', '')),
+        ))),
         'drivers' => [
             'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
             'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
             'openrouter' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
             'anthropic' => LimenAi\Providers\Anthropic\AnthropicProvider::class,
             'gemini' => LimenAi\Providers\Gemini\GeminiProvider::class,
+            'bedrock' => LimenAi\Providers\Bedrock\BedrockProvider::class,
+            'groq' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+            'xai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
         ],
         'fake' => [
             'driver' => 'fake',
@@ -34,6 +43,8 @@ return [
             'driver' => 'gemini',
             'api_key' => env('GEMINI_API_KEY'),
             'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+            'image_model' => env('GEMINI_IMAGE_MODEL', 'imagen-3.0-generate-002'),
+            'search_model' => env('GEMINI_SEARCH_MODEL', 'gemini-2.0-flash'),
             'timeout' => 60,
         ],
         'openrouter' => [
@@ -45,6 +56,50 @@ return [
                 'X-Title' => env('OPENROUTER_APP_NAME', env('APP_NAME')),
             ]),
             'timeout' => 60,
+        ],
+        'cohere' => [
+            'driver' => 'openai',
+            'api_key' => env('COHERE_API_KEY'),
+            'base_url' => env('COHERE_BASE_URL', 'https://api.cohere.com/v1'),
+            'rerank_model' => env('COHERE_RERANK_MODEL', 'rerank-v3.5'),
+        ],
+        'jina' => [
+            'driver' => 'openai',
+            'api_key' => env('JINA_API_KEY'),
+            'base_url' => env('JINA_BASE_URL', 'https://api.jina.ai/v1'),
+            'rerank_model' => env('JINA_RERANK_MODEL', 'jina-reranker-v2-base-multilingual'),
+        ],
+        'bedrock' => [
+            'driver' => 'bedrock',
+            'access_key_id' => env('AWS_ACCESS_KEY_ID'),
+            'secret_access_key' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            'model' => env('BEDROCK_MODEL', 'anthropic.claude-3-5-haiku-20241022-v1:0'),
+            'max_tokens' => (int) env('BEDROCK_MAX_TOKENS', 4096),
+            'timeout' => 60,
+        ],
+        'elevenlabs' => [
+            'api_key' => env('ELEVENLABS_API_KEY'),
+            'base_url' => env('ELEVENLABS_BASE_URL', 'https://api.elevenlabs.io/v1'),
+            'voice_id' => env('ELEVENLABS_VOICE_ID', '21m00Tcm4TlvDq8ikWAM'),
+            'model' => env('ELEVENLABS_MODEL', 'eleven_multilingual_v2'),
+            'stt_model' => env('ELEVENLABS_STT_MODEL', 'scribe_v1'),
+        ],
+        'groq' => [
+            'driver' => 'groq',
+            'api_key' => env('GROQ_API_KEY'),
+            'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+            'timeout' => 60,
+        ],
+        'xai' => [
+            'driver' => 'xai',
+            'api_key' => env('XAI_API_KEY'),
+            'base_url' => env('XAI_BASE_URL', 'https://api.x.ai/v1'),
+            'timeout' => 60,
+        ],
+        'voyage' => [
+            'api_key' => env('VOYAGE_API_KEY'),
+            'rerank_model' => env('VOYAGE_RERANK_MODEL', 'rerank-2'),
         ],
     ],
 
@@ -129,17 +184,36 @@ return [
         ],
     ],
 
+    'persistence' => [
+        'database' => $dbPersistence,
+        'connection' => env('LIMEN_AI_DB_CONNECTION'),
+    ],
+
     'runtime' => [
-        'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
-        'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
-        'approval_repository' => LimenAi\Authorization\InMemoryApprovalRepository::class,
+        'run_repository' => $dbPersistence
+            ? LimenAi\Runtime\DatabaseRunRepository::class
+            : LimenAi\Runtime\InMemoryRunRepository::class,
+        'checkpoint_store' => $dbPersistence
+            ? LimenAi\Runtime\DatabaseCheckpointStore::class
+            : LimenAi\Runtime\ArrayCheckpointStore::class,
+        'approval_repository' => $dbPersistence
+            ? LimenAi\Authorization\DatabaseApprovalRepository::class
+            : LimenAi\Authorization\InMemoryApprovalRepository::class,
     ],
 
     'conversations' => [
-        'repository' => LimenAi\Conversations\InMemoryConversationRepository::class,
-        'message_repository' => LimenAi\Conversations\InMemoryMessageRepository::class,
+        'repository' => $dbPersistence
+            ? LimenAi\Conversations\DatabaseConversationRepository::class
+            : LimenAi\Conversations\InMemoryConversationRepository::class,
+        'message_repository' => $dbPersistence
+            ? LimenAi\Conversations\DatabaseMessageRepository::class
+            : LimenAi\Conversations\InMemoryMessageRepository::class,
         'history_limit' => 50,
-        'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
+        'summarizer' => env('LIMEN_AI_LLM_SUMMARIZER', false)
+            ? LimenAi\Conversations\LlmConversationSummarizer::class
+            : LimenAi\Conversations\NullConversationSummarizer::class,
+        'summarize_after' => (int) env('LIMEN_AI_SUMMARIZE_AFTER', 20),
+        'summarizer_agent' => env('LIMEN_AI_SUMMARIZER_AGENT'),
     ],
 
     'tool_pipeline' => [
@@ -204,7 +278,7 @@ return [
         'get_shipment_status' => [
             'name' => 'Get Shipment Status',
             'description' => 'Look up the current status of a shipment by ID.',
-            'class' => null,
+            'class' => null, // Host: App\LimenAi\Tools\GetShipmentStatus::class
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
@@ -218,7 +292,7 @@ return [
         'send_customer_message' => [
             'name' => 'Send Customer Message',
             'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
-            'class' => null,
+            'class' => null, // Host: App\LimenAi\Tools\SendCustomerMessage::class
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],
@@ -349,7 +423,7 @@ return [
     ],
 
     'repositories' => [
-        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
+        'agent' => LimenAi\Agents\CompositeAgentRepository::class,
         'tool' => LimenAi\Tools\ConfigToolRepository::class,
         'skill' => LimenAi\Skills\ConfigSkillRepository::class,
         'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
@@ -406,10 +480,33 @@ return [
         'agent_runs' => env('LIMEN_AI_QUEUE_AGENT_RUNS', false),
     ],
 
+    'version' => '2.5.0',
+
+    'api' => [
+        'enabled' => env('LIMEN_AI_API_ENABLED', true),
+        'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
+        'middleware' => ['web', 'auth'],
+        'admin_middleware' => ['web', 'auth'],
+        'admin_ability' => env('LIMEN_AI_ADMIN_ABILITY', 'manageLimenAiAgents'),
+    ],
+
+    'streaming' => [
+        'enabled' => env('LIMEN_AI_STREAMING_ENABLED', true),
+        'allow_with_tools' => env('LIMEN_AI_STREAMING_WITH_TOOLS', false),
+    ],
+
     'observability' => [
         'audit_enabled' => env('LIMEN_AI_AUDIT_ENABLED', true),
         'usage_tracking_enabled' => env('LIMEN_AI_USAGE_TRACKING_ENABLED', true),
+        'usage_persist_database' => env('LIMEN_AI_USAGE_PERSIST_DB', true),
         'trace_enabled' => env('LIMEN_AI_TRACE_ENABLED', true),
+    ],
+
+    'webhooks' => [
+        'enabled' => env('LIMEN_AI_WEBHOOKS_ENABLED', false),
+        'urls' => array_filter(explode(',', (string) env('LIMEN_AI_WEBHOOK_URLS', ''))),
+        'events' => ['AgentCompleted', 'AgentFailed'],
+        'timeout' => (int) env('LIMEN_AI_WEBHOOK_TIMEOUT', 5),
     ],
 
     'security' => [
@@ -487,9 +584,83 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Class-based agents (Laravel AI SDK style)
+    |--------------------------------------------------------------------------
+    |
+    | Map agent keys to PHP classes implementing LimenAi\Ai\Contracts\Agent.
+    | Config-based agents under "agents" remain fully supported (v1).
+    |
+    */
+    'agent_classes' => [
+        // 'support' => App\Ai\Agents\SupportAgent::class,
+    ],
+
+    'agent_middleware' => [
+        // LimenAi\Runtime\Middleware\ExampleAgentMiddleware::class,
+    ],
+
+    'deferred_tool_loading' => env('LIMEN_AI_DEFERRED_TOOLS', false),
+
+    'protocols' => [
+        'vercel_chat' => env('LIMEN_AI_VERCEL_CHAT', false),
+        'ag_ui' => env('LIMEN_AI_AG_UI', false),
+    ],
+
+    'mcp' => [
+        'enabled' => env('LIMEN_AI_MCP_ENABLED', false),
+        'servers' => [
+            // 'docs' => [
+            //     'transport' => 'http',
+            //     'url' => 'https://mcp.example.com/rpc',
+            // ],
+            // 'local' => [
+            //     'transport' => 'stdio',
+            //     'command' => ['npx', '-y', '@modelcontextprotocol/server-filesystem', storage_path('app')],
+            // ],
+        ],
+        'register_tools' => env('LIMEN_AI_MCP_REGISTER_TOOLS', true),
+    ],
+
+    'rerank' => [
+        'default' => env('LIMEN_AI_RERANK_PROVIDER', 'fake'),
+    ],
+
+    'provider_tools' => [
+        'enabled' => env('LIMEN_AI_PROVIDER_TOOLS', false),
+        'web_search' => [
+            'enabled' => env('LIMEN_AI_TOOL_WEB_SEARCH', true),
+            'driver' => env('LIMEN_AI_WEB_SEARCH_DRIVER', 'duckduckgo'),
+            'endpoint' => env('LIMEN_AI_WEB_SEARCH_ENDPOINT', 'https://api.duckduckgo.com/'),
+        ],
+        'web_fetch' => [
+            'enabled' => env('LIMEN_AI_TOOL_WEB_FETCH', true),
+            'max_chars' => (int) env('LIMEN_AI_WEB_FETCH_MAX_CHARS', 12000),
+        ],
+        'file_search' => [
+            'enabled' => env('LIMEN_AI_TOOL_FILE_SEARCH', true),
+        ],
+    ],
+
+    'agent_storage' => [
+        'definition_sources' => ['config', 'database'],
+        'database' => [
+            'enabled' => env('LIMEN_AI_DB_AGENTS', false),
+            'connection' => env('LIMEN_AI_DB_CONNECTION'),
+            'table' => 'limen_ai_agent_definitions',
+            'cache' => env('LIMEN_AI_DB_AGENTS_CACHE', true),
+            'cache_ttl' => (int) env('LIMEN_AI_DB_AGENTS_CACHE_TTL', 300),
+        ],
+    ],
+
     'paths' => [
         'agents' => app_path('LimenAi/Agents'),
-        'tools' => app_path('LimenAi/Tools'),
+        'agent_classes' => app_path('Ai/Agents'),
+        'agent_namespace' => 'App\\Ai\\Agents',
+        'agent_config' => config_path('limen-ai/agents'),
+        'tools' => app_path('Ai/Tools'),
+        'tool_namespace' => 'App\\Ai\\Tools',
         'skills' => app_path('LimenAi/Skills'),
         'workflows' => app_path('LimenAi/Workflows'),
     ],
