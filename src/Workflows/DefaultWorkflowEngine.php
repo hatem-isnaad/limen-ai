@@ -21,7 +21,9 @@ use LimenAi\Events\WorkflowStarted;
 use LimenAi\Events\WorkflowStepCompleted;
 use LimenAi\Exceptions\InvalidRunStateException;
 use LimenAi\Exceptions\RunNotFoundException;
+use LimenAi\Exceptions\WorkflowDisabledException;
 use LimenAi\Exceptions\WorkflowNotFoundException;
+use LimenAi\Support\Enablement;
 use LimenAi\Runtime\RunContextData;
 use LimenAi\Runtime\RunStatus;
 
@@ -39,6 +41,8 @@ class DefaultWorkflowEngine implements WorkflowEngine
     /** @param  array<string, mixed>  $input */
     public function start(WorkflowDefinition $workflow, array $input, RunContext $context): string
     {
+        $this->assertWorkflowIsEnabled($workflow);
+
         $startStep = $this->startStepKey($workflow);
 
         $runId = $this->runs->create([
@@ -299,7 +303,16 @@ class DefaultWorkflowEngine implements WorkflowEngine
             throw WorkflowNotFoundException::forKey($workflowKey);
         }
 
+        $this->assertWorkflowIsEnabled($workflow);
+
         return $workflow;
+    }
+
+    protected function assertWorkflowIsEnabled(WorkflowDefinition $workflow): void
+    {
+        if (! Enablement::isEnabled($workflow)) {
+            throw WorkflowDisabledException::forWorkflow($workflow->key());
+        }
     }
 
     /** @param  array<string, mixed>  $run */
