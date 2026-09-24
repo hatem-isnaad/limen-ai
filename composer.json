@@ -1,1 +1,79 @@
-ewogICAgIm5hbWUiOiAibGltZW4tYWkvbGltZW4tYWkiLAogICAgInZlcnNpb24iOiAiMy4zLjIiCn0=
+{
+    "name": "limen-ai/limen-ai",
+    "description": "A reusable Laravel AI Agent Framework with agents, runtime, tools, skills, workflows, memory, knowledge, and chat UI.",
+    "version": "3.3.2",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "ai",
+        "agent",
+        "llm",
+        "tools",
+        "workflows",
+        "rag"
+    ],
+    "authors": [
+        {
+            "name": "Isnaad",
+            "homepage": "https://github.com/hatem-isnaad"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/broadcasting": "12.*",
+        "illuminate/contracts": "12.*",
+        "illuminate/database": "12.*",
+        "illuminate/http": "12.*",
+        "illuminate/queue": "12.*",
+        "illuminate/support": "12.*",
+        "illuminate/validation": "12.*"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LimenAi\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LimenAi\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LimenAi\\LimenAiServiceProvider"
+            ],
+            "aliases": {
+                "LimenAi": "LimenAi\\Facades\\LimenAi",
+                "Ai": "LimenAi\\Facades\\Ai"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:architecture": "phpunit --testsuite Architecture",
+        "test:security": "phpunit --testsuite Security",
+        "test:gates": [
+            "@test:architecture",
+            "@test:security"
+        ],
+        "test:release": [
+            "@test",
+            "@test:gates"
+        ]
+    }
+}
