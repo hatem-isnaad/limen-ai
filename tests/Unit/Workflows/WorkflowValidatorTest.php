@@ -2,8 +2,8 @@
 
 namespace LimenAi\Tests\Unit\Workflows;
 
-use LimenAi\Tests\TestCase;
 use LimenAi\Workflows\WorkflowValidator;
+use LimenAi\Tests\TestCase;
 
 class WorkflowValidatorTest extends TestCase
 {

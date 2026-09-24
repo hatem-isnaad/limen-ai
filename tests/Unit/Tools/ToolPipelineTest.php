@@ -9,9 +9,8 @@ use LimenAi\Exceptions\ApprovalRequiredException;
 use LimenAi\Exceptions\ToolNotFoundException;
 use LimenAi\Exceptions\ToolValidationException;
 use LimenAi\Runtime\RunContextData;
-use LimenAi\Tests\Stubs\EchoTool;
-use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ToolPipeline;
+use LimenAi\Tests\TestCase;
 
 class ToolPipelineTest extends TestCase
 {
@@ -73,7 +72,7 @@ class ToolPipelineTest extends TestCase
         config()->set('limen-ai.tools.confirmation_tool', [
             'name' => 'Confirmation Tool',
             'description' => 'Needs approval.',
-            'class' => EchoTool::class,
+            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],

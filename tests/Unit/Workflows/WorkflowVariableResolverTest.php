@@ -2,14 +2,14 @@
 
 namespace LimenAi\Tests\Unit\Workflows;
 
-use LimenAi\Tests\TestCase;
 use LimenAi\Workflows\WorkflowVariableResolver;
+use LimenAi\Tests\TestCase;
 
 class WorkflowVariableResolverTest extends TestCase
 {
     public function test_it_resolves_nested_state_paths(): void
     {
-        $resolver = new WorkflowVariableResolver;
+        $resolver = new WorkflowVariableResolver();
 
         $value = $resolver->resolve('input.mode', [
             'input' => ['mode' => 'tool'],
@@ -21,7 +21,7 @@ class WorkflowVariableResolverTest extends TestCase
 
     public function test_it_resolves_template_placeholders(): void
     {
-        $resolver = new WorkflowVariableResolver;
+        $resolver = new WorkflowVariableResolver();
 
         $resolved = $resolver->resolveTemplate('Hello {{ input.name }}', [
             'input' => ['name' => 'Limen'],
@@ -32,7 +32,7 @@ class WorkflowVariableResolverTest extends TestCase
 
     public function test_it_resolves_nested_input_arrays_for_tools(): void
     {
-        $resolver = new WorkflowVariableResolver;
+        $resolver = new WorkflowVariableResolver();
 
         $resolved = $resolver->resolveArray([
             'message' => '{{ step_outputs.draft.output }}',

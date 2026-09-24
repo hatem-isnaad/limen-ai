@@ -3,9 +3,9 @@
 namespace LimenAi\Tests\Unit\Tools;
 
 use LimenAi\Exceptions\ToolValidationException;
-use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ConfigToolDefinition;
 use LimenAi\Tools\ToolInputValidator;
+use LimenAi\Tests\TestCase;
 
 class ToolInputValidatorTest extends TestCase
 {

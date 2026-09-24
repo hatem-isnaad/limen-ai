@@ -9,13 +9,24 @@ use LimenAi\Tests\TestCase;
 
 class DefinitionLoaderTest extends TestCase
 {
+    private ?string $writtenFragment = null;
+
+    protected function tearDown(): void
+    {
+        if ($this->writtenFragment !== null && is_file($this->writtenFragment)) {
+            unlink($this->writtenFragment);
+        }
+
+        parent::tearDown();
+    }
+
     public function test_it_merges_config_registry_and_fragment_files(): void
     {
         if (! function_exists('config_path')) {
             $this->markTestSkipped('config_path helper unavailable.');
         }
 
-        app(ConfigFragmentWriter::class)->write('tools', 'runtime_echo', [
+        $this->writtenFragment = app(ConfigFragmentWriter::class)->write('tools', 'runtime_echo', [
             'name' => 'Runtime Echo',
             'class' => \LimenAi\Tests\Stubs\EchoTool::class,
             'input_schema' => ['message' => ['type' => 'string', 'required' => true]],
