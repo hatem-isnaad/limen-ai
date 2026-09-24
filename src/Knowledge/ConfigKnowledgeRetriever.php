@@ -18,7 +18,7 @@ class ConfigKnowledgeRetriever implements KnowledgeRetriever
                     continue;
                 }
 
-                $score = $this->score($query, $content);
+                $score = $this->scoreDocument($query, $document, $content);
 
                 if ($score <= 0) {
                     continue;
@@ -36,6 +36,20 @@ class ConfigKnowledgeRetriever implements KnowledgeRetriever
         usort($results, fn (array $left, array $right): int => $right['score'] <=> $left['score']);
 
         return array_slice($results, 0, $limit);
+    }
+
+    protected function scoreDocument(string $query, array $document, string $content): float
+    {
+        if (($document['type'] ?? null) === 'faq') {
+            $question = (string) ($document['question'] ?? '');
+            $faqScore = $this->score($query, $question);
+
+            if ($faqScore >= 0.75) {
+                return min(1.0, $faqScore + 0.15);
+            }
+        }
+
+        return $this->score($query, $content);
     }
 
     protected function score(string $query, string $content): float
