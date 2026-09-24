@@ -3,9 +3,9 @@
 namespace LimenAi\Tests\Unit\Conversations;
 
 use Illuminate\Support\Facades\Event;
-use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Conversations\ConversationService;
 use LimenAi\Conversations\ConversationState;
+use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Events\ConversationUpdated;
 use LimenAi\Events\MessageCreated;
 use LimenAi\Runtime\RunContextData;

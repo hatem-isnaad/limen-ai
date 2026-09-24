@@ -23,6 +23,6 @@ class StubGeneratorTest extends TestCase
 
         $this->assertSame($target, $path);
         $this->assertStringContainsString('namespace App\\LimenAi\\Tools;', file_get_contents($target));
-        $this->assertStringContainsString('class ExampleTool extends BaseTool', file_get_contents($target));
+        $this->assertStringContainsString('class ExampleTool implements Tool', file_get_contents($target));
     }
 }

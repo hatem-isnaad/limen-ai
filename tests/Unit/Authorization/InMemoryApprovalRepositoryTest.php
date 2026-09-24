@@ -31,7 +31,7 @@ class InMemoryApprovalRepositoryTest extends TestCase
 
     public function test_it_rejects_pending_approvals(): void
     {
-        $repository = new InMemoryApprovalRepository;
+        $repository = new InMemoryApprovalRepository();
         $approvalId = $repository->request('run-2', 'confirmation_tool', ['message' => 'no']);
 
         $repository->reject($approvalId, 3);

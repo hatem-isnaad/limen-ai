@@ -18,7 +18,7 @@ class ConfigKnowledgeRetrieverFaqTest extends TestCase
                     'type' => 'faq',
                     'question' => 'How do I reset my password?',
                     'answer' => 'Use forgot password.',
-                    'content' => 'Q: How do I reset my password?' . "\n" . 'A: Use forgot password.',
+                    'content' => 'Q: How do I reset my password?'."\n".'A: Use forgot password.',
                 ],
                 [
                     'content' => 'General shipping policy information.',

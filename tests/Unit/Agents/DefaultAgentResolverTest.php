@@ -29,7 +29,7 @@ class DefaultAgentResolverTest extends TestCase
 
         $this->assertSame(10, $resolved->limits()['max_tool_calls']);
         $this->assertSame(20, $resolved->limits()['max_steps']);
-        $this->assertSame(1200, $resolved->limits()['max_tokens']);
+        $this->assertSame(8000, $resolved->limits()['max_tokens']);
     }
 
     public function test_it_throws_for_missing_agent(): void

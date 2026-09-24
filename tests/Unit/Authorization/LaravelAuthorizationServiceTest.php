@@ -122,6 +122,8 @@ class LaravelAuthorizationServiceTest extends TestCase
 
     public function test_it_rejects_guest_agents_without_token(): void
     {
+        auth()->logout();
+
         $service = app(AuthorizationService::class);
         $agent = $this->agent(['guest_allowed' => true]);
 

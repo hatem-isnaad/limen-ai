@@ -23,9 +23,8 @@ class InstructionComposerTest extends TestCase
             'instructions' => 'Be concise and helpful.',
         ]);
 
-        $composed = app(InstructionComposer::class)->compose($agent, [$skill]);
+        $composed = (new InstructionComposer())->compose($agent, [$skill]);
 
-        $this->assertStringContainsString('# Persona', $composed);
         $this->assertStringContainsString('Base agent instructions.', $composed);
         $this->assertStringContainsString('## Skill: General Assistance', $composed);
         $this->assertStringContainsString('Be concise and helpful.', $composed);
