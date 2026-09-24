@@ -62,7 +62,7 @@ The `shipment_notify` workflow automates draft → approval → send for batch o
 
 1. Implement `App\Contracts\ShipmentService` against your models
 2. Register tools in `config/limen-ai.php` with `class` pointing to `App\LimenAi\Tools\*`
-3. Implement `authorize()` on each tool class (`BaseTool`) — default mode is `LIMEN_AI_AUTHORIZATION_MODE=simple` (no Gates). For enterprise policy integration, set `gates` and define abilities such as `agents.limen_3pl`, `shipments.view`, `shipments.notify`
+3. Define Gate abilities: `agents.limen_3pl`, `shipments.view`, `shipments.notify`
 4. Set `LIMEN_AI_DEFAULT_AGENT=limen_3pl` (optional)
 5. Add `<x-limen-ai::widget agent="limen_3pl" />` to your layout
 6. Configure broadcasting for live updates (optional)
