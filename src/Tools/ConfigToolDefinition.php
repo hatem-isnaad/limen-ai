@@ -22,6 +22,7 @@ final class ConfigToolDefinition implements ToolDefinition
         private readonly string $executorClass,
         private readonly array $httpIntegration,
         private readonly string $version,
+        private readonly bool $enabled,
     ) {}
 
     /**
@@ -42,6 +43,7 @@ final class ConfigToolDefinition implements ToolDefinition
             executorClass: is_string($executorClass) ? $executorClass : '',
             httpIntegration: is_array($config['integration'] ?? null) ? $config['integration'] : [],
             version: (string) ($config['version'] ?? '1.0.0'),
+            enabled: (bool) ($config['enabled'] ?? true),
         );
     }
 
@@ -93,5 +95,10 @@ final class ConfigToolDefinition implements ToolDefinition
     public function version(): string
     {
         return $this->version;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

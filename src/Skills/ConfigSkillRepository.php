@@ -6,6 +6,7 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Skills\SkillDefinition;
 use LimenAi\Contracts\Skills\SkillRepository;
+use LimenAi\Support\Enablement;
 
 class ConfigSkillRepository implements SkillRepository
 {
@@ -33,10 +34,15 @@ class ConfigSkillRepository implements SkillRepository
             return [];
         }
 
-        return array_values(array_map(
+        $definitions = array_map(
             fn (string $key, array $definition): SkillDefinition => ConfigSkillDefinition::fromConfig($key, $definition),
             array_keys($skills),
             $skills,
+        );
+
+        return array_values(array_filter(
+            $definitions,
+            fn (SkillDefinition $skill): bool => Enablement::isEnabled($skill),
         ));
     }
 
@@ -53,7 +59,7 @@ class ConfigSkillRepository implements SkillRepository
         foreach ($agent->skills() as $skillKey) {
             $skill = $this->find($skillKey);
 
-            if ($skill !== null) {
+            if ($skill !== null && Enablement::isEnabled($skill)) {
                 $skills[] = $skill;
             }
         }

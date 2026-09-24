@@ -5,12 +5,12 @@ namespace LimenAi\Agents;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentDefinition;
 use LimenAi\Contracts\Agents\AgentRepository;
+use LimenAi\Support\Enablement;
 
 class ConfigAgentRepository implements AgentRepository
 {
     public function __construct(
         private readonly ConfigRepository $config,
-        private readonly AgentConfigurationMerger $merger,
     ) {}
 
     public function find(string $key): ?AgentDefinition
@@ -21,7 +21,7 @@ class ConfigAgentRepository implements AgentRepository
             return null;
         }
 
-        return ConfigAgentDefinition::fromConfig($key, $this->merger->merge($definition));
+        return ConfigAgentDefinition::fromConfig($key, $definition);
     }
 
     public function all(): array
@@ -32,13 +32,15 @@ class ConfigAgentRepository implements AgentRepository
             return [];
         }
 
-        return array_values(array_map(
-            fn (string $key, array $definition): AgentDefinition => ConfigAgentDefinition::fromConfig(
-                $key,
-                $this->merger->merge($definition),
-            ),
+        $definitions = array_map(
+            fn (string $key, array $definition): AgentDefinition => ConfigAgentDefinition::fromConfig($key, $definition),
             array_keys($agents),
             $agents,
+        );
+
+        return array_values(array_filter(
+            $definitions,
+            fn (AgentDefinition $agent): bool => Enablement::isEnabled($agent),
         ));
     }
 

@@ -1,36 +1,17 @@
 <?php
 
-use LimenAi\Agents\ConfigAgentRepository;
-use LimenAi\Attachments\InMemoryAttachmentStore;
-use LimenAi\Authorization\CacheGuestSessionValidator;
-use LimenAi\Conversations\NullConversationSummarizer;
-use LimenAi\Knowledge\ConfigKnowledgeRepository;
-use LimenAi\Knowledge\InMemoryVectorStore;
-use LimenAi\Memory\DefaultMemoryRetriever;
-use LimenAi\Memory\InMemoryMemoryStore;
-use LimenAi\Providers\Anthropic\AnthropicProvider;
-use LimenAi\Providers\Fake\FakeEmbeddingProvider;
-use LimenAi\Providers\Fake\FakeLlmProvider;
-use LimenAi\Providers\Gemini\GeminiProvider;
-use LimenAi\Providers\OpenAi\OpenAiEmbeddingProvider;
-use LimenAi\Providers\OpenAi\OpenAiProvider;
-use LimenAi\Skills\ConfigSkillRepository;
-use LimenAi\Tools\CompositeToolRepository;
-use LimenAi\Tools\DelegateToAgentTool;
-use LimenAi\Workflows\ConfigWorkflowRepository;
-
 return [
 
-    'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'app_assistant'),
+    'default_agent' => env('LIMEN_AI_DEFAULT_AGENT', 'example'),
 
     'providers' => [
         'default' => env('LIMEN_AI_PROVIDER', 'fake'),
         'drivers' => [
-            'fake' => FakeLlmProvider::class,
-            'openai' => OpenAiProvider::class,
-            'openrouter' => OpenAiProvider::class,
-            'anthropic' => AnthropicProvider::class,
-            'gemini' => GeminiProvider::class,
+            'fake' => LimenAi\Providers\Fake\FakeLlmProvider::class,
+            'openai' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+            'openrouter' => LimenAi\Providers\OpenAi\OpenAiProvider::class,
+            'anthropic' => LimenAi\Providers\Anthropic\AnthropicProvider::class,
+            'gemini' => LimenAi\Providers\Gemini\GeminiProvider::class,
         ],
         'fake' => [
             'driver' => 'fake',
@@ -70,8 +51,8 @@ return [
     'embeddings' => [
         'default' => env('LIMEN_AI_EMBEDDING_PROVIDER', 'fake'),
         'drivers' => [
-            'fake' => FakeEmbeddingProvider::class,
-            'openai' => OpenAiEmbeddingProvider::class,
+            'fake' => LimenAi\Providers\Fake\FakeEmbeddingProvider::class,
+            'openai' => LimenAi\Providers\OpenAi\OpenAiEmbeddingProvider::class,
         ],
         'providers' => [
             'fake' => [
@@ -88,250 +69,77 @@ return [
         ],
     ],
 
-    'agent_defaults' => [
-        'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
-        'model' => env('LIMEN_AI_DEFAULT_MODEL', 'gpt-4.1-mini'),
-        'persona' => [
-            'tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
-            'language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'auto'),
-            'response_style' => 'concise',
-            'gender' => env('LIMEN_AI_DEFAULT_GENDER', 'neutral'),
-            'region' => env('LIMEN_AI_DEFAULT_REGION', 'international'),
-            'formality' => env('LIMEN_AI_DEFAULT_FORMALITY', 'neutral'),
-            'voice' => env('LIMEN_AI_DEFAULT_VOICE', ''),
-        ],
-        'output' => [
-            'format' => 'text',
-            'max_response_chars' => 4000,
-        ],
-        'limits' => [
-            'max_tool_calls' => 10,
-            'max_steps' => 20,
-            'timeout' => 60,
-            'temperature' => 0.2,
-            'max_tokens' => 1200,
-            'max_history_messages' => 30,
-        ],
-        'authorization' => [
-            'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
-            'abilities' => [],
-            'guest_allowed' => false,
-        ],
-        'memory' => [
-            'conversation' => true,
-            'user' => false,
-            'limit' => 10,
-            'max_value_length' => 256,
-        ],
-    ],
-
-    'agent_presets' => [
-        'genders' => [
-            'male' => [
-                'label' => 'Male',
-                'guidance' => 'Use a professional male assistant voice. In Arabic, use masculine agreement and phrasing.',
-            ],
-            'female' => [
-                'label' => 'Female',
-                'guidance' => 'Use a professional female assistant voice. In Arabic, use feminine agreement and phrasing.',
-            ],
-            'neutral' => [
-                'label' => 'Neutral',
-                'guidance' => 'Keep phrasing gender-neutral in all languages.',
-            ],
-        ],
-        'regions' => [
-            'international' => [
-                'label' => 'International',
-                'guidance' => 'Use clear modern Arabic or English without a strong local dialect unless the user prefers one.',
-            ],
-            'eg' => [
-                'label' => 'Egypt',
-                'guidance' => 'When speaking Arabic, prefer natural Egyptian Arabic vocabulary and phrasing.',
-            ],
-            'sa' => [
-                'label' => 'Saudi Arabia',
-                'guidance' => 'When speaking Arabic, prefer Saudi Arabic vocabulary and phrasing.',
-            ],
-            'ae' => [
-                'label' => 'UAE',
-                'guidance' => 'When speaking Arabic, prefer Gulf/UAE-friendly vocabulary and phrasing.',
-            ],
-            'jo' => [
-                'label' => 'Jordan',
-                'guidance' => 'When speaking Arabic, prefer Levantine/Jordanian phrasing.',
-            ],
-            'us' => [
-                'label' => 'United States',
-                'guidance' => 'Use American English spelling and phrasing.',
-            ],
-            'uk' => [
-                'label' => 'United Kingdom',
-                'guidance' => 'Use British English spelling and phrasing.',
-            ],
-        ],
-        'formality' => [
-            'casual' => [
-                'label' => 'Casual',
-                'guidance' => 'Friendly and conversational, but still respectful.',
-            ],
-            'neutral' => [
-                'label' => 'Neutral',
-                'guidance' => 'Balanced professional tone suitable for support and sales.',
-            ],
-            'formal' => [
-                'label' => 'Formal',
-                'guidance' => 'Formal, polished, and business-appropriate language.',
-            ],
-        ],
-    ],
-
     'agents' => [
-        ...(require __DIR__.'/limen-ai-black-box-defaults.php')['agents'],
         'example' => [
+            'enabled' => env('LIMEN_AI_EXAMPLE_AGENT_ENABLED', true),
             'name' => 'Example Agent',
             'description' => 'Demonstration agent for package development.',
             'model' => env('LIMEN_AI_EXAMPLE_MODEL', 'gpt-4.1-mini'),
-            'provider' => 'fake',
+            'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are a helpful assistant. Use tools when needed.',
-            'persona' => [
-                'display_name' => 'Example Agent',
-                'tone' => 'friendly',
-                'language' => env('LIMEN_AI_EXAMPLE_LANGUAGE', 'auto'),
-                'response_style' => 'concise',
-                'gender' => env('LIMEN_AI_EXAMPLE_GENDER', 'neutral'),
-                'region' => env('LIMEN_AI_EXAMPLE_REGION', 'international'),
-                'formality' => env('LIMEN_AI_EXAMPLE_FORMALITY', 'casual'),
-                'voice' => env('LIMEN_AI_EXAMPLE_VOICE', 'warm and helpful'),
-                'ui' => [],
-                'rules' => [
-                    'Use tools only when they add value.',
-                    'Never invent shipment, order, or account data.',
-                    'Support Arabic and English. Switch language immediately when the user asks.',
-                ],
-                'forbidden' => [
-                    'Legal advice',
-                    'Medical advice',
-                ],
-            ],
             'skills' => ['general_assistance'],
             'tools' => ['example_echo'],
             'knowledge' => ['getting_started'],
             'memory' => [
                 'conversation' => true,
                 'user' => false,
-                'limit' => 10,
-                'allowed_keys' => ['preferred_language', 'timezone'],
-                'max_value_length' => 256,
             ],
             'authorization' => [
-                'required' => env('LIMEN_AI_REQUIRE_AUTH', false),
+                'required' => true,
                 'abilities' => [],
-                'guest_allowed' => env('LIMEN_AI_UI_GUEST_ENABLED', false),
+                'guest_allowed' => false,
             ],
             'output' => [
                 'format' => 'text',
-                'max_response_chars' => 4000,
             ],
             'limits' => [
                 'max_tool_calls' => 10,
                 'max_steps' => 20,
                 'timeout' => 60,
-                'temperature' => 0.2,
-                'max_tokens' => 1200,
-                'max_history_messages' => 30,
             ],
             'version' => '1.0.0',
         ],
-        ...require __DIR__.'/limen-ai-provider-agents.php',
         'limen_3pl' => [
             'name' => 'Limen 3PL Assistant',
             'description' => 'Helps operators look up shipments and send approved customer updates.',
             'model' => env('LIMEN_AI_LIMEN_MODEL', 'gpt-4.1-mini'),
             'provider' => env('LIMEN_AI_PROVIDER', 'fake'),
             'instructions' => 'You are the Limen 3PL logistics assistant. Use get_shipment_status for lookups and send_customer_message only for approved outbound customer updates.',
-            'persona' => [
-                'display_name' => 'Limen 3PL Assistant',
-                'tone' => 'professional',
-                'language' => env('LIMEN_AI_LIMEN_LANGUAGE', 'auto'),
-                'response_style' => 'concise',
-                'gender' => env('LIMEN_AI_LIMEN_GENDER', 'female'),
-                'region' => env('LIMEN_AI_LIMEN_REGION', 'eg'),
-                'formality' => env('LIMEN_AI_LIMEN_FORMALITY', 'formal'),
-                'voice' => env('LIMEN_AI_LIMEN_VOICE', 'clear operational support'),
-                'ui' => [
-                    'title' => 'Limen 3PL Support',
-                    'subtitle' => 'Shipment lookups and approved customer updates',
-                    'welcome_message' => 'How can I help with your shipment today?',
-                ],
-                'rules' => [
-                    'Reference shipment IDs explicitly.',
-                    'Escalate to a human when data is missing or ambiguous.',
-                ],
-                'forbidden' => [
-                    'Promising delivery dates without tool confirmation',
-                    'Sending customer messages without approval',
-                ],
-            ],
             'skills' => ['logistics_support'],
             'tools' => ['get_shipment_status', 'send_customer_message'],
             'knowledge' => ['limen_3pl_ops'],
             'memory' => [
                 'conversation' => true,
                 'user' => true,
-                'limit' => 15,
-                'allowed_keys' => ['preferred_language', 'timezone', 'warehouse_id'],
-                'max_value_length' => 512,
             ],
             'authorization' => [
-                'required' => env('LIMEN_AI_REQUIRE_AUTH', true),
+                'required' => true,
                 'abilities' => [],
                 'guest_allowed' => false,
             ],
             'output' => [
                 'format' => 'text',
-                'max_response_chars' => 3000,
             ],
             'limits' => [
                 'max_tool_calls' => 8,
                 'max_steps' => 16,
                 'timeout' => 90,
-                'temperature' => 0.1,
-                'max_tokens' => 1500,
-                'max_history_messages' => 24,
             ],
             'version' => '1.0.0',
         ],
     ],
 
-    'persistence' => [
-        // Unset driver + auto_detect=true (default): use database when limen_ai_conversations exists.
-        'driver' => env('LIMEN_AI_PERSISTENCE_DRIVER'),
-        'auto_detect' => env('LIMEN_AI_PERSISTENCE_AUTO_DETECT', true),
-    ],
-
     'runtime' => [
-        'run_repository' => env('LIMEN_AI_RUN_REPOSITORY'),
-        'checkpoint_store' => env('LIMEN_AI_CHECKPOINT_STORE'),
-        'approval_repository' => env('LIMEN_AI_APPROVAL_REPOSITORY'),
+        'run_repository' => LimenAi\Runtime\InMemoryRunRepository::class,
+        'checkpoint_store' => LimenAi\Runtime\ArrayCheckpointStore::class,
+        'approval_repository' => LimenAi\Authorization\InMemoryApprovalRepository::class,
     ],
 
     'conversations' => [
-        'repository' => env('LIMEN_AI_CONVERSATION_REPOSITORY'),
-        'message_repository' => env('LIMEN_AI_MESSAGE_REPOSITORY'),
+        'repository' => LimenAi\Conversations\InMemoryConversationRepository::class,
+        'message_repository' => LimenAi\Conversations\InMemoryMessageRepository::class,
         'history_limit' => 50,
-        'summarizer' => env('LIMEN_AI_CONVERSATION_SUMMARIZER', NullConversationSummarizer::class),
-        'summary_threshold' => (int) env('LIMEN_AI_SUMMARY_THRESHOLD', 24),
-        'summary_keep_recent' => (int) env('LIMEN_AI_SUMMARY_KEEP_RECENT', 12),
-        'summary_refresh_messages' => (int) env('LIMEN_AI_SUMMARY_REFRESH_MESSAGES', 8),
-    ],
-
-    'streaming' => [
-        'enabled' => env('LIMEN_AI_STREAMING_ENABLED', true),
-        'poll_interval_ms' => (int) env('LIMEN_AI_STREAM_POLL_MS', 400),
-        'max_wait_seconds' => (int) env('LIMEN_AI_STREAM_MAX_WAIT', 120),
-        'chunk_final_message' => env('LIMEN_AI_STREAM_CHUNK_FINAL', true),
-        'chunk_chars' => (int) env('LIMEN_AI_STREAM_CHUNK_CHARS', 24),
+        'summarizer' => LimenAi\Conversations\NullConversationSummarizer::class,
     ],
 
     'tool_pipeline' => [
@@ -360,7 +168,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null, // Set in host app: App\LimenAi\Tools\ExampleEchoTool::class
+            'class' => null,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],
@@ -368,24 +176,7 @@ return [
                 'abilities' => [],
             ],
             'confirmation' => false,
-            'guest_safe' => true,
             'timeout' => 5,
-            'version' => '1.0.0',
-        ],
-        'delegate_to_agent' => [
-            'name' => 'Delegate To Agent',
-            'description' => 'Delegates a message to another configured agent and returns its final reply.',
-            'class' => DelegateToAgentTool::class,
-            'input_schema' => [
-                'agent_key' => ['type' => 'string', 'required' => true],
-                'message' => ['type' => 'string', 'required' => true],
-            ],
-            'authorization' => [
-                'abilities' => [],
-            ],
-            'confirmation' => false,
-            'guest_safe' => false,
-            'timeout' => 120,
             'version' => '1.0.0',
         ],
         'example_http_status' => [
@@ -413,7 +204,7 @@ return [
         'get_shipment_status' => [
             'name' => 'Get Shipment Status',
             'description' => 'Look up the current status of a shipment by ID.',
-            'class' => null, // Host: App\LimenAi\Tools\GetShipmentStatus::class
+            'class' => null,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
@@ -427,7 +218,7 @@ return [
         'send_customer_message' => [
             'name' => 'Send Customer Message',
             'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
-            'class' => null, // Host: App\LimenAi\Tools\SendCustomerMessage::class
+            'class' => null,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],
@@ -523,10 +314,9 @@ return [
 
     'knowledge' => [
         'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
-        'vector_store' => InMemoryVectorStore::class,
+        'vector_store' => LimenAi\Knowledge\InMemoryVectorStore::class,
         'limit' => 5,
         'collections' => [
-            ...(require __DIR__.'/limen-ai-black-box-defaults.php')['knowledge_collections'],
             'getting_started' => [
                 'name' => 'Getting Started',
                 'description' => 'Introductory knowledge for the example agent.',
@@ -559,55 +349,25 @@ return [
     ],
 
     'repositories' => [
-        'agent' => ConfigAgentRepository::class,
-        'tool' => CompositeToolRepository::class,
-        'skill' => ConfigSkillRepository::class,
-        'workflow' => ConfigWorkflowRepository::class,
-        'knowledge' => ConfigKnowledgeRepository::class,
+        'agent' => LimenAi\Agents\ConfigAgentRepository::class,
+        'tool' => LimenAi\Tools\ConfigToolRepository::class,
+        'skill' => LimenAi\Skills\ConfigSkillRepository::class,
+        'workflow' => LimenAi\Workflows\ConfigWorkflowRepository::class,
+        'knowledge' => LimenAi\Knowledge\ConfigKnowledgeRepository::class,
     ],
 
     'authorization' => [
-        // simple = no Gates required; use tool authorize() methods. gates = Laravel abilities/policies.
-        'mode' => env('LIMEN_AI_AUTHORIZATION_MODE', 'simple'),
         'enforce_context_user_match' => true,
         'guest' => [
-            'validator' => CacheGuestSessionValidator::class,
+            'validator' => LimenAi\Authorization\NullGuestSessionValidator::class,
             'cache_prefix' => 'limen-ai:guest:',
         ],
     ],
 
     'memory' => [
-        'store' => InMemoryMemoryStore::class,
-        'retriever' => DefaultMemoryRetriever::class,
+        'store' => LimenAi\Memory\InMemoryMemoryStore::class,
+        'retriever' => LimenAi\Memory\DefaultMemoryRetriever::class,
         'limit' => 20,
-        'strict' => [
-            'enforce_allowlist' => env('LIMEN_AI_MEMORY_STRICT', true),
-            'max_key_length' => 64,
-            'max_value_length' => 512,
-            'allowed_key_pattern' => '/^[a-z][a-z0-9_]*$/',
-        ],
-    ],
-
-    'quality' => [
-        'default_tone' => env('LIMEN_AI_DEFAULT_TONE', 'professional'),
-        'default_language' => env('LIMEN_AI_DEFAULT_LANGUAGE', 'en'),
-        'save_tokens' => env('LIMEN_AI_SAVE_TOKENS', true),
-        'heuristic_validation' => env('LIMEN_AI_HEURISTIC_VALIDATION', ! in_array(env('APP_ENV', 'production'), ['local', 'testing'], true)),
-        'heuristic_concise_max_sentences' => (int) env('LIMEN_AI_HEURISTIC_CONCISE_MAX_SENTENCES', 12),
-        'enforce_forbidden_topics' => env('LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS', false),
-        'semantic_validation' => env('LIMEN_AI_SEMANTIC_VALIDATION', false),
-        'semantic_min_score' => (float) env('LIMEN_AI_SEMANTIC_MIN_SCORE', 0.65),
-        'semantic_validation_strict' => env('LIMEN_AI_SEMANTIC_VALIDATION_STRICT', false),
-        'skill_adherence_check' => env('LIMEN_AI_SKILL_ADHERENCE_CHECK', false),
-        'output_validator' => env('LIMEN_AI_OUTPUT_VALIDATOR'),
-        'output_moderation_enabled' => env('LIMEN_AI_OUTPUT_MODERATION', false),
-        'output_moderator' => env('LIMEN_AI_OUTPUT_MODERATOR'),
-        'tool_count_warn' => (int) env('LIMEN_AI_TOOL_COUNT_WARN', 15),
-        'tool_count_critical' => (int) env('LIMEN_AI_TOOL_COUNT_CRITICAL', 25),
-    ],
-
-    'router' => [
-        'delegates' => array_values(array_filter(explode(',', (string) env('LIMEN_AI_ROUTER_DELEGATES', '')))),
     ],
 
     'responses' => [
@@ -617,28 +377,6 @@ return [
         'session_expired' => 'limen-ai::responses.session_expired',
         'approval_required' => 'limen-ai::responses.approval_required',
         'error' => 'limen-ai::responses.error',
-    ],
-
-    'attachments' => [
-        'enabled' => env('LIMEN_AI_ATTACHMENTS_ENABLED', true),
-        'store' => InMemoryAttachmentStore::class,
-        'disk' => env('LIMEN_AI_ATTACHMENTS_DISK', 'local'),
-        'path' => env('LIMEN_AI_ATTACHMENTS_PATH', 'limen-ai/attachments'),
-        'max_size_kb' => (int) env('LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB', 10240),
-        'max_count' => (int) env('LIMEN_AI_ATTACHMENTS_MAX_COUNT', 5),
-        'allowed_mime_types' => [
-            'text/plain',
-            'text/markdown',
-            'text/csv',
-            'application/json',
-            'application/xml',
-            'text/xml',
-        ],
-        'rag' => [
-            'enabled' => env('LIMEN_AI_ATTACHMENT_RAG_ENABLED', true),
-            'chunk_size' => 1000,
-            'collection_prefix' => 'attachment',
-        ],
     ],
 
     'limits' => [
@@ -696,19 +434,12 @@ return [
         'redaction' => [
             'keys' => ['password', 'token', 'secret', 'api_key'],
         ],
-        'output_moderation' => [
-            'patterns' => [
-                '/\b(?:password|token|secret|api[_-]?key)\s*[:=]\s*\S+/i',
-                '/\bsk-[A-Za-z0-9]{10,}\b/',
-            ],
-        ],
     ],
 
     'ui' => [
         'enabled' => env('LIMEN_AI_UI_ENABLED', true),
         'route_prefix' => env('LIMEN_AI_ROUTE_PREFIX', 'limen-ai'),
-        'middleware' => ['web'],
-        'auth_middleware' => env('LIMEN_AI_UI_REQUIRE_AUTH', true),
+        'middleware' => ['web', 'auth'],
         'palettes' => [
             'light' => [
                 'primary' => '#4F46E5',
@@ -729,17 +460,16 @@ return [
         ],
         'presets' => [
             'default' => [
-                'radius' => '16px',
+                'radius' => '12px',
                 'position' => 'bottom-right',
                 'direction' => 'ltr',
-                'font_family' => '"Cairo", sans-serif',
+                'font_family' => 'ui-sans-serif, system-ui, sans-serif',
                 'title' => 'Limen AI Assistant',
-                'subtitle' => 'Typically replies in a few seconds',
                 'welcome_message' => 'How can I help you today?',
             ],
             'arabic' => [
                 'direction' => 'rtl',
-                'font_family' => '"Cairo", sans-serif',
+                'font_family' => '"Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif',
                 'title' => 'مساعد Limen AI',
                 'welcome_message' => 'كيف يمكنني مساعدتك اليوم؟',
             ],
@@ -749,126 +479,11 @@ return [
             'mode' => env('LIMEN_AI_THEME_MODE', 'light'),
             'allow_mode_toggle' => env('LIMEN_AI_THEME_TOGGLE', false),
             'overrides' => [],
-            'radius' => env('LIMEN_AI_UI_RADIUS'),
-            'position' => env('LIMEN_AI_UI_POSITION'),
-            'direction' => env('LIMEN_AI_UI_DIRECTION'),
-            'title' => env('LIMEN_AI_UI_TITLE'),
-            'subtitle' => env('LIMEN_AI_UI_SUBTITLE'),
-            'welcome_message' => env('LIMEN_AI_UI_WELCOME_MESSAGE'),
-            'avatar_url' => env('LIMEN_AI_UI_AVATAR_URL'),
-            'user_avatar_url' => env('LIMEN_AI_UI_USER_AVATAR_URL'),
-            'font_family' => env('LIMEN_AI_UI_FONT_FAMILY'),
-        ],
-
-        'sounds' => [
-            'enabled' => env('LIMEN_AI_UI_SOUNDS_ENABLED', true),
-            'volume' => (float) env('LIMEN_AI_UI_SOUND_VOLUME', 0.35),
-            'on_send' => env('LIMEN_AI_UI_SOUND_SEND', true),
-            'on_receive' => env('LIMEN_AI_UI_SOUND_RECEIVE', true),
-            'on_open' => env('LIMEN_AI_UI_SOUND_OPEN', true),
-            'on_notification' => env('LIMEN_AI_UI_SOUND_NOTIFICATION', true),
-        ],
-
-        'animations' => [
-            'enabled' => env('LIMEN_AI_UI_ANIMATIONS_ENABLED', true),
-            'duration_ms' => (int) env('LIMEN_AI_UI_ANIMATION_MS', 280),
-            'message_entrance' => env('LIMEN_AI_UI_ANIMATE_MESSAGES', true),
-            'typing_indicator' => env('LIMEN_AI_UI_TYPING_INDICATOR', true),
-            'launcher_pulse' => env('LIMEN_AI_UI_LAUNCHER_PULSE', true),
-            'panel_entrance' => env('LIMEN_AI_UI_PANEL_ENTRANCE', true),
-        ],
-
-        'widget' => [
-            'launcher_label' => env('LIMEN_AI_UI_LAUNCHER_LABEL', ''),
-            'show_unread_badge' => env('LIMEN_AI_UI_UNREAD_BADGE', true),
-            'close_on_escape' => env('LIMEN_AI_UI_CLOSE_ON_ESCAPE', true),
-            'show_header_controls' => true,
-        ],
-
-        'composer' => [
-            'max_rows' => (int) env('LIMEN_AI_UI_COMPOSER_ROWS', 4),
-            'show_char_count' => env('LIMEN_AI_UI_CHAR_COUNT', false),
-            'max_length' => (int) env('LIMEN_AI_UI_MAX_MESSAGE_LENGTH', 4000),
-        ],
-
-        'messages' => [
-            'show_timestamps' => env('LIMEN_AI_UI_TIMESTAMPS', true),
-            'show_avatars' => env('LIMEN_AI_UI_AVATARS', true),
-            'show_role_labels' => env('LIMEN_AI_UI_ROLE_LABELS', false),
-            'time_format' => env('LIMEN_AI_UI_TIME_FORMAT', 'short'),
-        ],
-
-        'rate_limit' => [
-            'enabled' => env('LIMEN_AI_UI_RATE_LIMIT_ENABLED', false),
-            'max_attempts' => (int) env('LIMEN_AI_UI_RATE_LIMIT_MAX', 60),
-            'decay_minutes' => (int) env('LIMEN_AI_UI_RATE_LIMIT_DECAY', 1),
-        ],
-
-        'streaming' => [
-            'enabled' => env('LIMEN_AI_UI_STREAMING_ENABLED', true),
-        ],
-
-        'guest' => [
-            'enabled' => env('LIMEN_AI_UI_GUEST_ENABLED', false),
-            'session_ttl_minutes' => (int) env('LIMEN_AI_UI_GUEST_SESSION_TTL', 10080),
-            'storage_key' => 'limen-ai-guest-token',
-            'form' => [
-                'name' => [
-                    'label' => 'Name',
-                    'placeholder' => 'Your name',
-                    'required' => true,
-                    'max' => 120,
-                ],
-                'email' => [
-                    'label' => 'Email',
-                    'placeholder' => 'you@example.com',
-                    'required' => true,
-                    'max' => 255,
-                ],
-                'phone' => [
-                    'label' => 'Phone',
-                    'placeholder' => '+1 555 000 0000',
-                    'required' => false,
-                    'max' => 40,
-                ],
-            ],
-        ],
-
-        'history' => [
-            'enabled' => env('LIMEN_AI_UI_HISTORY_ENABLED', true),
-            'show_preview' => env('LIMEN_AI_UI_HISTORY_PREVIEW', true),
-            'resume_last_conversation' => env('LIMEN_AI_UI_RESUME_CONVERSATION', true),
-            'defer_until_open' => env('LIMEN_AI_UI_DEFER_UNTIL_OPEN', true),
-            'storage_key' => 'limen-ai-active-conversation',
-        ],
-
-        'i18n' => [
-            'enabled' => env('LIMEN_AI_UI_I18N_ENABLED', true),
-            'default_locale' => env('LIMEN_AI_UI_DEFAULT_LOCALE', 'en'),
-            'storage_key' => 'limen-ai-locale',
-            'supported' => ['en', 'ar'],
-            'labels' => [
-                'en' => [
-                    'placeholder' => 'Type your message...',
-                    'send' => 'Send',
-                    'typing' => 'Typing...',
-                    'history' => 'Conversations',
-                    'new_chat' => 'New chat',
-                    'guest_title' => 'Start a conversation',
-                    'guest_copy' => 'Enter your details to continue.',
-                    'guest_continue' => 'Continue',
-                ],
-                'ar' => [
-                    'placeholder' => 'اكتب رسالتك...',
-                    'send' => 'إرسال',
-                    'typing' => 'يكتب...',
-                    'history' => 'المحادثات',
-                    'new_chat' => 'محادثة جديدة',
-                    'guest_title' => 'ابدأ المحادثة',
-                    'guest_copy' => 'أدخل بياناتك للمتابعة.',
-                    'guest_continue' => 'متابعة',
-                ],
-            ],
+            'radius' => '12px',
+            'position' => 'bottom-right',
+            'direction' => 'ltr',
+            'title' => 'Limen AI Assistant',
+            'welcome_message' => 'How can I help you today?',
         ],
     ],
 
@@ -877,10 +492,6 @@ return [
         'tools' => app_path('LimenAi/Tools'),
         'skills' => app_path('LimenAi/Skills'),
         'workflows' => app_path('LimenAi/Workflows'),
-        'providers' => app_path('LimenAi/Providers'),
-        'memory' => app_path('LimenAi/Memory'),
-        'knowledge' => app_path('LimenAi/Knowledge'),
-        'connectors' => app_path('LimenAi/Connectors'),
     ],
 
 ];
