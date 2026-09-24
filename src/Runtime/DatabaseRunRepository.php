@@ -70,6 +70,19 @@ class DatabaseRunRepository implements RunRepository
             if (isset($metadata['metadata'])) {
                 $updates['metadata'] = json_encode($metadata['metadata'], JSON_THROW_ON_ERROR);
             }
+
+            $existing = $this->find($runId);
+            $mergedMeta = is_array($existing['metadata'] ?? null) ? $existing['metadata'] : [];
+
+            foreach (['usage_summary', 'structured_output'] as $metaKey) {
+                if (array_key_exists($metaKey, $metadata)) {
+                    $mergedMeta[$metaKey] = $metadata[$metaKey];
+                }
+            }
+
+            if ($mergedMeta !== []) {
+                $updates['metadata'] = json_encode($mergedMeta, JSON_THROW_ON_ERROR);
+            }
         }
 
         if (in_array($status, [RunStatus::COMPLETED, RunStatus::FAILED, RunStatus::CANCELLED], true)) {

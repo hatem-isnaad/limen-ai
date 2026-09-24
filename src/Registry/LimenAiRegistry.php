@@ -22,9 +22,13 @@ final class LimenAiRegistry
     /** @var array<string, array<string, mixed>> */
     private array $providers = [];
 
-    /** @param  array<string, mixed>  $definition */
-    public function agent(string $key, array $definition): self
+    /** @param  array<string, mixed>|class-string  $definition */
+    public function agent(string $key, array|string $definition): self
     {
+        if (is_string($definition)) {
+            $definition = ['class' => $definition];
+        }
+
         $this->agents[$key] = $definition;
 
         return $this;
