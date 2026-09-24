@@ -5,6 +5,7 @@ namespace LimenAi\Workflows;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Workflows\WorkflowDefinition;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
+use LimenAi\Support\Enablement;
 
 class ConfigWorkflowRepository implements WorkflowRepository
 {
@@ -31,10 +32,15 @@ class ConfigWorkflowRepository implements WorkflowRepository
             return [];
         }
 
-        return array_values(array_map(
+        $definitions = array_map(
             fn (string $key, array $definition): WorkflowDefinition => ConfigWorkflowDefinition::fromConfig($key, $definition),
             array_keys($workflows),
             $workflows,
+        );
+
+        return array_values(array_filter(
+            $definitions,
+            fn (WorkflowDefinition $workflow): bool => Enablement::isEnabled($workflow),
         ));
     }
 }

@@ -14,6 +14,7 @@ final class ConfigWorkflowDefinition implements WorkflowDefinition
         private readonly string $name,
         private readonly array $definition,
         private readonly string $version,
+        private readonly bool $enabled,
     ) {}
 
     /**
@@ -21,7 +22,7 @@ final class ConfigWorkflowDefinition implements WorkflowDefinition
      */
     public static function fromConfig(string $key, array $config): self
     {
-        $workflowDefinition = $config['definition'] ?? $config;
+        $workflowDefinition = $config['definition'] ?? $config['steps'] ?? $config;
 
         unset($workflowDefinition['name'], $workflowDefinition['version']);
 
@@ -30,6 +31,7 @@ final class ConfigWorkflowDefinition implements WorkflowDefinition
             name: (string) ($config['name'] ?? $key),
             definition: is_array($workflowDefinition) ? $workflowDefinition : [],
             version: (string) ($config['version'] ?? '1.0.0'),
+            enabled: (bool) ($config['enabled'] ?? true),
         );
     }
 
@@ -64,5 +66,10 @@ final class ConfigWorkflowDefinition implements WorkflowDefinition
         $steps = $this->definition['steps'] ?? [];
 
         return is_array($steps) ? $steps : [];
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

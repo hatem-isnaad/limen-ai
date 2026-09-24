@@ -6,6 +6,7 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Contracts\Tools\ToolRepository;
+use LimenAi\Support\Enablement;
 
 class ConfigToolRepository implements ToolRepository
 {
@@ -33,10 +34,15 @@ class ConfigToolRepository implements ToolRepository
             return [];
         }
 
-        return array_values(array_map(
+        $definitions = array_map(
             fn (string $key, array $definition): ToolDefinition => ConfigToolDefinition::fromConfig($key, $definition),
             array_keys($tools),
             $tools,
+        );
+
+        return array_values(array_filter(
+            $definitions,
+            fn (ToolDefinition $tool): bool => Enablement::isEnabled($tool),
         ));
     }
 
@@ -53,7 +59,7 @@ class ConfigToolRepository implements ToolRepository
         foreach ($agent->tools() as $toolKey) {
             $tool = $this->find($toolKey);
 
-            if ($tool !== null) {
+            if ($tool !== null && Enablement::isEnabled($tool)) {
                 $tools[] = $tool;
             }
         }
