@@ -3,36 +3,46 @@
 namespace LimenAi\Runtime;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use LimenAi\Agents\AgentPersonaComposer;
-use LimenAi\Agents\AgentResponseGuard;
 use LimenAi\Agents\ResolvedAgent;
 use LimenAi\Authorization\ApprovalStatus;
+use LimenAi\Conversations\ConversationService;
 use LimenAi\Contracts\Agents\AgentResolver;
-use LimenAi\Contracts\Attachments\AgentAttachmentRetriever;
 use LimenAi\Contracts\Authorization\ApprovalRepository;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Contracts\Knowledge\AgentKnowledgeRetriever;
 use LimenAi\Contracts\Memory\MemoryRetriever;
+use LimenAi\Contracts\Observability\UsageReader;
 use LimenAi\Contracts\Observability\UsageTracker;
+use LimenAi\Observability\MessageUsageEnvelope;
+use LimenAi\Observability\RunUsageFinalizer;
+use LimenAi\Observability\RunUsageMessageLinker;
+use LimenAi\Observability\TraceContext;
+use LimenAi\Contracts\Security\ContentSanitizer;
 use LimenAi\Contracts\Runtime\AgentRuntime;
 use LimenAi\Contracts\Runtime\CheckpointStore;
 use LimenAi\Contracts\Runtime\RunContext;
 use LimenAi\Contracts\Runtime\RunRepository;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
-use LimenAi\Contracts\Security\ContentSanitizer;
-use LimenAi\Conversations\ConversationService;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentFailed;
 use LimenAi\Events\AgentStarted;
+use LimenAi\Events\AgentStreamDelta;
+use LimenAi\Exceptions\StreamingNotSupportedException;
+use LimenAi\Contracts\Providers\StreamingLlmProvider;
+use LimenAi\Providers\LlmResponseData;
+use LimenAi\Providers\LlmStreamChunk;
+use LimenAi\Ai\Messages\Message;
+use LimenAi\Observability\TokenUsage;
+use LimenAi\Support\StructuredOutput;
 use LimenAi\Events\ApprovalGranted;
 use LimenAi\Events\ApprovalRejected;
 use LimenAi\Events\ApprovalRequested;
 use LimenAi\Exceptions\ApprovalRequiredException;
 use LimenAi\Exceptions\InvalidRunStateException;
 use LimenAi\Exceptions\RunNotFoundException;
-use LimenAi\Observability\TraceContext;
 use LimenAi\Runtime\RunContextData as RunContextDataImpl;
 use LimenAi\Tools\ToolPipeline;
+use LimenAi\Runtime\AgentStepRunner;
 
 class DefaultAgentRuntime implements AgentRuntime
 {
@@ -47,12 +57,13 @@ class DefaultAgentRuntime implements AgentRuntime
         private readonly ConversationService $conversations,
         private readonly MemoryRetriever $memory,
         private readonly AgentKnowledgeRetriever $knowledge,
-        private readonly AgentAttachmentRetriever $attachments,
         private readonly ContentSanitizer $sanitizer,
         private readonly UsageTracker $usage,
+        private readonly UsageReader $usageReader,
+        private readonly RunUsageFinalizer $usageFinalizer,
+        private readonly RunUsageMessageLinker $usageMessageLinker,
+        private readonly AgentStepRunner $agentSteps,
         private readonly Dispatcher $events,
-        private readonly AgentPersonaComposer $personaComposer,
-        private readonly AgentResponseGuard $responseGuard,
     ) {}
 
     public function run(string $agentKey, string $conversationId, string $userMessage, RunContext $context): string
@@ -72,29 +83,15 @@ class DefaultAgentRuntime implements AgentRuntime
         $userMessage = $this->sanitizer->sanitize($userMessage);
 
         $history = $this->conversations->historyForAgent($conversationId, $agentKey);
-        $this->conversations->appendUserMessage($conversationId, $userMessage);
+        $userTurn = $this->buildUserTurnMessage($userMessage, $context);
+        $this->conversations->appendAgentMessage($conversationId, $userTurn);
 
-        $baseMessages = array_merge($history, [
-            ['role' => 'user', 'content' => $userMessage],
-        ]);
+        $baseMessages = array_merge($history, [$userTurn]);
 
         $historyCount = count($baseMessages);
         $memoryMessages = $this->memory->retrieve($agentKey, $this->memoryContext($agentKey, $conversationId, $context));
         $knowledgeMessages = $this->knowledge->retrieve($agentKey, $userMessage);
-        $attachmentIds = array_values(array_filter((array) ($context->metadata()['attachment_ids'] ?? [])));
-        $attachmentMessages = $this->attachments->retrieve($conversationId, $userMessage, $attachmentIds);
-        $runtimePersona = $this->runtimePersonaMessage($agent, $context);
-        $contextPrefixCount = count($memoryMessages)
-            + count($knowledgeMessages)
-            + count($attachmentMessages)
-            + ($runtimePersona !== null ? 1 : 0);
-        $messages = array_merge(
-            $memoryMessages,
-            $knowledgeMessages,
-            $attachmentMessages,
-            $runtimePersona !== null ? [$runtimePersona] : [],
-            $baseMessages,
-        );
+        $messages = array_merge($memoryMessages, $knowledgeMessages, $baseMessages);
 
         $runId = $this->runs->create([
             'agent_key' => $agentKey,
@@ -106,9 +103,7 @@ class DefaultAgentRuntime implements AgentRuntime
             'span_id' => $trace?->spanId,
         ]);
 
-        $skillKeys = $this->skillKeys($agent);
-
-        $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context, $skillKeys));
+        $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context));
 
         $limits = new RuntimeLimits($agent->limits(), microtime(true));
 
@@ -122,22 +117,44 @@ class DefaultAgentRuntime implements AgentRuntime
                 context: $context,
             );
 
+            $structured = [];
+
+            if (($agent->definition()->outputConfig()['format'] ?? 'text') === 'json') {
+                $structured = StructuredOutput::decode($finalMessage, $agent->definition()->outputConfig());
+            }
+
+            $usageSummary = $this->usageFinalizer->finalize(
+                $runId,
+                $agent->providerName(),
+                $agent->model(),
+                $finalMessage,
+                $userMessage,
+            );
+
             $this->persistRun($runId, RunStatus::COMPLETED, [
                 'final_message' => $finalMessage,
+                'structured_output' => $structured !== [] ? $structured : null,
+                'usage_summary' => $usageSummary,
                 'current_step' => $limits->currentStep(),
                 'tool_call_count' => $limits->toolCallCount(),
                 'messages' => $messages,
                 'error' => null,
             ]);
 
-            $this->syncConversationMessages($conversationId, $messages, $historyCount, $contextPrefixCount);
+            $this->syncConversationMessages(
+                $conversationId,
+                $messages,
+                $historyCount,
+                $this->messageUsageEnvelope($runId, $agent, $usageSummary),
+                $runId,
+            );
 
-            $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $finalMessage, $context, $skillKeys));
+            $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $finalMessage, $context));
             $this->checkpoints->delete($runId);
 
             return $runId;
         } catch (ApprovalRequiredException $exception) {
-            $this->syncConversationMessages($conversationId, $messages, $historyCount, $contextPrefixCount);
+            $this->syncConversationMessages($conversationId, $messages, $historyCount);
             $this->conversations->markWaitingApproval($conversationId);
 
             $approval = $this->approvals->findPendingForRun($runId);
@@ -155,6 +172,175 @@ class DefaultAgentRuntime implements AgentRuntime
                 'error' => $exception->getMessage(),
                 'current_step' => $limits->currentStep(),
                 'tool_call_count' => $limits->toolCallCount(),
+                'messages' => $messages,
+            ]);
+
+            $this->events->dispatch(new AgentFailed($runId, $agentKey, $conversationId, $exception->getMessage(), $context));
+
+            throw $exception;
+        }
+    }
+
+    public function stream(string $agentKey, string $conversationId, string $userMessage, RunContext $context): \Generator
+    {
+        if (! (bool) config('limen-ai.streaming.enabled', true)) {
+            throw StreamingNotSupportedException::forReason('Streaming is disabled in configuration.');
+        }
+
+        $agent = $this->agentResolver->resolve($agentKey);
+        $this->authorization->authorizeAgent($agent->definition());
+        $this->authorization->validateRunContext($context, $agent->definition());
+
+        if ($agent->toolSchemas() !== [] && ! (bool) config('limen-ai.streaming.allow_with_tools', false)) {
+            throw StreamingNotSupportedException::forReason(
+                'Streaming is not available for tool-enabled agents. Use run() or enable streaming.allow_with_tools.',
+            );
+        }
+
+        $this->conversations->ensure($conversationId, $agentKey, $context);
+
+        $userMessage = $this->sanitizer->sanitize($userMessage);
+
+        $history = $this->conversations->historyForAgent($conversationId, $agentKey);
+        $userTurn = $this->buildUserTurnMessage($userMessage, $context);
+        $this->conversations->appendAgentMessage($conversationId, $userTurn);
+
+        $baseMessages = array_merge($history, [$userTurn]);
+
+        $historyCount = count($baseMessages);
+        $memoryMessages = $this->memory->retrieve($agentKey, $this->memoryContext($agentKey, $conversationId, $context));
+        $knowledgeMessages = $this->knowledge->retrieve($agentKey, $userMessage);
+        $messages = array_merge($memoryMessages, $knowledgeMessages, $baseMessages);
+
+        $runId = $this->runs->create([
+            'agent_key' => $agentKey,
+            'conversation_id' => $conversationId,
+            'user_id' => $context->userId(),
+            'status' => RunStatus::RUNNING,
+            'messages' => $messages,
+        ]);
+
+        $this->events->dispatch(new AgentStarted($runId, $agentKey, $conversationId, $context));
+
+        $content = '';
+        $usage = [];
+        $limits = new RuntimeLimits($agent->limits(), microtime(true));
+        $useToolLoop = $agent->toolSchemas() !== [] && (bool) config('limen-ai.streaming.allow_with_tools', false);
+
+        try {
+            if ($useToolLoop) {
+                $content = '';
+
+                foreach ($this->executeLoopStreaming(
+                    agent: $agent,
+                    runId: $runId,
+                    conversationId: $conversationId,
+                    messages: $messages,
+                    limits: $limits,
+                    context: $context,
+                ) as $streamChunk) {
+                    if (isset($streamChunk->meta['final_content'])) {
+                        $content = (string) $streamChunk->meta['final_content'];
+
+                        continue;
+                    }
+
+                    if ($streamChunk->done) {
+                        continue;
+                    }
+
+                    if ($streamChunk->delta !== '' || ($streamChunk->meta['type'] ?? null) !== null) {
+                        yield $streamChunk;
+                    }
+                }
+            } else {
+                $limits->nextStep();
+                $pendingStep = $this->agentSteps->process($agent, $runId, $messages, $limits->currentStep());
+                $messages = $pendingStep->messages;
+
+                foreach ($agent->stream($messages, $pendingStep->options) as $chunk) {
+                    if ($chunk->delta !== '') {
+                        $content .= $chunk->delta;
+                    }
+
+                    if ($chunk->usage !== []) {
+                        $usage = $chunk->usage;
+                    }
+
+                    $this->events->dispatch(new AgentStreamDelta(
+                        $runId,
+                        $conversationId,
+                        $agentKey,
+                        $chunk->delta,
+                        $chunk->done,
+                    ));
+
+                    yield $chunk;
+                }
+            }
+
+            $messages[] = ['role' => 'assistant', 'content' => $content];
+
+            $structured = [];
+
+            if (($agent->definition()->outputConfig()['format'] ?? 'text') === 'json') {
+                $structured = StructuredOutput::decode($content, $agent->definition()->outputConfig());
+            }
+
+            if ($usage !== [] && ($summaryPreview = TokenUsage::normalize($usage))['total_tokens'] > 0) {
+                $this->usage->recordLlmUsage(
+                    $runId,
+                    $agent->providerName(),
+                    $agent->model(),
+                    $usage,
+                );
+            }
+
+            $usageSummary = $this->usageFinalizer->finalize(
+                $runId,
+                $agent->providerName(),
+                $agent->model(),
+                $content,
+                $userMessage,
+            );
+
+            $this->persistRun($runId, RunStatus::COMPLETED, [
+                'final_message' => $content,
+                'structured_output' => $structured !== [] ? $structured : null,
+                'usage_summary' => $usageSummary,
+                'current_step' => $useToolLoop ? $limits->currentStep() : 1,
+                'tool_call_count' => $useToolLoop ? $limits->toolCallCount() : 0,
+                'messages' => $messages,
+                'error' => null,
+            ]);
+
+            $usageEnvelope = $this->messageUsageEnvelope($runId, $agent, $usageSummary);
+
+            $assistantMessageId = $this->syncConversationMessages(
+                $conversationId,
+                $messages,
+                $historyCount,
+                $usageEnvelope,
+                $runId,
+            );
+
+            if ($assistantMessageId !== null) {
+                $usageEnvelope['message_id'] = $assistantMessageId;
+            }
+
+            yield new LlmStreamChunk(
+                delta: '',
+                done: true,
+                meta: [
+                    'run_id' => $runId,
+                    'usage' => $usageEnvelope,
+                ],
+            );
+
+            $this->events->dispatch(new AgentCompleted($runId, $agentKey, $conversationId, $content, $context));
+        } catch (\Throwable $exception) {
+            $this->persistRun($runId, RunStatus::FAILED, [
+                'error' => $exception->getMessage(),
                 'messages' => $messages,
             ]);
 
@@ -220,15 +406,32 @@ class DefaultAgentRuntime implements AgentRuntime
             context: $context,
         );
 
+        $lastUserMessage = $this->lastUserMessageFrom($messages);
+
+        $usageSummary = $this->usageFinalizer->finalize(
+            $runId,
+            $agent->providerName(),
+            $agent->model(),
+            $finalMessage,
+            $lastUserMessage,
+        );
+
         $this->persistRun($runId, RunStatus::COMPLETED, [
             'final_message' => $finalMessage,
+            'usage_summary' => $usageSummary,
             'current_step' => $limits->currentStep(),
             'tool_call_count' => $limits->toolCallCount(),
             'messages' => $messages,
             'error' => null,
         ]);
 
-        $this->syncConversationMessages($conversationId, $messages, $historyCount);
+        $this->syncConversationMessages(
+            $conversationId,
+            $messages,
+            $historyCount,
+            $this->messageUsageEnvelope($runId, $agent, $usageSummary),
+            $runId,
+        );
 
         $this->events->dispatch(new AgentCompleted(
             $runId,
@@ -236,7 +439,6 @@ class DefaultAgentRuntime implements AgentRuntime
             $conversationId,
             $finalMessage,
             $context,
-            $this->skillKeys($agent),
         ));
 
         $this->checkpoints->delete($runId);
@@ -286,26 +488,130 @@ class DefaultAgentRuntime implements AgentRuntime
         RuntimeLimits $limits,
         RunContext $context,
     ): string {
+        $content = '';
+
+        foreach ($this->executeLoopStreaming($agent, $runId, $conversationId, $messages, $limits, $context) as $chunk) {
+            if (($chunk->meta['final_content'] ?? null) !== null) {
+                $content = (string) $chunk->meta['final_content'];
+            }
+        }
+
+        return $content;
+    }
+
+    protected function executeLoopStreaming(
+        ResolvedAgent $agent,
+        string $runId,
+        string $conversationId,
+        array &$messages,
+        RuntimeLimits $limits,
+        RunContext $context,
+    ): \Generator {
         while (true) {
             $limits->nextStep();
 
-            $response = $agent->chat($messages);
-            $this->usage->recordLlmUsage(
-                $runId,
-                $agent->providerName(),
-                $agent->model(),
-                $response->usage(),
-            );
+            $pendingStep = $this->agentSteps->process($agent, $runId, $messages, $limits->currentStep());
+            $messages = $pendingStep->messages;
+
+            $toolsDisabled = ($pendingStep->options['omit_tools'] ?? false) || $agent->toolSchemas() === [];
+            $provider = $agent->provider();
+            $canStream = $provider instanceof StreamingLlmProvider && $provider->supportsStreaming();
+
+            if (
+                $canStream
+                && ! $toolsDisabled
+                && (bool) config('limen-ai.streaming.allow_with_tools', false)
+            ) {
+                $streamResult = yield from $this->streamAgentStepWithOptionalToolCalls(
+                    agent: $agent,
+                    runId: $runId,
+                    conversationId: $conversationId,
+                    messages: $messages,
+                    limits: $limits,
+                    context: $context,
+                    pendingOptions: $pendingStep->options,
+                );
+
+                if ($streamResult === 'completed') {
+                    return;
+                }
+
+                continue;
+            }
+
+            if (
+                $toolsDisabled
+                && $canStream
+            ) {
+                $content = '';
+
+                foreach ($agent->stream($messages, $pendingStep->options) as $chunk) {
+                    if ($chunk->delta !== '') {
+                        $content .= $chunk->delta;
+
+                        $this->events->dispatch(new AgentStreamDelta(
+                            $runId,
+                            $conversationId,
+                            $agent->key(),
+                            $chunk->delta,
+                            false,
+                        ));
+
+                        yield new LlmStreamChunk(
+                            delta: $chunk->delta,
+                            done: false,
+                            usage: $chunk->usage,
+                            finishReason: $chunk->finishReason,
+                        );
+                    }
+
+                    if ($chunk->usage !== []) {
+                        $this->usage->recordLlmUsage(
+                            $runId,
+                            $agent->providerName(),
+                            $agent->model(),
+                            $chunk->usage,
+                        );
+                    }
+                }
+
+                $messages[] = ['role' => 'assistant', 'content' => $content];
+
+                yield new LlmStreamChunk(
+                    delta: '',
+                    done: true,
+                    meta: ['final_content' => $content],
+                );
+
+                return;
+            }
+
+            $response = $agent->chat($messages, $pendingStep->options);
+            $llmUsage = $response->usage();
+
+            if (TokenUsage::normalize($llmUsage)['total_tokens'] > 0) {
+                $this->usage->recordLlmUsage(
+                    $runId,
+                    $agent->providerName(),
+                    $agent->model(),
+                    $llmUsage,
+                );
+            }
             $toolCalls = $this->toolCallParser->parse($response);
 
             if ($toolCalls === []) {
-                $content = $this->responseGuard->apply(
-                    $agent->definition(),
-                    (string) ($response->content() ?? ''),
-                );
+                $content = (string) ($response->content() ?? '');
                 $messages[] = ['role' => 'assistant', 'content' => $content];
 
-                return $content;
+                yield from $this->emitStreamChunks($runId, $conversationId, $agent->key(), $content);
+
+                yield new LlmStreamChunk(
+                    delta: '',
+                    done: true,
+                    meta: ['final_content' => $content],
+                );
+
+                return;
             }
 
             $limits->recordToolCalls(count($toolCalls));
@@ -319,6 +625,17 @@ class DefaultAgentRuntime implements AgentRuntime
             $toolContext = $this->toolContext($context, $runId, $conversationId, $agent->key());
 
             foreach ($toolCalls as $toolCall) {
+                yield new LlmStreamChunk(
+                    delta: '',
+                    done: false,
+                    meta: [
+                        'type' => 'tool-call',
+                        'tool_call_id' => (string) ($toolCall['id'] ?? ''),
+                        'tool_name' => (string) ($toolCall['name'] ?? ''),
+                        'arguments' => $toolCall['arguments'] ?? [],
+                    ],
+                );
+
                 try {
                     $result = $this->toolPipeline->execute(
                         $toolCall['name'],
@@ -330,140 +647,167 @@ class DefaultAgentRuntime implements AgentRuntime
                     throw $exception;
                 }
 
+                $output = $result->output();
+
+                yield new LlmStreamChunk(
+                    delta: '',
+                    done: false,
+                    meta: [
+                        'type' => 'tool-result',
+                        'tool_call_id' => (string) ($toolCall['id'] ?? ''),
+                        'result' => $output,
+                    ],
+                );
+
                 $messages[] = [
                     'role' => 'tool',
                     'tool_call_id' => $toolCall['id'],
-                    'content' => json_encode($result->output(), JSON_THROW_ON_ERROR),
+                    'content' => json_encode($output, JSON_THROW_ON_ERROR),
                 ];
             }
         }
     }
 
-    protected function saveApprovalCheckpoint(
+    protected function streamAgentStepWithOptionalToolCalls(
+        ResolvedAgent $agent,
         string $runId,
+        string $conversationId,
+        array &$messages,
         RuntimeLimits $limits,
-        array $messages,
-        ApprovalRequiredException $exception,
         RunContext $context,
-        ?string $toolCallId = null,
-    ): string {
-        $payload = [
-            'tool_call_id' => $toolCallId,
-            'input' => $exception->input(),
-        ];
+        array $pendingOptions,
+    ): \Generator {
+        $content = '';
+        $assembledToolCalls = [];
+        $llmUsage = [];
 
-        $approvalId = $this->approvals->request(
-            $runId,
-            $exception->tool()->key(),
-            $payload,
-            $context->userId(),
-        );
+        foreach ($agent->stream($messages, $pendingOptions) as $chunk) {
+            if ($chunk->delta !== '') {
+                $content .= $chunk->delta;
+                $this->events->dispatch(new AgentStreamDelta($runId, $conversationId, $agent->key(), $chunk->delta, false));
+                yield $chunk;
+            } elseif (($chunk->meta['type'] ?? null) === 'tool-call-delta') {
+                yield $chunk;
+            }
 
-        $this->checkpoints->save($runId, $limits->currentStep(), [
-            'messages' => $messages,
-            'tool_call_count' => $limits->toolCallCount(),
-            'pending_approval' => [
-                'tool_call_id' => $toolCallId,
-                'tool_key' => $exception->tool()->key(),
-                'input' => $exception->input(),
-                'approval_id' => $approvalId,
-            ],
+            if (($chunk->meta['type'] ?? null) === 'tool-calls-complete') {
+                $assembledToolCalls = array_values($chunk->meta['tool_calls'] ?? []);
+                yield $chunk;
+            }
+
+            if ($chunk->usage !== []) {
+                $llmUsage = $chunk->usage;
+            }
+        }
+
+        if (TokenUsage::normalize($llmUsage)['total_tokens'] > 0) {
+            $this->usage->recordLlmUsage($runId, $agent->providerName(), $agent->model(), $llmUsage);
+        }
+
+        if ($assembledToolCalls === []) {
+            $messages[] = ['role' => 'assistant', 'content' => $content];
+            yield from $this->emitStreamChunks($runId, $conversationId, $agent->key(), $content);
+            yield new LlmStreamChunk(delta: '', done: true, meta: ['final_content' => $content]);
+            return 'completed';
+        }
+
+        $response = LlmResponseData::fromArray([
+            'content' => $content !== '' ? $content : null,
+            'tool_calls' => $assembledToolCalls,
+            'finish_reason' => 'tool_calls',
         ]);
 
-        $this->events->dispatch(new ApprovalRequested(
-            $approvalId,
-            $runId,
-            $exception->tool()->key(),
-            $payload,
-        ));
+        $toolCalls = $this->toolCallParser->parse($response);
 
+        if ($toolCalls === []) {
+            $messages[] = ['role' => 'assistant', 'content' => $content];
+            yield from $this->emitStreamChunks($runId, $conversationId, $agent->key(), $content);
+            yield new LlmStreamChunk(delta: '', done: true, meta: ['final_content' => $content]);
+            return 'completed';
+        }
+
+        $limits->recordToolCalls(count($toolCalls));
+        $messages[] = ['role' => 'assistant', 'content' => $content !== '' ? $content : null, 'tool_calls' => $assembledToolCalls];
+        $toolContext = $this->toolContext($context, $runId, $conversationId, $agent->key());
+
+        foreach ($toolCalls as $toolCall) {
+            yield new LlmStreamChunk(delta: '', done: false, meta: ['type' => 'tool-call', 'tool_call_id' => (string) ($toolCall['id'] ?? ''), 'tool_name' => (string) ($toolCall['name'] ?? ''), 'arguments' => $toolCall['arguments'] ?? []]);
+            try {
+                $result = $this->toolPipeline->execute($toolCall['name'], $toolCall['arguments'], $toolContext);
+            } catch (ApprovalRequiredException $exception) {
+                $this->saveApprovalCheckpoint($runId, $limits, $messages, $exception, $context, $toolCall['id']);
+                throw $exception;
+            }
+            $output = $result->output();
+            yield new LlmStreamChunk(delta: '', done: false, meta: ['type' => 'tool-result', 'tool_call_id' => (string) ($toolCall['id'] ?? ''), 'result' => $output]);
+            $messages[] = ['role' => 'tool', 'tool_call_id' => $toolCall['id'], 'content' => json_encode($output, JSON_THROW_ON_ERROR)];
+        }
+
+        return 'continue';
+    }
+
+    protected function saveApprovalCheckpoint(string $runId, RuntimeLimits $limits, array $messages, ApprovalRequiredException $exception, RunContext $context, ?string $toolCallId = null): string
+    {
+        $payload = ['tool_call_id' => $toolCallId, 'input' => $exception->input()];
+        $approvalId = $this->approvals->request($runId, $exception->tool()->key(), $payload, $context->userId());
+        $this->checkpoints->save($runId, $limits->currentStep(), ['messages' => $messages, 'tool_call_count' => $limits->toolCallCount(), 'pending_approval' => ['tool_call_id' => $toolCallId, 'tool_key' => $exception->tool()->key(), 'input' => $exception->input(), 'approval_id' => $approvalId]]);
+        $this->events->dispatch(new ApprovalRequested($approvalId, $runId, $exception->tool()->key(), $payload));
         return $approvalId;
     }
 
     protected function loadRunWaitingForApproval(string $runId): array
     {
         $run = $this->runs->find($runId);
-
         if ($run === null) {
             throw RunNotFoundException::forId($runId);
         }
-
         if ($run['status'] !== RunStatus::WAITING_APPROVAL) {
             throw InvalidRunStateException::notWaitingForApproval($runId);
         }
-
         return $run;
     }
 
     protected function loadCheckpoint(string $runId): array
     {
         $checkpoint = $this->checkpoints->load($runId);
-
         if ($checkpoint === null) {
             throw InvalidRunStateException::checkpointMissing($runId);
         }
-
         return $checkpoint;
     }
 
     protected function resolvePendingApproval(string $runId, RunContext $context, string $status): void
     {
         $approval = $this->approvals->findPendingForRun($runId);
-
         if ($approval === null) {
             return;
         }
-
         $resolverId = $context->userId() ?? 0;
         $approvalId = (string) $approval['id'];
-
         if ($status === ApprovalStatus::APPROVED) {
             $this->approvals->approve($approvalId, $resolverId);
             $this->events->dispatch(new ApprovalGranted($approvalId, $runId, $resolverId));
-
             return;
         }
-
         $this->approvals->reject($approvalId, $resolverId);
         $this->events->dispatch(new ApprovalRejected($approvalId, $runId, $resolverId));
     }
 
-    protected function toolContext(
-        RunContext $context,
-        string $runId,
-        string $conversationId,
-        string $agentKey,
-    ): ToolExecutionContext {
+    protected function toolContext(RunContext $context, string $runId, string $conversationId, string $agentKey): ToolExecutionContext
+    {
         if ($context instanceof RunContextDataImpl) {
             return $context->forToolExecution($runId, $conversationId, $agentKey);
         }
-
-        return RunContextDataImpl::make([
-            'user_id' => $context->userId(),
-            'guest_token' => $context->guestToken(),
-            'metadata' => $context->metadata(),
-            'locale' => $context->locale(),
-        ])->forToolExecution($runId, $conversationId, $agentKey);
+        return RunContextDataImpl::make(['user_id' => $context->userId(), 'guest_token' => $context->guestToken(), 'metadata' => $context->metadata(), 'locale' => $context->locale()])->forToolExecution($runId, $conversationId, $agentKey);
     }
 
-    protected function approvedToolContext(
-        RunContext $context,
-        string $runId,
-        string $conversationId,
-        string $agentKey,
-    ): ToolExecutionContext {
+    protected function approvedToolContext(RunContext $context, string $runId, string $conversationId, string $agentKey): ToolExecutionContext
+    {
         $toolContext = $this->toolContext($context, $runId, $conversationId, $agentKey);
-
         if ($toolContext instanceof RunContextDataImpl) {
             return $toolContext->withApprovalGranted();
         }
-
-        return RunContextDataImpl::make([
-            'user_id' => $context->userId(),
-            'guest_token' => $context->guestToken(),
-            'metadata' => array_merge($context->metadata(), ['approval_granted' => true]),
-            'locale' => $context->locale(),
-        ])->forToolExecution($runId, $conversationId, $agentKey);
+        return RunContextDataImpl::make(['user_id' => $context->userId(), 'guest_token' => $context->guestToken(), 'metadata' => array_merge($context->metadata(), ['approval_granted' => true]), 'locale' => $context->locale()])->forToolExecution($runId, $conversationId, $agentKey);
     }
 
     protected function persistRun(string $runId, string $status, array $attributes): void
@@ -471,35 +815,36 @@ class DefaultAgentRuntime implements AgentRuntime
         $this->runs->updateStatus($runId, $status, $attributes);
     }
 
-    protected function syncConversationMessages(
-        string $conversationId,
-        array $messages,
-        int $historyCount,
-        int $contextPrefixCount = 0,
-    ): void {
-        if ($contextPrefixCount > 0) {
-            $turnStart = $contextPrefixCount + $historyCount - 1;
-            $newMessages = array_slice($messages, $turnStart + 1);
-        } else {
-            $newMessages = array_slice($messages, $historyCount);
+    protected function syncConversationMessages(string $conversationId, array $messages, int $historyCount, ?array $usageEnvelope = null, ?string $runId = null): ?string
+    {
+        $newMessages = array_slice($messages, $historyCount);
+        if ($newMessages === []) {
+            return null;
         }
-
-        $persistable = array_values(array_filter(
-            $newMessages,
-            static function (array $message): bool {
-                if (($message['role'] ?? '') !== 'assistant') {
-                    return false;
-                }
-
-                return trim((string) ($message['content'] ?? '')) !== '';
-            },
-        ));
-
-        if ($persistable === []) {
-            return;
+        if ($usageEnvelope !== null) {
+            $newMessages = MessageUsageEnvelope::attachToNewMessages($newMessages, $usageEnvelope);
         }
+        $messageIds = $this->conversations->appendAgentMessages($conversationId, $newMessages);
+        $assistantMessageId = $this->assistantMessageIdFor($newMessages, $messageIds);
+        if ($runId !== null && $assistantMessageId !== null) {
+            $this->usageMessageLinker->link($runId, $conversationId, $assistantMessageId);
+        }
+        return $assistantMessageId;
+    }
 
-        $this->conversations->appendAgentMessages($conversationId, $persistable);
+    protected function assistantMessageIdFor(array $newMessages, array $messageIds): ?string
+    {
+        for ($i = count($newMessages) - 1; $i >= 0; $i--) {
+            if (($newMessages[$i]['role'] ?? '') === 'assistant' && ($newMessages[$i]['content'] ?? '') !== '') {
+                return $messageIds[$i] ?? null;
+            }
+        }
+        return null;
+    }
+
+    protected function messageUsageEnvelope(string $runId, ResolvedAgent $agent, array $usageSummary): array
+    {
+        return MessageUsageEnvelope::fromSummary($runId, $agent->providerName(), $agent->model(), $usageSummary, MessageUsageEnvelope::hasEstimatedUsage($this->usageReader->recordsForRun($runId)));
     }
 
     protected function shouldTrace(): bool
@@ -507,36 +852,38 @@ class DefaultAgentRuntime implements AgentRuntime
         return (bool) config('limen-ai.observability.trace_enabled', true);
     }
 
+    protected function emitStreamChunks(string $runId, string $conversationId, string $agentKey, string $content): \Generator
+    {
+        foreach (preg_split('/(\s+)/u', $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $part) {
+            $this->events->dispatch(new AgentStreamDelta($runId, $conversationId, $agentKey, $part, false));
+            yield new LlmStreamChunk(delta: $part);
+        }
+        $this->events->dispatch(new AgentStreamDelta($runId, $conversationId, $agentKey, '', true));
+        yield new LlmStreamChunk(delta: '', done: true);
+    }
+
     protected function memoryContext(string $agentKey, string $conversationId, RunContext $context): array
     {
-        return [
-            'agent_key' => $agentKey,
-            'conversation_id' => $conversationId,
-            'user_id' => $context->userId(),
-            'guest_token' => $context->guestToken(),
-        ];
+        return ['agent_key' => $agentKey, 'conversation_id' => $conversationId, 'user_id' => $context->userId(), 'guest_token' => $context->guestToken()];
     }
 
-    /** @return list<string> */
-    protected function skillKeys(ResolvedAgent $agent): array
+    protected function lastUserMessageFrom(array $messages): string
     {
-        return array_values(array_map(
-            static fn ($skill): string => $skill->key(),
-            $agent->skills(),
-        ));
-    }
-
-    protected function runtimePersonaMessage(ResolvedAgent $agent, RunContext $context): ?array
-    {
-        $addendum = $this->personaComposer->composeRuntimeAddendum($agent->definition(), $context);
-
-        if ($addendum === null || trim($addendum) === '') {
-            return null;
+        for ($i = count($messages) - 1; $i >= 0; $i--) {
+            if (($messages[$i]['role'] ?? '') === 'user') {
+                $content = $messages[$i]['content'] ?? '';
+                return is_array($content) ? (string) (collect($content)->firstWhere('type', 'text')['text'] ?? '') : (string) $content;
+            }
         }
+        return '';
+    }
 
-        return [
-            'role' => 'system',
-            'content' => $addendum,
-        ];
+    protected function buildUserTurnMessage(string $userMessage, RunContext $context): array
+    {
+        $attachments = $context->metadata()['attachments'] ?? [];
+        if (! is_array($attachments) || $attachments === []) {
+            return ['role' => 'user', 'content' => $userMessage];
+        }
+        return (new Message('user', $userMessage, array_values($attachments)))->toArray();
     }
 }
