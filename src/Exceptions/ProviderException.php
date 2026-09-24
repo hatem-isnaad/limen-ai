@@ -4,4 +4,6 @@ namespace LimenAi\Exceptions;
 
 use RuntimeException;
 
-class ProviderException extends RuntimeException {}
+class ProviderException extends RuntimeException
+{
+}

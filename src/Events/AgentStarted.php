@@ -16,7 +16,5 @@ class AgentStarted
         public readonly string $agentKey,
         public readonly string $conversationId,
         public readonly RunContext $context,
-        /** @var list<string> */
-        public readonly array $skillKeys = [],
     ) {}
 }

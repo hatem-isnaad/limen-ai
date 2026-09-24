@@ -4,18 +4,17 @@ namespace LimenAi\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use LimenAi\Contracts\Runtime\RunContext;
 
-class AgentCompleted
+final class AgentStreamDelta
 {
     use Dispatchable;
     use SerializesModels;
 
     public function __construct(
         public readonly string $runId,
-        public readonly string $agentKey,
         public readonly string $conversationId,
-        public readonly string $finalMessage,
-        public readonly RunContext $context,
+        public readonly string $agentKey,
+        public readonly string $delta,
+        public readonly bool $done,
     ) {}
 }

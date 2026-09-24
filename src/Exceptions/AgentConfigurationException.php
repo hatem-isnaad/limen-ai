@@ -2,4 +2,6 @@
 
 namespace LimenAi\Exceptions;
 
-class AgentConfigurationException extends ProviderException {}
+class AgentConfigurationException extends ProviderException
+{
+}
