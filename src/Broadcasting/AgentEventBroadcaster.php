@@ -8,6 +8,7 @@ use LimenAi\Contracts\Runtime\RunContext;
 use LimenAi\Events\AgentCompleted;
 use LimenAi\Events\AgentFailed;
 use LimenAi\Events\AgentStarted;
+use LimenAi\Events\AgentStreamDelta;
 use LimenAi\Events\ApprovalGranted;
 use LimenAi\Events\ApprovalRejected;
 use LimenAi\Events\ApprovalRequested;
@@ -25,6 +26,7 @@ class AgentEventBroadcaster
         $events->listen(AgentStarted::class, [$this, 'handleAgentStarted']);
         $events->listen(AgentCompleted::class, [$this, 'handleAgentCompleted']);
         $events->listen(AgentFailed::class, [$this, 'handleAgentFailed']);
+        $events->listen(AgentStreamDelta::class, [$this, 'handleAgentStreamDelta']);
         $events->listen(MessageCreated::class, [$this, 'handleMessageCreated']);
         $events->listen(ConversationUpdated::class, [$this, 'handleConversationUpdated']);
         $events->listen(ApprovalRequested::class, [$this, 'handleApprovalRequested']);
@@ -50,6 +52,17 @@ class AgentEventBroadcaster
             'conversation_id' => $event->conversationId,
             'final_message' => $event->finalMessage,
             'user_id' => $this->userId($event->context),
+        ]);
+    }
+
+    public function handleAgentStreamDelta(AgentStreamDelta $event): void
+    {
+        $this->broadcastToConversation($event->conversationId, 'AgentStreamDelta', [
+            'run_id' => $event->runId,
+            'agent_key' => $event->agentKey,
+            'conversation_id' => $event->conversationId,
+            'delta' => $event->delta,
+            'done' => $event->done,
         ]);
     }
 
