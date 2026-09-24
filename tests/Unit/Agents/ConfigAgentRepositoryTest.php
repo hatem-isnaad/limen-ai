@@ -36,10 +36,7 @@ class ConfigAgentRepositoryTest extends TestCase
 
         $agents = $repository->all();
 
-        $this->assertCount(7, $agents);
-        $this->assertSame(
-            ['app_assistant', 'example', 'example_openai', 'example_anthropic', 'example_gemini', 'example_openrouter', 'limen_3pl'],
-            array_map(fn ($agent) => $agent->key(), $agents),
-        );
+        $this->assertCount(1, $agents);
+        $this->assertSame('example', $agents[0]->key());
     }
 }
