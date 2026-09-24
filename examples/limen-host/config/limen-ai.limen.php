@@ -1,8 +1,5 @@
 <?php
 
-use App\LimenAi\Tools\GetShipmentStatus;
-use App\LimenAi\Tools\SendCustomerMessage;
-
 /**
  * Merge this file into config/limen-ai.php in the Limen host application.
  */
@@ -52,7 +49,7 @@ TEXT,
         'get_shipment_status' => [
             'name' => 'Get Shipment Status',
             'description' => 'Look up the current status of a shipment by ID.',
-            'class' => GetShipmentStatus::class,
+            'class' => App\LimenAi\Tools\GetShipmentStatus::class,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
@@ -66,7 +63,7 @@ TEXT,
         'send_customer_message' => [
             'name' => 'Send Customer Message',
             'description' => 'Send an outbound message to a shipment customer. Requires human approval.',
-            'class' => SendCustomerMessage::class,
+            'class' => App\LimenAi\Tools\SendCustomerMessage::class,
             'input_schema' => [
                 'shipment_id' => ['type' => 'string', 'required' => true],
                 'message' => ['type' => 'string', 'required' => true],

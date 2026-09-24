@@ -59,24 +59,6 @@ $this->app->singleton(
 <x-limen-ai::widget agent="limen_3pl" />
 ```
 
-7. Copy the host integration test template and adapt it in your app:
-
-```
-examples/limen-host/tests/Feature/LimenAiAgentTest.php
-```
-
-Run `php artisan migrate` (persistence auto-detects database), then use the template to verify conversation + message HTTP flows.
-
-## Multi-agent layout
-
-For apps with many tools, split agents instead of one mega-agent:
-
-```
-examples/limen-host/config/multi-agent.example.php
-```
-
-See [docs/scaling-agents-and-tools.md](../../docs/scaling-agents-and-tools.md).
-
 ## Demo Scenarios
 
 | Scenario | Agent flow |
