@@ -6,24 +6,22 @@ All commands registered under `limen-ai:*` namespace.
 
 | Command | Purpose |
 |---------|---------|
-| `limen-ai:install` | Publish config, env example, views, assets, and stubs |
-| `limen-ai:doctor` | Validate config, providers, queue, broadcasting (`--json` for CI) |
-| `limen-ai:import:knowledge` | Import JSON/CSV FAQ documents into `config/limen-ai-knowledge.php` |
-| `limen-ai:validate` | Validate agents, tools, skills, workflows (`--strict` for tool-count failures) |
-| `limen-ai:checklist` | First-run host checklist (migrate, persistence, doctor, UI version) |
+| `limen-ai:install` | Publish config, views, assets, migrations, examples |
+| `limen-ai:doctor` | Validate config, providers, queue, broadcasting |
+| `limen-ai:validate` | Validate agents, tools, skills, workflows definitions |
 
 ## Generators
 
 | Command | Generates |
 |---------|-----------|
-| `limen-ai:make:agent` | Agent config stub |
-| `limen-ai:make:tool` | Tool class + optional test |
-| `limen-ai:make:skill` | Skill config stub |
-| `limen-ai:make:workflow` | Workflow config stub |
-| `limen-ai:make:connector` | HTTP connector config stub |
+| `limen-ai:make:agent` | Agent config stub / class |
+| `limen-ai:make:tool` | Tool class + test |
+| `limen-ai:make:skill` | Skill class |
+| `limen-ai:make:workflow` | Workflow definition class |
+| `limen-ai:make:connector` | HTTP connection config |
 | `limen-ai:make:provider` | Custom LLM provider adapter |
 | `limen-ai:make:memory` | Memory store implementation |
-| `limen-ai:make:knowledge` | Knowledge retriever implementation |
+| `limen-ai:make:knowledge` | Knowledge source handler |
 
 ## Inspection
 
@@ -34,35 +32,26 @@ All commands registered under `limen-ai:*` namespace.
 | `limen-ai:tools` | List tools |
 | `limen-ai:skills` | List skills |
 | `limen-ai:workflows` | List workflows |
-| `limen-ai:logs` | Show buffered audit log entries |
+| `limen-ai:logs` | Tail/filter audit and run logs |
 
 ## Testing & Execution
 
 | Command | Purpose |
 |---------|---------|
-| `limen-ai:agent:test {agent}` | Run agent against fake or live provider (`--expect-contains`) |
-| `limen-ai:skill:test {skill}` | Preview skill instructions (`--agent=` for composed prompt) |
-| `limen-ai:tool:test {tool}` | Execute tool with JSON input |
+| `limen-ai:agent:test {agent}` | Run agent against fake or live provider |
+| `limen-ai:tool:test {tool}` | Execute tool with sample input |
 | `limen-ai:workflow:test {workflow}` | Dry-run workflow |
 | `limen-ai:run {agent}` | Interactive CLI chat session |
 
 ## Install Options
 
-```bash
+```
 php artisan limen-ai:install
-php artisan limen-ai:install --force  # overwrite publishables
+php artisan limen-ai:install --force  # overwrite publishables with confirmation
 ```
 
 ## Stub Publishing
 
-```bash
-php artisan vendor:publish --tag=limen-ai-stubs
 ```
-
-## Facade
-
-```php
-use LimenAi\Facades\LimenAi;
-
-$runId = LimenAi::run('example', $conversationId, 'Hello', ['user_id' => 1]);
+php artisan vendor:publish --tag=limen-ai-stubs
 ```
