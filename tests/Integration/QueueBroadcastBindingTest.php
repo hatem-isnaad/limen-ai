@@ -8,7 +8,6 @@ use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\RunStatusReader;
 use LimenAi\Runtime\DefaultRunStatusReader;
-use LimenAi\Runtime\QueuedAgentRunDispatcher;
 use LimenAi\Runtime\SyncAgentRunDispatcher;
 use LimenAi\Tests\TestCase;
 
@@ -28,7 +27,7 @@ class QueueBroadcastBindingTest extends TestCase
         $this->app->forgetInstance(AgentRunDispatcher::class);
 
         $this->assertInstanceOf(
-            QueuedAgentRunDispatcher::class,
+            \LimenAi\Runtime\QueuedAgentRunDispatcher::class,
             $this->app->make(AgentRunDispatcher::class),
         );
     }

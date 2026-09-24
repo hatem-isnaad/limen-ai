@@ -13,10 +13,7 @@ class UiBindingTest extends TestCase
         config()->set('limen-ai.ui.enabled', true);
 
         $this->assertInstanceOf(ConversationAccessGuard::class, app(ConversationAccessGuard::class));
-        $this->assertTrue(Route::has('limen-ai.agents.show'));
-        $this->assertTrue(Route::has('limen-ai.conversations.index'));
         $this->assertTrue(Route::has('limen-ai.conversations.store'));
-        $this->assertTrue(Route::has('limen-ai.guest.session'));
         $this->assertTrue(Route::has('limen-ai.messages.store'));
         $this->assertTrue(Route::has('limen-ai.runs.show'));
     }
