@@ -11,25 +11,30 @@ This document describes how to install, publish, and release **Limen AI** v1.x.
 
 ## Installation
 
-See **[installation.md](installation.md)** for all install methods:
+```bash
+composer require limen-ai/limen-ai
+```
 
-- Packagist (`composer require`)
-- VCS / Git repository (no Packagist needed)
-- Path repository (local development symlink)
-- Private Composer registry (Satis, Artifact)
-- Monorepo layout
-
-Quick start:
+Publish configuration and assets:
 
 ```bash
-composer require limen-ai/limen-ai   # or use VCS/path repo — see installation.md
-php artisan limen-ai:install
+php artisan vendor:publish --tag=limen-ai-config
+php artisan vendor:publish --tag=limen-ai-views
+php artisan vendor:publish --tag=limen-ai-assets
+```
+
+Run migrations:
+
+```bash
 php artisan migrate
+```
+
+Validate the environment:
+
+```bash
 php artisan limen-ai:doctor
 php artisan limen-ai:validate
 ```
-
-Copy environment keys from `.env.limen-ai.example` (published) or [`.env.example`](../.env.example).
 
 ## Host app integration
 
@@ -101,5 +106,5 @@ The optional `.github/workflows/release.yml` workflow validates tags and runs th
 
 ## Support
 
-- Documentation index: [PROJECT_MANIFEST.md](project/PROJECT_MANIFEST.md)
+- Documentation index: [PROJECT_MANIFEST.md](../PROJECT_MANIFEST.md)
 - Issues: https://github.com/hatem-isnaad/limen-ai/issues

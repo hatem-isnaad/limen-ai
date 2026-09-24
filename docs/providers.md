@@ -14,80 +14,39 @@ Limen AI resolves providers and models entirely from `config/limen-ai.php`. Each
 
 Register additional drivers under `providers.drivers` and reference them from a provider block.
 
-## Example agents (one per provider)
-
-The package ships ready-to-use example agents in `config/limen-ai.php`:
-
-| Agent key | Provider | Default model | Env model key |
-|-----------|----------|---------------|---------------|
-| `example` | `fake` | `gpt-4.1-mini` | `LIMEN_AI_EXAMPLE_MODEL` |
-| `example_openai` | `openai` | `gpt-4.1-mini` | `LIMEN_AI_OPENAI_MODEL` |
-| `example_anthropic` | `anthropic` | `claude-sonnet-4-20250514` | `LIMEN_AI_ANTHROPIC_MODEL` |
-| `example_gemini` | `gemini` | `gemini-2.0-flash` | `LIMEN_AI_GEMINI_MODEL` |
-| `example_openrouter` | `openrouter` | `anthropic/claude-3.5-sonnet` | `LIMEN_AI_OPENROUTER_MODEL` |
-
-Use in Blade or API:
-
-```blade
-<x-limen-ai::chatbot agent="example_openai" />
-```
-
-Set the matching API key in `.env`, then run `php artisan limen-ai:validate`.
-
 ## Per-agent provider and model
 
-Each agent picks its own `provider` and `model`. The model is passed to the provider on every chat turn — switch models without code changes by updating config or `.env` only.
+```php
+'agents' => [
+    'support_openai' => [
+        'model' => env('SUPPORT_OPENAI_MODEL', 'gpt-4.1-mini'),
+        'provider' => 'openai',
+        // ...
+    ],
+    'support_claude' => [
+        'model' => env('SUPPORT_CLAUDE_MODEL', 'claude-sonnet-4-20250514'),
+        'provider' => 'anthropic',
+        // ...
+    ],
+    'support_openrouter' => [
+        'model' => env('SUPPORT_OR_MODEL', 'anthropic/claude-3.5-sonnet'),
+        'provider' => 'openrouter',
+        // ...
+    ],
+],
+```
+
+The agent `model` is passed to the provider on every chat turn. Switch models without code changes — update config or `.env` only.
 
 ## Environment variables
 
-Copy from the published template:
-
-```bash
-php artisan vendor:publish --tag=limen-ai-env
-# merges into .env.limen-ai.example at project root
-```
-
-Or see `.env.example` in the package repository for the full key list.
-
-| Variable | Purpose |
-|----------|---------|
+| Variable | Provider |
+|----------|----------|
 | `OPENAI_API_KEY` | `openai` LLM + embeddings |
 | `OPENROUTER_API_KEY` | `openrouter` |
 | `ANTHROPIC_API_KEY` | `anthropic` |
 | `GEMINI_API_KEY` | `gemini` |
-| `LIMEN_AI_OPENAI_MODEL` | Model for `example_openai` |
-| `LIMEN_AI_ANTHROPIC_MODEL` | Model for `example_anthropic` |
-| `LIMEN_AI_GEMINI_MODEL` | Model for `example_gemini` |
-| `LIMEN_AI_OPENROUTER_MODEL` | Model for `example_openrouter` |
-| `OPENAI_EMBEDDING_MODEL` | Embedding model (default `text-embedding-3-small`) |
-
-## Ollama / local OpenAI-compatible servers
-
-Ollama exposes an OpenAI-compatible API. Point the `openai` provider at your local server:
-
-```env
-LIMEN_AI_PROVIDER=openai
-OPENAI_API_KEY=ollama
-OPENAI_BASE_URL=http://localhost:11434/v1
-LIMEN_AI_EXAMPLE_MODEL=qwen3:8b
-```
-
-Use the model name exactly as `ollama list` shows it. The API key can be any non-empty string — Ollama does not validate it, but Limen AI requires a value.
-
-### Reply quality with local models (e.g. `qwen3:8b`)
-
-Local models vary in quality. Combine layers:
-
-```env
-LIMEN_AI_HEURISTIC_VALIDATION=true
-LIMEN_AI_SEMANTIC_VALIDATION=true
-LIMEN_AI_SEMANTIC_MIN_SCORE=0.6
-LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false
-```
-
-Keep **5–8 tools** on `app_assistant` and ground answers with `product_help` knowledge. Semantic judge uses the same Ollama endpoint (one extra LLM call per reply when enabled).
-
-For agents other than `example`, set the matching `LIMEN_AI_*_MODEL` env key or override `model` in the agent config block.
+| `OPENAI_EMBEDDING_MODEL` | embedding model (default `text-embedding-3-small`) |
 
 ## OpenRouter example
 
@@ -171,7 +130,7 @@ These are architectural preparations, not incomplete v1 features:
 | Database-backed agent repository | Contract ready; config repos used in v1 |
 | SaaS multi-tenancy | Future phase |
 | MCP tool integrations | Future phase |
-| Attachment RAG pipeline | Enabled when `knowledge.driver=vector` and `attachments.rag.enabled=true` |
+| Attachment RAG pipeline | Future phase |
 | OpenTelemetry export | Observability hooks exist; exporter deferred |
 
-See [IMPLEMENTATION.md](project/IMPLEMENTATION.md) for the full deferral list.
+See [IMPLEMENTATION.md](../IMPLEMENTATION.md) for the full deferral list.
