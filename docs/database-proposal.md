@@ -113,25 +113,6 @@ Indexes: `run_id`, `status`
 
 Indexes: `actor_id`, `action`, `created_at`
 
-### limen_ai_attachments
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| conversation_id | uuid FK | |
-| user_id | nullable unsignedBigInteger | Uploader |
-| original_name | string | |
-| mime_type | string | |
-| size_bytes | unsignedBigInteger | |
-| disk | string | Filesystem disk |
-| path | string | Stored file path |
-| extracted_text | longText nullable | Sanitized text for runtime/RAG |
-| status | string | pending, processed, failed |
-| metadata | json | |
-| created_at / updated_at | timestamps | |
-
-Indexes: `conversation_id`, `status`, `user_id`
-
 ### limen_ai_usage_records
 
 | Column | Type | Notes |
