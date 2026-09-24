@@ -4,13 +4,25 @@ namespace LimenAi\Agents;
 
 use LimenAi\Contracts\Agents\AgentDefinition;
 use LimenAi\Contracts\Providers\LlmProvider;
-use LimenAi\Contracts\Providers\LlmResponse;
+use LimenAi\Contracts\Skills\SkillDefinition;
+use LimenAi\Contracts\Providers\StreamingLlmProvider;
+use LimenAi\Contracts\Tools\ToolDefinition;
+use LimenAi\Exceptions\StreamingNotSupportedException;
+use LimenAi\Providers\LlmStreamChunk;
+use LimenAi\Support\StructuredOutput;
 use LimenAi\Tools\ToolSchemaBuilder;
+use Generator;
 
 final class ResolvedAgent
 {
+    /** @var list<array<string, mixed>>|null */
     private ?array $cachedToolSchemas = null;
 
+    /**
+     * @param  list<ToolDefinition>  $tools
+     * @param  list<SkillDefinition>  $skills
+     * @param  array<string, mixed>  $limits
+     */
     public function __construct(
         private readonly AgentDefinition $definition,
         private readonly LlmProvider $provider,
@@ -56,55 +68,112 @@ final class ResolvedAgent
         return $this->instructions;
     }
 
+    /** @return list<ToolDefinition> */
     public function tools(): array
     {
         return $this->tools;
     }
 
+    /** @return list<SkillDefinition> */
     public function skills(): array
     {
         return $this->skills;
     }
 
+    /** @return array<string, mixed> */
     public function limits(): array
     {
         return $this->limits;
     }
 
+    /** @return list<array<string, mixed>> */
     public function toolSchemas(): array
     {
         if ($this->cachedToolSchemas !== null) {
             return $this->cachedToolSchemas;
         }
+
         $this->cachedToolSchemas = $this->toolSchemaBuilder->buildMany($this->tools);
 
         return $this->cachedToolSchemas;
     }
 
+    /** @return array<string, mixed> */
     public function chatOptions(): array
     {
-        return array_filter([
+        $options = [
             'model' => $this->model(),
             'max_tokens' => $this->limits['max_tokens'] ?? null,
-            'temperature' => $this->limits['temperature'] ?? null,
-        ], fn ($value) => $value !== null && $value !== '');
+        ];
+
+        if ((bool) config('limen-ai.deferred_tool_loading', false)) {
+            $options['deferred_tools'] = true;
+        }
+
+        return array_filter(array_merge(
+            $options,
+            StructuredOutput::chatOptions($this->definition->outputConfig(), $this->key()),
+        ), fn ($value) => $value !== null && $value !== '');
     }
 
-    public function chat(array $messages): LlmResponse
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     * @return \LimenAi\Contracts\Providers\LlmResponse
+     */
+    public function chat(array $messages, array $optionsOverride = []): \LimenAi\Contracts\Providers\LlmResponse
     {
+        $options = array_merge($this->chatOptions(), $optionsOverride);
+        $tools = ($options['omit_tools'] ?? false) ? [] : $this->toolSchemas();
+        unset($options['omit_tools'], $options['deferred_tools']);
+
         return $this->provider->chat(
             messages: $this->prependSystemMessage($messages),
-            tools: $this->toolSchemas(),
-            options: $this->chatOptions(),
+            tools: $tools,
+            options: $options,
         );
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     * @return Generator<int, LlmStreamChunk>
+     */
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     * @param  array<string, mixed>  $optionsOverride
+     */
+    public function stream(array $messages, array $optionsOverride = []): Generator
+    {
+        if (! $this->provider instanceof StreamingLlmProvider) {
+            throw StreamingNotSupportedException::forReason(
+                "Provider [{$this->providerName()}] does not support streaming.",
+            );
+        }
+
+        $options = array_merge($this->chatOptions(), $optionsOverride);
+        $tools = ($options['omit_tools'] ?? false) ? [] : $this->toolSchemas();
+        unset($options['omit_tools'], $options['deferred_tools']);
+
+        yield from $this->provider->streamChat(
+            messages: $this->prependSystemMessage($messages),
+            tools: $tools,
+            options: $options,
+        );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $messages
+     * @return list<array<string, mixed>>
+     */
     private function prependSystemMessage(array $messages): array
     {
         if ($this->instructions === '') {
             return $messages;
         }
-        array_unshift($messages, ['role' => 'system', 'content' => $this->instructions]);
+
+        array_unshift($messages, [
+            'role' => 'system',
+            'content' => $this->instructions,
+        ]);
 
         return $messages;
     }
