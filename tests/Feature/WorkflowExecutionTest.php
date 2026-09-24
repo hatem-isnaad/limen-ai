@@ -19,6 +19,13 @@ use LimenAi\Tests\TestCase;
 
 class WorkflowExecutionTest extends TestCase
 {
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        $app['config']->set('limen-ai.agents.limen_3pl.enabled', true);
+    }
+
     public function test_it_executes_branching_workflow_through_tool_path(): void
     {
         Event::fake([WorkflowStarted::class, WorkflowStepCompleted::class, WorkflowCompleted::class]);
