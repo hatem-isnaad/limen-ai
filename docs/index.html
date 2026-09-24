@@ -1,3111 +1,525 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" class="docs-en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Limen AI — official Laravel AI agent framework documentation.">
-    <meta name="theme-color" content="#050816">
-    <title>Documentation Hub — Limen AI</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #050816;
-            --bg-2: #0c1229;
-            --surface: rgba(15, 23, 42, 0.72);
-            --surface-solid: #0f172a;
-            --glass: rgba(255, 255, 255, 0.04);
-            --border: rgba(148, 163, 184, 0.14);
-            --border-glow: rgba(56, 189, 248, 0.35);
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --primary: #38bdf8;
-            --primary-2: #818cf8;
-            --accent: #22d3ee;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --danger: #fb7185;
-            --radius: 18px;
-            --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-            --font: "Cairo", system-ui, sans-serif;
-            --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-            --code-bg: #0a0e1a;
-            --code-head: #10162b;
-            --code-line: rgba(148, 163, 184, 0.08);
-        }
-
-        *, *::before, *::after { box-sizing: border-box; }
-
-        .sprite { display: none; }
-
-        .ico {
-            width: 1em;
-            height: 1em;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.9;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            flex-shrink: 0;
-            vertical-align: -0.125em;
-            overflow: visible;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            margin: 0;
-            font-family: var(--font);
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.75;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(900px 500px at 85% -5%, rgba(56, 189, 248, 0.18), transparent 55%),
-                radial-gradient(700px 420px at 5% 15%, rgba(129, 140, 248, 0.16), transparent 50%),
-                radial-gradient(600px 400px at 50% 100%, rgba(34, 211, 238, 0.08), transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .grid-bg {
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
-            background-size: 48px 48px;
-            mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
-        a:hover { color: #7dd3fc; }
-
-        .shell {
-            position: relative;
-            z-index: 1;
-            max-width: 1180px;
-            margin: 0 auto;
-            padding: 0 1.25rem 5rem;
-        }
-
-        /* Nav */
-        .topnav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(16px);
-            background: rgba(5, 8, 22, 0.78);
-            border-bottom: 1px solid var(--border);
-            margin: 0 -1.25rem 2rem;
-            padding: 0.85rem 1.25rem;
-        }
-
-        .topnav-inner {
-            max-width: 1180px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            font-weight: 800;
-            font-size: 1.05rem;
-        }
-
-        .brand-icon {
-            width: 2.25rem;
-            height: 2.25rem;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            display: grid;
-            place-items: center;
-            font-size: 1rem;
-            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35);
-        }
-
-        .nav-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem 1rem;
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--muted);
-        }
-
-        .nav-links a:hover { color: var(--text); text-decoration: none; }
-
-        /* Hero */
-        .hero {
-            position: relative;
-            padding: 3rem 2rem 2.5rem;
-            border-radius: calc(var(--radius) + 6px);
-            border: 1px solid var(--border);
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.55));
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            margin-bottom: 2.5rem;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            inset: auto auto -40% -10%;
-            width: 320px;
-            height: 320px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.25), transparent 70%);
-            filter: blur(8px);
-            animation: pulse 6s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.08); opacity: 1; }
-        }
-
-        .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 0.3rem 0.75rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-        }
-
-        .badge-live {
-            border-color: rgba(74, 222, 128, 0.4);
-            color: #86efac;
-            background: rgba(74, 222, 128, 0.08);
-        }
-
-        .live-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #4ade80;
-            box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
-            animation: livePulse 2s ease-out infinite;
-        }
-
-        @keyframes livePulse {
-            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
-            70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-        }
-
-        .badge-ai {
-            border-color: rgba(56, 189, 248, 0.35);
-            color: #bae6fd;
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        h1 {
-            margin: 0 0 1rem;
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 900;
-            line-height: 1.2;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 45%, #38bdf8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .lead {
-            margin: 0;
-            max-width: 52ch;
-            font-size: 1.08rem;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.85rem;
-            margin: 2rem 0 1.75rem;
-        }
-
-        .stat {
-            padding: 1rem 1.1rem;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-            backdrop-filter: blur(8px);
-        }
-
-        .stat-num {
-            font-size: 1.75rem;
-            font-weight: 900;
-            line-height: 1;
-            color: var(--primary);
-        }
-
-        .stat-label { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-top: 0.25rem; }
-
-        .cta-row { display: flex; flex-wrap: wrap; gap: 0.65rem; }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.45rem;
-            padding: 0.7rem 1.15rem;
-            border-radius: 12px;
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 0.92rem;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-        }
-
-        .btn:hover { transform: translateY(-2px); text-decoration: none; }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9, #6366f1);
-            color: white;
-            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.35);
-        }
-
-        .btn-ghost {
-            background: rgba(30, 41, 59, 0.8);
-            color: var(--text);
-            border-color: var(--border);
-        }
-
-        /* Sections */
-        section { margin-bottom: 3rem; scroll-margin-top: 5rem; }
-
-        .section-head {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.25rem;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 1.55rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-
-        .h2-icon {
-            flex-shrink: 0;
-            width: 2.1rem;
-            height: 2.1rem;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: 1.05rem;
-            color: var(--primary);
-            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
-            border: 1px solid rgba(56, 189, 248, 0.2);
-        }
-
-        .section-sub { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.92rem; font-weight: 500; }
-
-        .grid { display: grid; gap: 1rem; }
-        @media (min-width: 640px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 900px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 900px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
-
-        /* Bento cards */
-        .card {
-            position: relative;
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.85));
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.35rem 1.4rem;
-            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-        }
-
-        .card:hover {
-            border-color: rgba(56, 189, 248, 0.28);
-            transform: translateY(-3px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-        }
-
-        .card-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            font-size: 1.2rem;
-            margin-bottom: 0.85rem;
-            color: var(--primary);
-            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
-            border: 1px solid rgba(56, 189, 248, 0.22);
-            transition: transform 0.25s cubic-bezier(0.34, 1.5, 0.64, 1), color 0.25s;
-        }
-
-        .card:hover .card-icon { transform: translateY(-2px) scale(1.06); color: #7dd3fc; }
-
-        .card h3 {
-            margin: 0 0 0.4rem;
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .card h3 > .ico { font-size: 1.05rem; color: var(--primary); }
-
-        .step-dot {
-            flex-shrink: 0;
-            width: 1.5rem;
-            height: 1.5rem;
-            border-radius: 7px;
-            display: inline-grid;
-            place-items: center;
-            font-size: 0.72rem;
-            font-weight: 900;
-            font-family: var(--mono);
-            color: #04121f;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-        }
-        .card p { margin: 0; color: var(--muted); font-size: 0.9rem; font-weight: 500; line-height: 1.65; }
-
-        .card-wide { grid-column: 1 / -1; }
-
-        @media (min-width: 900px) {
-            .bento .span-2 { grid-column: span 2; }
-        }
-
-        /* Timeline */
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            position: relative;
-            padding-right: 1rem;
-        }
-
-        .timeline::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0.45rem;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--primary), var(--primary-2), transparent);
-        }
-
-        .step {
-            position: relative;
-            padding: 0.85rem 1.5rem 0.85rem 0;
-        }
-
-        .step::before {
-            content: "";
-            position: absolute;
-            right: -0.15rem;
-            top: 1.15rem;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
-        }
-
-        .step-title {
-            font-weight: 800;
-            font-size: 0.98rem;
-            margin-bottom: 0.15rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .step-desc { color: var(--muted); font-size: 0.88rem; margin: 0; }
-
-        /* Table */
-        .table-wrap {
-            overflow: hidden;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: var(--surface-solid);
-        }
-
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-
-        th, td {
-            padding: 0.9rem 1rem;
-            border-bottom: 1px solid var(--border);
-            text-align: right;
-            vertical-align: top;
-        }
-
-        th {
-            background: rgba(15, 23, 42, 0.95);
-            color: var(--muted);
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(56, 189, 248, 0.04); }
-
-        code {
-            font-family: var(--mono);
-            font-size: 0.8em;
-            font-weight: 500;
-            direction: ltr;
-            display: inline-block;
-            background: rgba(129, 140, 248, 0.1);
-            border: 1px solid rgba(129, 140, 248, 0.2);
-            padding: 0.08rem 0.4rem;
-            border-radius: 6px;
-            color: #c7d2fe;
-            vertical-align: baseline;
-        }
-
-        .pill {
-            display: inline-block;
-            font-size: 0.76rem;
-            font-weight: 600;
-            padding: 0.2rem 0.55rem;
-            border-radius: 999px;
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid var(--border);
-            color: #cbd5e1;
-            margin: 0.15rem 0 0.15rem 0.35rem;
-            direction: ltr;
-        }
-
-        .pill-live { background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.35); color: #86efac; }
-        .pill-warn { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); color: #fde68a; }
-
-        /* Prompts */
-        .prompt-box { display: flex; flex-direction: column; gap: 0.55rem; }
-
-        .prompt {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.7);
-            font-size: 0.92rem;
-            font-weight: 600;
-        }
-
-        .prompt-text { flex: 1; }
-
-        .copy-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            flex-shrink: 0;
-            order: -1;
-            font-family: var(--font);
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 0.35rem 0.65rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .copy-btn:hover { color: var(--text); border-color: var(--primary); }
-        .copy-btn:active { transform: scale(0.95); }
-        .copy-btn.copied { color: var(--success); border-color: rgba(74, 222, 128, 0.5); }
-        .copy-btn.failed { color: var(--danger); border-color: rgba(251, 113, 133, 0.5); }
-        .code-copy.failed { color: #fda4af; border-color: rgba(251, 113, 133, 0.5); background: rgba(251, 113, 133, 0.12); }
-
-        /* CLI command rows */
-        .cli-block {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.6rem 0.8rem;
-            border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.14);
-            background: var(--code-bg);
-            margin-bottom: 0.45rem;
-            direction: ltr;
-            text-align: left;
-            transition: border-color 0.18s, background 0.18s;
-        }
-
-        .cli-block:hover { border-color: rgba(56, 189, 248, 0.32); }
-
-        .cli-block::before {
-            content: "$";
-            flex-shrink: 0;
-            font-family: var(--mono);
-            font-weight: 700;
-            font-size: 0.82rem;
-            color: #4ade80;
-        }
-
-        .cli-block > code {
-            flex: 1;
-            min-width: 0;
-            overflow-x: auto;
-            white-space: pre;
-            background: none;
-            border: none;
-            padding: 0;
-            border-radius: 0;
-            display: block;
-            font-family: var(--mono);
-            font-size: 0.79rem;
-            color: #cdd6f4;
-        }
-
-        .cli-block > code::-webkit-scrollbar { height: 6px; }
-        .cli-block > code::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 6px; }
-
-        .cli-block > span {
-            flex-shrink: 0;
-            max-width: 42%;
-            color: var(--muted);
-            direction: rtl;
-            text-align: right;
-            font-family: var(--font);
-            font-size: 0.78rem;
-            font-weight: 500;
-            padding-right: 0.7rem;
-            border-right: 1px solid rgba(148, 163, 184, 0.14);
-        }
-
-        @media (max-width: 720px) {
-            .cli-block { flex-wrap: wrap; }
-            .cli-block > span { max-width: 100%; border-right: none; padding-right: 0; padding-top: 0.35rem; }
-        }
-
-        /* Tabs */
-        .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-
-        .tab {
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 0.88rem;
-            padding: 0.5rem 1rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab.active, .tab:hover {
-            color: var(--text);
-            border-color: rgba(56, 189, 248, 0.45);
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        footer {
-            margin-top: 3rem;
-            padding: 2rem 1.5rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: var(--glass);
-            color: var(--muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        footer strong { color: var(--text); }
-
-        /* Flow diagram */
-        .flow {
-            display: flex;
-            flex-direction: column;
-            gap: 0.55rem;
-            direction: ltr;
-            text-align: center;
-        }
-
-        .flow-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 0.45rem;
-        }
-
-        .flow-box {
-            padding: 0.55rem 0.85rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.85);
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #e2e8f0;
-            direction: rtl;
-        }
-
-        .flow-box.highlight {
-            border-color: rgba(56, 189, 248, 0.45);
-            background: rgba(56, 189, 248, 0.12);
-            color: #bae6fd;
-        }
-
-        .flow-arrow {
-            color: var(--primary);
-            font-size: 1rem;
-            font-weight: 400;
-            opacity: 0.55;
-            line-height: 1;
-        }
-
-        /* ---------- Code blocks ---------- */
-        pre {
-            margin: 0;
-            padding: 0.95rem 1.1rem;
-            overflow-x: auto;
-            direction: ltr;
-            text-align: left;
-            background: transparent;
-            border: none;
-            font-family: var(--mono);
-            font-size: 0.8rem;
-            line-height: 1.75;
-            color: #cdd6f4;
-            tab-size: 4;
-        }
-
-        pre code {
-            background: none;
-            border: none;
-            padding: 0;
-            font-size: inherit;
-            font-family: inherit;
-            display: block;
-            color: inherit;
-        }
-
-        .code-block {
-            position: relative;
-            margin: 0 0 0.85rem;
-            border-radius: 13px;
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            background: var(--code-bg);
-            overflow: hidden;
-            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
-        }
-
-        .code-head {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding: 0.5rem 0.75rem;
-            background: var(--code-head);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-            direction: ltr;
-        }
-
-        .code-dots { display: inline-flex; gap: 0.3rem; margin-left: auto; }
-
-        .code-dots i {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            display: block;
-        }
-
-        .code-dots i:nth-child(1) { background: #ff5f57; }
-        .code-dots i:nth-child(2) { background: #febc2e; }
-        .code-dots i:nth-child(3) { background: #28c840; }
-
-        .code-lang {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #7f8ba6;
-        }
-
-        .code-copy {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            flex-shrink: 0;
-            font-family: var(--font);
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 0.26rem 0.6rem;
-            border-radius: 7px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            background: rgba(148, 163, 184, 0.08);
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.18s;
-        }
-
-        .code-copy:hover {
-            color: #e2e8f0;
-            border-color: rgba(56, 189, 248, 0.5);
-            background: rgba(56, 189, 248, 0.12);
-        }
-
-        .code-copy:active { transform: scale(0.95); }
-
-        /* Smooth icon swap */
-        .ico-swap {
-            position: relative;
-            display: inline-block;
-            width: 0.95rem;
-            height: 0.95rem;
-            flex-shrink: 0;
-        }
-
-        .ico-swap .ico {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.6, 0.64, 1);
-        }
-
-        .ico-swap .ico-done,
-        .ico-swap .ico-fail {
-            opacity: 0;
-            transform: scale(0.4) rotate(-30deg);
-        }
-
-        .copied .ico-swap .ico-idle,
-        .failed .ico-swap .ico-idle {
-            opacity: 0;
-            transform: scale(0.4) rotate(30deg);
-        }
-
-        .copied .ico-swap .ico-done,
-        .failed .ico-swap .ico-fail {
-            opacity: 1;
-            transform: none;
-        }
-
-        .copy-label {
-            min-width: 2rem;
-            text-align: center;
-            transition: color 0.2s;
-        }
-
-        .code-copy.copied {
-            color: #86efac;
-            border-color: rgba(74, 222, 128, 0.5);
-            background: rgba(74, 222, 128, 0.12);
-        }
-
-        .code-body { display: flex; align-items: stretch; }
-
-        .code-gutter {
-            flex-shrink: 0;
-            padding: 0.95rem 0.6rem 0.95rem 0.85rem;
-            font-family: var(--mono);
-            font-size: 0.8rem;
-            line-height: 1.75;
-            text-align: right;
-            color: #3e4a63;
-            background: rgba(255, 255, 255, 0.015);
-            border-right: 1px solid var(--code-line);
-            user-select: none;
-            direction: ltr;
-            white-space: pre;
-        }
-
-        .code-body > pre { flex: 1; min-width: 0; }
-
-        pre::-webkit-scrollbar { height: 8px; }
-        pre::-webkit-scrollbar-track { background: transparent; }
-        pre::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 8px; }
-
-        /* Compact command rows */
-        .cmd {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.6rem 0.8rem;
-            border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.14);
-            background: var(--code-bg);
-            direction: ltr;
-            transition: border-color 0.18s;
-        }
-
-        .cmd:hover { border-color: rgba(56, 189, 248, 0.3); }
-
-        .cmd-prompt {
-            flex-shrink: 0;
-            font-family: var(--mono);
-            font-weight: 700;
-            font-size: 0.82rem;
-            color: #4ade80;
-        }
-
-        .cmd-text {
-            flex: 1;
-            min-width: 0;
-            overflow-x: auto;
-            white-space: pre;
-            font-family: var(--mono);
-            font-size: 0.79rem;
-            color: #cdd6f4;
-        }
-
-        .cmd-text::-webkit-scrollbar { height: 6px; }
-        .cmd-text::-webkit-scrollbar-thumb { background: #1f2a44; border-radius: 6px; }
-
-        .cmd-note {
-            margin: 0.3rem 0 0.7rem;
-            padding-right: 0.15rem;
-            font-size: 0.82rem;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .code-caption {
-            margin: 0.35rem 0 0.65rem;
-            font-size: 0.82rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        /* Accordion */
-        .accordion { display: flex; flex-direction: column; gap: 0.55rem; }
-
-        .acc-item {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: rgba(15, 23, 42, 0.55);
-            overflow: hidden;
-        }
-
-        .acc-trigger > span:first-child {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-        }
-
-        .acc-trigger {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1rem 1.15rem;
-            border: none;
-            background: transparent;
-            color: var(--text);
-            font-family: var(--font);
-            font-size: 0.98rem;
-            font-weight: 800;
-            cursor: pointer;
-            text-align: right;
-        }
-
-        .acc-trigger:hover { background: rgba(56, 189, 248, 0.05); }
-
-        .acc-icon {
-            flex-shrink: 0;
-            width: 1.75rem;
-            height: 1.75rem;
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
-            background: rgba(56, 189, 248, 0.12);
-            color: var(--primary);
-            font-size: 0.85rem;
-            transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.2s;
-        }
-
-        .acc-trigger:hover .acc-icon { background: rgba(56, 189, 248, 0.22); }
-
-        .acc-item.open .acc-icon { transform: rotate(180deg); }
-
-        .acc-body {
-            display: none;
-            padding: 0 1.15rem 1.15rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .acc-item.open .acc-body { display: block; }
-
-        /* Decision map */
-        .decision-grid {
-            display: grid;
-            gap: 0.75rem;
-        }
-
-        @media (min-width: 640px) {
-            .decision-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .decision {
-            display: flex;
-            gap: 0.75rem;
-            padding: 1rem 1.1rem;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-        }
-
-        .decision-q {
-            flex-shrink: 0;
-            width: 2.1rem;
-            height: 2.1rem;
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-            font-size: 1.05rem;
-            color: var(--primary);
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.18);
-        }
-
-        .decision h4 {
-            margin: 0 0 0.25rem;
-            font-size: 0.92rem;
-            font-weight: 800;
-        }
-
-        .decision p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .alert {
-            padding: 1rem 1.15rem;
-            border-radius: 14px;
-            border: 1px solid rgba(251, 191, 36, 0.35);
-            background: rgba(251, 191, 36, 0.08);
-            color: #fde68a;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .alert-info {
-            border-color: rgba(56, 189, 248, 0.35);
-            background: rgba(56, 189, 248, 0.08);
-            color: #bae6fd;
-        }
-
-        h3.section-mini {
-            margin: 1.25rem 0 0.65rem;
-            font-size: 1rem;
-            font-weight: 800;
-        }
-
-        /* Concept cards */
-        .concepts { display: flex; flex-direction: column; gap: 0.85rem; }
-
-        .concept {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.82));
-            padding: 1.15rem 1.3rem;
-            transition: border-color 0.25s, transform 0.25s;
-        }
-
-        .concept:hover { border-color: rgba(56, 189, 248, 0.26); transform: translateY(-2px); }
-
-        .concept-head {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.9rem;
-            flex-wrap: wrap;
-        }
-
-        .concept-icon {
-            flex-shrink: 0;
-            width: 2.4rem;
-            height: 2.4rem;
-            border-radius: 11px;
-            display: grid;
-            place-items: center;
-            font-size: 1.15rem;
-            color: var(--primary);
-            background: linear-gradient(145deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.1));
-            border: 1px solid rgba(56, 189, 248, 0.22);
-        }
-
-        .concept-title { font-size: 1.08rem; font-weight: 900; margin: 0; }
-
-        .concept-en {
-            font-family: var(--mono);
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-right: 0.45rem;
-            direction: ltr;
-            display: inline-block;
-        }
-
-        .concept-tag {
-            margin: 0;
-            font-size: 0.84rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .concept-row {
-            display: grid;
-            grid-template-columns: 5.5rem 1fr;
-            gap: 0.4rem 0.75rem;
-            padding: 0.55rem 0;
-            border-top: 1px dashed rgba(148, 163, 184, 0.12);
-        }
-
-        .concept-row:first-of-type { border-top: none; padding-top: 0; }
-
-        .concept-label {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: var(--primary);
-            padding-top: 0.12rem;
-        }
-
-        .concept-row p { margin: 0; font-size: 0.9rem; color: #cbd5e1; font-weight: 500; line-height: 1.75; }
-        .concept-row .warn { color: #fde68a; }
-        .concept-row .good { color: #86efac; }
-
-        .concept-row .code-block { margin: 0.15rem 0 0; }
-
-        @media (max-width: 560px) {
-            .concept-row { grid-template-columns: 1fr; gap: 0.15rem; }
-            .concept-label { padding-top: 0; }
-        }
-
-        .analogy {
-            border: 1px solid rgba(129, 140, 248, 0.28);
-            background: linear-gradient(145deg, rgba(129, 140, 248, 0.12), rgba(56, 189, 248, 0.06));
-            border-radius: var(--radius);
-            padding: 1.35rem 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .analogy h3 { margin: 0 0 0.6rem; font-size: 1.1rem; font-weight: 900; }
-        .analogy p { margin: 0 0 0.75rem; font-size: 0.95rem; color: #dbeafe; font-weight: 500; }
-        .analogy p:last-child { margin-bottom: 0; }
-
-        .env-live {
-            display: inline-block;
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            font-weight: 600;
-            direction: ltr;
-            padding: 0.12rem 0.45rem;
-            border-radius: 6px;
-            background: rgba(74, 222, 128, 0.1);
-            border: 1px solid rgba(74, 222, 128, 0.28);
-            color: #86efac;
-        }
-
-        .env-table { font-size: 0.82rem; }
-        .env-table td:first-child { font-family: var(--mono); direction: ltr; text-align: left; white-space: nowrap; color: #bae6fd; font-size: 0.78rem; }
-        .env-table .val { font-family: var(--mono); font-size: 0.76rem; color: #fde68a; direction: ltr; text-align: left; }
-        .env-table .def { color: var(--muted); font-size: 0.78rem; }
-
-        .live-grid {
-            display: grid;
-            gap: 0.55rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (min-width: 720px) { .live-grid { grid-template-columns: repeat(3, 1fr); } }
-
-        .live-item {
-            padding: 0.7rem 0.85rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-        }
-
-        .live-item kbd {
-            display: block;
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            color: var(--muted);
-            direction: ltr;
-            text-align: left;
-            margin-bottom: 0.25rem;
-        }
-
-        .live-item span { font-size: 0.88rem; font-weight: 700; direction: ltr; display: block; text-align: left; }
-
-        /* Walkthrough steps */
-        .walk { display: flex; flex-direction: column; gap: 0.9rem; }
-
-        .walk-step {
-            position: relative;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.82));
-            padding: 1.2rem 1.35rem;
-            transition: border-color 0.25s;
-        }
-
-        .walk-step:hover { border-color: rgba(56, 189, 248, 0.26); }
-
-        .walk-head {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .walk-title { font-size: 1.02rem; font-weight: 800; }
-
-        .walk-file {
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: #7dd3fc;
-            direction: ltr;
-            background: rgba(56, 189, 248, 0.08);
-            border: 1px solid rgba(56, 189, 248, 0.18);
-            border-radius: 6px;
-            padding: 0.1rem 0.45rem;
-            margin-right: auto;
-        }
-
-        .walk-desc {
-            margin: 0 0 0.85rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .walk-step .code-block:last-child { margin-bottom: 0; }
-
-        .scenario {
-            display: grid;
-            gap: 0.65rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (min-width: 720px) { .scenario { grid-template-columns: repeat(3, 1fr); } }
-
-        .scenario-item {
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-        }
-
-        .scenario-item h4 {
-            margin: 0 0 0.3rem;
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .scenario-item p { margin: 0; font-size: 0.85rem; color: var(--muted); font-weight: 500; }
-
-        /* English blocks */
-        .en {
-            direction: ltr;
-            text-align: left;
-            font-family: "Inter", system-ui, -apple-system, sans-serif;
-        }
-
-        .section-sub .en,
-        .en-note {
-            display: block;
-            margin-top: 0.2rem;
-            direction: ltr;
-            text-align: left;
-            font-size: 0.85rem;
-            color: rgba(148, 163, 184, 0.78);
-            font-weight: 500;
-            font-style: italic;
-        }
-
-        .en-guide {
-            direction: ltr;
-            text-align: left;
-        }
-
-        .en-guide h3 {
-            margin: 0 0 0.35rem;
-            font-size: 1.05rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .en-guide p { margin: 0 0 0.85rem; color: var(--muted); font-size: 0.9rem; font-weight: 500; }
-        .en-guide ul { margin: 0 0 0.85rem; padding-left: 1.2rem; color: var(--muted); font-size: 0.88rem; }
-        .en-guide li { margin-bottom: 0.3rem; }
-        .en-guide strong { color: var(--text); }
-
-        .step-num {
-            flex-shrink: 0;
-            width: 1.85rem;
-            height: 1.85rem;
-            border-radius: 9px;
-            display: grid;
-            place-items: center;
-            font-size: 0.82rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            color: #04121f;
-        }
-
-        .lang-toggle {
-            display: inline-flex;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            background: rgba(15, 23, 42, 0.85);
-        }
-
-        .lang-toggle button {
-            font-family: var(--font);
-            font-size: 0.76rem;
-            font-weight: 800;
-            padding: 0.35rem 0.7rem;
-            border: none;
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.18s;
-        }
-
-        .lang-toggle button.active {
-            background: rgba(56, 189, 248, 0.16);
-            color: #bae6fd;
-        }
-
-        body.hide-en .en-only { display: none !important; }
-        body.hide-ar .ar-only { display: none !important; }
-
-        /* Syntax highlighting — Palenight-inspired */
-        .tok-comment { color: #5f7186; font-style: italic; }
-        .tok-string  { color: #c3e88d; }
-        .tok-var     { color: #f07178; }
-        .tok-keyword { color: #c792ea; }
-        .tok-func    { color: #82aaff; }
-        .tok-number  { color: #f78c6c; }
-        .tok-op      { color: #89ddff; }
-        .tok-key     { color: #ffcb6b; }
-        .tok-tag     { color: #f07178; }
-        .tok-attr    { color: #ffcb6b; }
-        .tok-flag    { color: #f78c6c; }
-        .tok-class   { color: #ffcb6b; }
-
-        /* Scroll progress */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: 3px;
-            z-index: 100;
-            background: linear-gradient(90deg, var(--primary), var(--primary-2), var(--accent));
-            transform: scaleX(0);
-            transform-origin: right center;
-            transition: transform 0.08s linear;
-        }
-
-        /* Search */
-        .search-wrap {
-            position: relative;
-            flex: 1 1 200px;
-            max-width: 280px;
-        }
-
-        .search-input {
-            width: 100%;
-            font-family: var(--font);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text);
-            padding: 0.5rem 2.2rem 0.5rem 2.2rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.85);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .search-input::placeholder { color: var(--muted); font-weight: 500; }
-
-        .search-input:focus {
-            border-color: rgba(56, 189, 248, 0.5);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
-        }
-
-        .search-icon {
-            position: absolute;
-            top: 50%;
-            right: 0.75rem;
-            transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 0.85rem;
-            pointer-events: none;
-        }
-
-        .search-kbd {
-            position: absolute;
-            top: 50%;
-            left: 0.6rem;
-            transform: translateY(-50%);
-            font-size: 0.68rem;
-            font-weight: 700;
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 0.05rem 0.3rem;
-            pointer-events: none;
-        }
-
-        .search-count {
-            font-size: 0.78rem;
-            color: var(--muted);
-            font-weight: 600;
-            margin-top: 0.4rem;
-        }
-
-        [hidden] { display: none !important; }
-
-        mark {
-            background: rgba(251, 191, 36, 0.28);
-            color: #fde68a;
-            border-radius: 4px;
-            padding: 0 0.15rem;
-        }
-
-        .empty-state {
-            padding: 2.5rem 1.5rem;
-            text-align: center;
-            border-radius: var(--radius);
-            border: 1px dashed var(--border);
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        /* Scrollspy */
-        .nav-links a {
-            position: relative;
-            padding: 0.2rem 0;
-        }
-
-        .nav-links a::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            bottom: -2px;
-            width: 0;
-            height: 2px;
-            border-radius: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-2));
-            transition: width 0.25s ease;
-        }
-
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        .nav-links a.active::after { width: 100%; }
-
-        /* Reveal on scroll */
-        .reveal {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .reveal.shown { opacity: 1; transform: none; }
-
-        /* Back to top */
-        .to-top {
-            position: fixed;
-            bottom: 1.5rem;
-            left: 1.5rem;
-            z-index: 60;
-            width: 2.9rem;
-            height: 2.9rem;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.92);
-            backdrop-filter: blur(10px);
-            color: var(--text);
-            font-size: 1rem;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(12px);
-            transition: all 0.25s;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .to-top.visible { opacity: 1; visibility: visible; transform: none; }
-        .to-top:hover { border-color: var(--primary); color: var(--primary); }
-
-        .cli-block > .code-copy { order: -1; }
-
-        /* Tool filter */
-        .filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-bottom: 1rem;
-        }
-
-        .filter-chip {
-            font-family: var(--font);
-            font-size: 0.82rem;
-            font-weight: 700;
-            padding: 0.4rem 0.9rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-chip.active, .filter-chip:hover {
-            color: var(--text);
-            border-color: rgba(56, 189, 248, 0.45);
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        .tool-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.62);
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .tool-card:hover { border-color: rgba(56, 189, 248, 0.3); transform: translateY(-2px); }
-
-        .tool-key {
-            font-family: var(--mono);
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #bae6fd;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .tool-desc { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
-
-        .tool-flags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-
-        .flag {
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 0.1rem 0.45rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            color: var(--muted);
-        }
-
-        .flag-guest { border-color: rgba(74, 222, 128, 0.35); color: #86efac; background: rgba(74, 222, 128, 0.08); }
-        .flag-approval { border-color: rgba(251, 191, 36, 0.35); color: #fde68a; background: rgba(251, 191, 36, 0.08); }
-
-        .tool-grid { display: grid; gap: 0.6rem; }
-        @media (min-width: 640px) { .tool-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1000px) { .tool-grid { grid-template-columns: repeat(3, 1fr); } }
-
-        /* Accordion controls */
-        .acc-controls {
-            display: flex;
-            gap: 0.4rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .mini-btn {
-            font-family: var(--font);
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 0.35rem 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--glass);
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.18s;
-        }
-
-        .mini-btn:hover { color: var(--text); border-color: var(--primary); }
-
-        /* Anchor links on headings */
-        .anchor {
-            margin-right: 0.45rem;
-            font-size: 0.85em;
-            color: var(--muted);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        h2:hover .anchor { opacity: 1; }
-
-        ::selection { background: rgba(56, 189, 248, 0.3); color: #fff; }
-
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #050816; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 8px; border: 2px solid #050816; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-            .reveal { opacity: 1; transform: none; }
-        }
-
-        @media print {
-            body { background: #fff; color: #000; }
-            .grid-bg, .topnav, .to-top, .progress-bar, .copy-btn, .code-copy, .search-wrap { display: none !important; }
-            .card, .table-wrap, pre { break-inside: avoid; border-color: #ccc; }
-            .acc-body { display: block !important; }
-            a { color: #000; }
-        }
-
-        @media (max-width: 640px) {
-            .hero { padding: 2rem 1.25rem; }
-            h1 { font-size: 1.75rem; }
-            .nav-links { font-size: 0.8rem; gap: 0.3rem 0.75rem; }
-            .search-wrap { max-width: 100%; }
-            .to-top { bottom: 1rem; left: 1rem; }
-        }
-<style>
-    /* LTR overrides for English package docs (capabilities CSS is RTL-first) */
-    html[dir="ltr"] .progress-bar { transform-origin: left center; }
-    html[dir="ltr"] .to-top { left: auto; right: 1.5rem; }
-    html[dir="ltr"] .search-icon { left: 0.75rem; right: auto; }
-    html[dir="ltr"] .search-kbd { right: 0.6rem; left: auto; }
-    html[dir="ltr"] th, html[dir="ltr"] td { text-align: left; }
-    html[dir="ltr"] .nav-links a::after { left: 0; right: auto; }
-    html[dir="ltr"] .acc-trigger { text-align: left; }
-    html[dir="ltr"] .prose blockquote { border-left: 3px solid var(--primary); border-right: none; padding-left: 1rem; padding-right: 0; }
-
-    /* Hide duplicate hero embedded in package index.html — Blade layout provides the hero */
-    #hubContent > header.hero { display: none; }
-
-    /* Package hub content classes (from docs/index.html) */
-    #hubContent h2.section-title,
-    #hubContent .section-title {
-        font-size: clamp(1.35rem, 3vw, 1.6rem);
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        margin: 0 0 0.35rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--border);
-        color: var(--text);
-        display: block;
-    }
-
-    #hubContent .section-desc {
-        color: var(--muted);
-        margin-bottom: 1rem;
-        max-width: 65ch;
-        font-size: 0.92rem;
-        font-weight: 500;
-    }
-
-    #hubContent h3 {
-        font-size: 1.05rem;
-        font-weight: 800;
-        margin: 1.35rem 0 0.5rem;
-        color: var(--text);
-    }
-
-    #hubContent h4 {
-        font-size: 0.95rem;
-        font-weight: 800;
-        margin: 0.75rem 0 0.4rem;
-        color: var(--text);
-    }
-
-    #hubContent p,
-    #hubContent ul,
-    #hubContent ol {
-        margin-bottom: 0.75rem;
-        color: var(--muted);
-        font-weight: 500;
-    }
-
-    #hubContent ul,
-    #hubContent ol { padding-left: 1.25rem; }
-
-    #hubContent li { margin-bottom: 0.35rem; line-height: 1.65; }
-
-    #hubContent .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 0.25rem 0.65rem;
-        border-radius: 999px;
-        background: rgba(56, 189, 248, 0.12);
-        color: var(--primary);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        margin-bottom: 0.85rem;
-    }
-
-    #hubContent .hero-lead {
-        color: var(--muted);
-        font-size: 1.02rem;
-        max-width: 58ch;
-        font-weight: 500;
-    }
-
-    #hubContent .hero-actions {
-        margin-top: 1.25rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.625rem;
-    }
-
-    #hubContent .btn-secondary {
-        background: rgba(30, 41, 59, 0.8);
-        color: var(--text);
-        border-color: var(--border);
-    }
-
-    #hubContent .btn-secondary:hover {
-        color: var(--text);
-        border-color: var(--border-glow);
-        text-decoration: none;
-    }
-
-    #hubContent .grid-2 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-        gap: 0.875rem;
-    }
-
-    #hubContent .grid-3 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-        gap: 0.875rem;
-    }
-
-    #hubContent .grid-4 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-        gap: 0.875rem;
-    }
-
-    #hubContent .card h4 { margin-top: 0; }
-
-    #hubContent .pill {
-        display: inline-block;
-        font-size: 0.68rem;
-        font-weight: 700;
-        padding: 0.12rem 0.45rem;
-        border-radius: 999px;
-        margin-bottom: 0.35rem;
-        margin-right: 0.25rem;
-    }
-
-    #hubContent .pill-blue { background: rgba(56, 189, 248, 0.12); color: var(--primary); }
-    #hubContent .pill-green { background: rgba(74, 222, 128, 0.12); color: #86efac; }
-    #hubContent .pill-amber { background: rgba(251, 191, 36, 0.12); color: #fde68a; }
-
-    #hubContent .callout {
-        border-radius: var(--radius);
-        padding: 0.875rem 1rem;
-        margin: 1rem 0;
-        border: 1px solid var(--border);
-        font-size: 0.9rem;
-        background: var(--glass);
-    }
-
-    #hubContent .callout-info {
-        background: rgba(56, 189, 248, 0.08);
-        border-color: rgba(56, 189, 248, 0.28);
-    }
-
-    #hubContent .callout-warn {
-        background: rgba(251, 191, 36, 0.08);
-        border-color: rgba(251, 191, 36, 0.28);
-    }
-
-    #hubContent .callout strong {
-        color: var(--text);
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    #hubContent .callout p { margin: 0; font-size: 0.875rem; color: var(--muted); }
-
-    #hubContent .use-case {
-        border-left: 3px solid var(--primary);
-        padding-left: 0.85rem;
-    }
-
-    #hubContent .flow {
-        background: var(--code-bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1rem 1.125rem;
-        font-family: var(--mono);
-        font-size: 0.78rem;
-        line-height: 1.55;
-        white-space: pre;
-        overflow-x: auto;
-        color: var(--muted);
-        direction: ltr;
-        text-align: left;
-    }
-
-    /* Package index ships pre-built code-block + code-toolbar — map to guide chrome */
-    #hubContent .code-block .code-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5rem 0.75rem;
-        background: var(--code-head);
-        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-        direction: ltr;
-    }
-
-    #hubContent .code-block .code-toolbar .code-lang {
-        font-family: var(--mono);
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #7f8ba6;
-    }
-
-    #hubContent .code-block .copy-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-family: var(--font);
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 0.26rem 0.6rem;
-        border-radius: 7px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        background: rgba(148, 163, 184, 0.08);
-        color: #94a3b8;
-        cursor: pointer;
-    }
-
-    #hubContent .code-block .copy-btn:hover {
-        color: #e2e8f0;
-        border-color: rgba(56, 189, 248, 0.5);
-        background: rgba(56, 189, 248, 0.12);
-    }
-
-    #hubContent .code-block .copy-btn.copied {
-        color: #86efac;
-        border-color: rgba(74, 222, 128, 0.5);
-        background: rgba(74, 222, 128, 0.12);
-    }
-
-    #hubContent .code-block {
-        margin: 0.75rem 0 1rem;
-        border: 1px solid rgba(148, 163, 184, 0.16);
-        border-radius: 13px;
-        overflow: hidden;
-        background: var(--code-bg);
-        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
-    }
-
-    #hubContent .code-block pre {
-        margin: 0;
-        padding: 0.95rem 1.1rem;
-        overflow-x: auto;
-        direction: ltr;
-        text-align: left;
-    }
-
-    #hubContent .code-block pre code {
-        background: none;
-        border: none;
-        padding: 0;
-        display: block;
-        font-family: var(--mono);
-        font-size: 0.8rem;
-        line-height: 1.75;
-        color: #cdd6f4;
-    }
-
-    #hubContent footer {
-        margin-top: 2.5rem;
-        padding-top: 1.25rem;
-        border-top: 1px solid var(--border);
-        color: var(--muted);
-        font-size: 0.85rem;
-        background: transparent;
-        border-radius: 0;
-    }
-
-    #hubContent footer p { margin-bottom: 0.4rem; color: var(--muted); }
-
-    @media (max-width: 640px) {
-        #hubContent .hero-actions { flex-direction: column; }
-        #hubContent .hero-actions .btn { width: 100%; }
-    }
-
-    /* Markdown pages */
-    .prose :is(h1, h2, h3, h4) {
-        color: var(--text);
-        scroll-margin-top: 5.5rem;
-    }
-
-    .prose h1 { font-size: 1.65rem; font-weight: 900; margin: 0 0 1rem; background: none; color: var(--text); }
-    .prose h2 {
-        font-size: 1.35rem;
-        font-weight: 800;
-        margin: 2rem 0 0.85rem;
-        padding-bottom: 0.45rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .prose h3 { font-size: 1.08rem; font-weight: 800; margin: 1.5rem 0 0.65rem; }
-    .prose p, .prose li { color: var(--muted); font-weight: 500; line-height: 1.75; }
-    .prose p { margin-bottom: 1rem; }
-    .prose ul, .prose ol { margin-bottom: 1rem; padding-left: 1.25rem; }
-    .prose blockquote {
-        border-left: 3px solid var(--primary);
-        padding-left: 1rem;
-        margin: 1rem 0;
-        color: var(--muted);
-    }
-
-    .prose .table-wrap { margin: 1rem 0; }
-
-    /* Docs navbar — no horizontal scroll */
-    .docs-topnav { margin-bottom: 1.5rem; }
-
-    .docs-topnav-inner {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        gap: 0.75rem 1rem;
-    }
-
-    .docs-nav {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25rem;
-        min-width: 0;
-    }
-
-    .docs-nav-main {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.15rem 0.35rem;
-    }
-
-    .docs-nav-link,
-    .nav-drop-trigger {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        padding: 0.42rem 0.72rem;
-        border-radius: 999px;
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: var(--muted);
-        border: 1px solid transparent;
-        background: transparent;
-        font-family: var(--font);
-        cursor: pointer;
-        transition: color 0.2s, background 0.2s, border-color 0.2s;
-        white-space: nowrap;
-    }
-
-    .docs-nav-link:hover,
-    .nav-drop-trigger:hover,
-    .nav-drop.open .nav-drop-trigger {
-        color: var(--text);
-        background: rgba(255, 255, 255, 0.04);
-        border-color: var(--border);
-        text-decoration: none;
-    }
-
-    .docs-nav-link.active,
-    .nav-drop.open .nav-drop-trigger {
-        color: var(--primary);
-        background: rgba(56, 189, 248, 0.1);
-        border-color: rgba(56, 189, 248, 0.25);
-    }
-
-    .docs-nav-link-primary {
-        color: #bae6fd;
-        border-color: rgba(56, 189, 248, 0.22);
-        background: rgba(56, 189, 248, 0.08);
-    }
-
-    .docs-start-banner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.5rem;
-        padding: 0.85rem 1.1rem;
-        border-radius: 14px;
-        border: 1px solid rgba(56, 189, 248, 0.28);
-        background: rgba(56, 189, 248, 0.08);
-        color: #bae6fd;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .docs-start-banner strong { color: var(--text); }
-    .docs-start-banner a { font-weight: 700; }
-
-    .btn-sm {
-        padding: 0.45rem 0.85rem;
-        font-size: 0.82rem;
-    }
-
-    .docs-nav-host .ico { color: var(--primary); }
-
-    .nav-chevron {
-        width: 0.85em;
-        height: 0.85em;
-        transition: transform 0.2s;
-    }
-
-    .nav-drop.open .nav-chevron { transform: rotate(180deg); }
-
-    .nav-drop { position: relative; }
-
-    .nav-drop-panel {
-        position: absolute;
-        top: calc(100% + 0.45rem);
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 120;
-        min-width: 220px;
-        padding: 0.55rem;
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: rgba(10, 14, 26, 0.96);
-        backdrop-filter: blur(16px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
-    }
-
-    .nav-drop-panel-wide { min-width: min(720px, calc(100vw - 2rem)); padding: 0.85rem; }
-
-    .nav-drop-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.75rem 1.25rem;
-    }
-
-    @media (min-width: 900px) {
-        .nav-drop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-
-    .nav-drop-title {
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--muted);
-        padding: 0.2rem 0.55rem 0.35rem;
-    }
-
-    .nav-drop-link {
-        display: block;
-        padding: 0.38rem 0.55rem;
-        border-radius: 8px;
-        font-size: 0.84rem;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .nav-drop-link:hover {
-        color: var(--text);
-        background: rgba(56, 189, 248, 0.08);
-        text-decoration: none;
-    }
-
-    .docs-nav-actions {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 0.5rem;
-    }
-
-    .docs-nav-actions .search-wrap {
-        flex: 0 1 240px;
-        max-width: 240px;
-        min-width: 160px;
-    }
-
-    .docs-nav-toggle {
-        display: none;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.45rem 0.8rem;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.85);
-        color: var(--text);
-        font-family: var(--font);
-        font-size: 0.82rem;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .docs-nav-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 140;
-        background: rgba(1, 4, 9, 0.65);
-        backdrop-filter: blur(2px);
-    }
-
-    .docs-nav-panel {
-        position: fixed;
-        top: 0;
-        right: 0;
-        z-index: 150;
-        width: min(320px, 88vw);
-        height: 100vh;
-        overflow-y: auto;
-        padding: 1rem 0.85rem 2rem;
-        border-left: 1px solid var(--border);
-        background: rgba(8, 12, 24, 0.98);
-        backdrop-filter: blur(16px);
-        box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45);
-    }
-
-    .docs-nav-panel-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        padding: 0.35rem 0.45rem 0.85rem;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 0.65rem;
-    }
-
-    .docs-nav-panel-head strong { font-size: 0.92rem; }
-
-    .docs-nav-close {
-        display: grid;
-        place-items: center;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--muted);
-        cursor: pointer;
-    }
-
-    .docs-nav-panel-group { margin-bottom: 0.85rem; }
-
-    .docs-nav-panel-label {
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--muted);
-        padding: 0.35rem 0.45rem 0.25rem;
-    }
-
-    .docs-nav-panel a {
-        display: block;
-        padding: 0.42rem 0.45rem;
-        border-radius: 8px;
-        font-size: 0.86rem;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .docs-nav-panel a:hover {
-        color: var(--text);
-        background: rgba(56, 189, 248, 0.08);
-        text-decoration: none;
-    }
-
-    @media (max-width: 960px) {
-        .docs-topnav-inner {
-            grid-template-columns: 1fr auto;
-        }
-
-        .docs-nav {
-            grid-column: 1 / -1;
-            order: 3;
-            justify-content: space-between;
-        }
-
-        .docs-nav-main { display: none; }
-
-        .docs-nav-toggle { display: inline-flex; }
-
-        .docs-nav-actions {
-            grid-column: 2;
-        }
-
-        .docs-nav-actions .search-wrap {
-            max-width: 200px;
-            min-width: 140px;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .docs-topnav-inner { grid-template-columns: 1fr; }
-        .docs-nav-actions { width: 100%; }
-        .docs-nav-actions .search-wrap { flex: 1; max-width: none; }
-    }
-
-    /* Learning paths */
-    .path-grid { align-items: stretch; }
-    .path-card { display: flex; flex-direction: column; height: 100%; }
-    .path-card h3 { margin: 0.35rem 0 0.5rem; font-size: 1.05rem; font-weight: 800; }
-    .path-card > p { margin-bottom: 0.85rem; flex: 1; }
-    .path-featured { border-color: rgba(56, 189, 248, 0.35); box-shadow: 0 12px 40px rgba(56, 189, 248, 0.08); }
-    .path-steps {
-        margin: 0 0 1rem;
-        padding-left: 1.15rem;
-        color: var(--muted);
-        font-size: 0.88rem;
-        font-weight: 500;
-    }
-    .path-steps li { margin-bottom: 0.35rem; }
-    .path-go { margin-top: auto; align-self: flex-start; }
-
-    .path-note {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.65rem;
-        margin-top: 1rem;
-        text-align: left;
-    }
-
-    .path-note .ico { flex-shrink: 0; margin-top: 0.15rem; color: var(--primary); }
-    .path-note div { color: #bae6fd; font-weight: 500; line-height: 1.6; }
-    .path-note strong { color: var(--text); }
-
-    .hub-divider,
-    .content-divider {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin: 2.5rem 0 2rem;
-        color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-    }
-
-    .hub-divider::before,
-    .hub-divider::after,
-    .content-divider::before,
-    .content-divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-    }
-
-    .md-guide-card {
-        display: block;
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .md-guide-card:hover { color: inherit; text-decoration: none; }
-    .md-guide-card h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
-    .md-guide-card p { margin: 0; font-size: 0.78rem; }
-    .md-guide-card code { font-size: 0.72rem; }
-
-    html[dir="ltr"] .acc-trigger { text-align: left; }
-    html[dir="ltr"] .acc-body { text-align: left; }
-    html[dir="ltr"] .acc-body p { color: var(--muted); font-weight: 500; }
-</style>
-    </head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Limen AI — Laravel AI Agent Framework documentation. Agents, tools, workflows, memory, RAG, chat UI, and enterprise security for Laravel 11/12.">
+  <meta name="color-scheme" content="dark light">
+  <title>Limen AI — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+  <style>
+    :root {
+      --sidebar-w: 288px;
+      --header-h: 56px;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --font: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --transition: 0.2s ease;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --bg-subtle: #010409;
+      --surface: #161b22;
+      --surface-hover: #1c2128;
+      --border: #30363d;
+      --border-muted: #21262d;
+      --text: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --primary: #2f81f7;
+      --primary-hover: #58a6ff;
+      --primary-soft: rgba(47, 129, 247, 0.12);
+      --accent: #3fb950;
+      --accent-soft: rgba(63, 185, 80, 0.12);
+      --warning: #d29922;
+      --warning-soft: rgba(210, 153, 34, 0.12);
+      --hero-gradient: linear-gradient(135deg, rgba(47, 129, 247, 0.08) 0%, rgba(63, 185, 80, 0.04) 100%);
+      --code-bg: #0d1117;
+      --overlay: rgba(1, 4, 9, 0.65);
+      --scrollbar: #30363d;
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --surface: #ffffff;
+      --surface-hover: #f6f8fa;
+      --border: #d0d7de;
+      --border-muted: #eaeef2;
+      --text: #1f2328;
+      --text-secondary: #57606a;
+      --text-muted: #656d76;
+      --primary: #0969da;
+      --primary-hover: #0550ae;
+      --primary-soft: rgba(9, 105, 218, 0.1);
+      --accent: #1a7f37;
+      --accent-soft: rgba(26, 127, 55, 0.1);
+      --warning: #9a6700;
+      --warning-soft: rgba(154, 103, 0, 0.1);
+      --hero-gradient: linear-gradient(135deg, rgba(9, 105, 218, 0.06) 0%, rgba(26, 127, 55, 0.04) 100%);
+      --code-bg: #f6f8fa;
+      --overlay: rgba(31, 35, 40, 0.4);
+      --scrollbar: #d0d7de;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+    ::selection { background: var(--primary-soft); color: var(--text); }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 999px; }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--primary-hover); text-decoration: underline; }
+
+    .site-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      z-index: 40;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      backdrop-filter: blur(12px);
+    }
+    .site-header-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-weight: 700; font-size: 0.95rem; color: var(--text);
+    }
+    .site-header-brand:hover { text-decoration: none; color: var(--text); }
+    .brand-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: grid; place-items: center;
+      font-size: 0.7rem; font-weight: 800; color: #fff;
+    }
+    .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+    .icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: var(--overlay);
+      z-index: 45;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 1.25rem 0.875rem 2rem;
+      z-index: 50;
+      transition: transform var(--transition);
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.25rem 0.5rem 1rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-muted);
+    }
+    .sidebar-brand h1 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+    .sidebar-brand p { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .sidebar-theme { padding: 0 0.5rem 0.75rem; }
+    .theme-toggle {
+      display: flex; width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-subtle);
+    }
+    .theme-toggle button {
+      flex: 1; padding: 0.4rem 0.5rem;
+      border: none; background: transparent;
+      font-size: 0.75rem; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .theme-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-group { margin-bottom: 0.75rem; }
+    .nav-group-title {
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0.35rem 0.5rem;
+    }
+    .nav-link {
+      display: block;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 450;
+      transition: background var(--transition), color var(--transition);
+    }
+    .nav-link:hover { background: var(--surface-hover); color: var(--text); text-decoration: none; }
+    .nav-link.active { background: var(--primary-soft); color: var(--primary); font-weight: 500; }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-width: 0;
+      padding: 2rem clamp(1rem, 4vw, 2.5rem) 4rem;
+    }
+    .content { max-width: 820px; margin: 0 auto; }
+
+    .hero {
+      background: var(--hero-gradient);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.5rem, 4vw, 2.25rem);
+      margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid transparent;
+      margin-bottom: 0.875rem;
+    }
+    .hero h2 {
+      font-size: clamp(1.65rem, 4.5vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
+    }
+    .hero-lead { color: var(--text-secondary); font-size: 1.02rem; max-width: 58ch; }
+    .hero-actions { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.625rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-weight: 600; font-size: 0.875rem;
+      border: 1px solid transparent;
+      transition: background var(--transition), border-color var(--transition);
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; color: #fff; }
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); text-decoration: none; color: var(--text); }
+
+    section { margin-bottom: 2.75rem; scroll-margin-top: calc(var(--header-h) + 1rem); }
+    h2.section-title {
+      font-size: clamp(1.35rem, 3vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-muted);
+    }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.35rem 0 0.5rem; color: var(--text); }
+    h4 { font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.4rem; color: var(--text); }
+    .section-desc { color: var(--text-secondary); margin-bottom: 1rem; max-width: 65ch; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 0.875rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0.875rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.125rem;
+      transition: border-color var(--transition);
+    }
+    .card:hover { border-color: var(--border); }
+    .card h4 { margin-top: 0; }
+    .card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.55; }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 600;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      margin-bottom: 0.35rem;
+      margin-right: 0.25rem;
+    }
+    .pill-blue { background: var(--primary-soft); color: var(--primary); }
+    .pill-green { background: var(--accent-soft); color: var(--accent); }
+    .pill-amber { background: var(--warning-soft); color: var(--warning); }
+
+    p, ul, ol { margin-bottom: 0.75rem; color: var(--text-secondary); }
+    ul, ol { padding-left: 1.25rem; }
+    li { margin-bottom: 0.3rem; }
+    li::marker { color: var(--text-muted); }
+
+    :not(pre) > code {
+      font-family: var(--mono);
+      font-size: 0.84em;
+      padding: 0.15em 0.4em;
+      border-radius: 5px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-muted);
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      -webkit-overflow-scrolling: touch;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 480px; }
+    th, td { padding: 0.625rem 0.875rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border-muted); }
+    tr:last-child td { border-bottom: none; }
+    th { background: var(--bg-subtle); color: var(--text); font-weight: 600; white-space: nowrap; }
+    td { color: var(--text-secondary); }
+    td code { white-space: nowrap; }
+
+    .code-block {
+      margin: 0.75rem 0 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--code-bg);
+    }
+    .code-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.35rem 0.625rem;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-muted);
+    }
+    .code-lang {
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .copy-btn {
+      font-size: 0.68rem; font-weight: 500;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .code-block pre {
+      margin: 0; padding: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .code-block pre code.hljs {
+      display: block;
+      padding: 1rem 1.125rem;
+      font-family: var(--mono);
+      font-size: clamp(0.75rem, 2.5vw, 0.8125rem);
+      line-height: 1.6;
+      background: transparent !important;
+      tab-size: 2;
+    }
+
+    .flow {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.125rem;
+      font-family: var(--mono);
+      font-size: clamp(0.72rem, 2.5vw, 0.78rem);
+      line-height: 1.55;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--text-secondary);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .callout {
+      border-radius: var(--radius);
+      padding: 0.875rem 1rem;
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .callout-info { background: var(--primary-soft); border-color: rgba(47, 129, 247, 0.25); }
+    .callout-warn { background: var(--warning-soft); border-color: rgba(210, 153, 34, 0.25); }
+    .callout strong { color: var(--text); display: block; margin-bottom: 0.25rem; }
+    .callout p { margin: 0; font-size: 0.875rem; }
+
+    .use-case { border-left: 3px solid var(--primary); }
+
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    footer p { margin-bottom: 0.4rem; color: var(--text-muted); }
+
+    @media (max-width: 1024px) {
+      .site-header { display: flex; }
+      .sidebar {
+        top: var(--header-h);
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-md);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-backdrop { display: block; }
+      .main {
+        margin-left: 0;
+        padding-top: calc(var(--header-h) + 1.25rem);
+      }
+      .sidebar-theme { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      .hero-actions { flex-direction: column; }
+      .btn { width: 100%; }
+      table { min-width: 360px; font-size: 0.8125rem; }
+      th, td { padding: 0.5rem 0.625rem; }
+    }
+  </style>
+</head>
 <body>
-<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
-    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 2.94a1.5 1.5 0 0 1 2.12 0l1.06 1.06a1.5 1.5 0 0 0 2.12 0l1.06-1.06a1.5 1.5 0 0 1 2.12 2.12l-1.06 1.06a1.5 1.5 0 0 0 0 2.12l1.06 1.06a1.5 1.5 0 0 1-2.12 2.12l-1.06-1.06a1.5 1.5 0 0 0-2.12 0l-1.06 1.06a1.5 1.5 0 0 1-2.12-2.12l1.06-1.06a1.5 1.5 0 0 0 0-2.12L7.82 5.06a1.5 1.5 0 0 1 0-2.12Z"/><path d="M19 9v1"/><path d="M19 14v1"/><path d="M14 19h1"/><path d="M9 19h1"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
-    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></symbol>
-    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
-    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m12 19V5"/><path d="m5 12 7-7 7 7"/></symbol>
-    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
-    <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
-    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
-    <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
-    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
-    <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></symbol>
-    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
-    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
-</svg>
-
-<div class="progress-bar" id="progressBar" aria-hidden="true"></div>
-<div class="grid-bg" aria-hidden="true"></div>
-
-<div class="shell">
-    <nav class="topnav docs-topnav" aria-label="Documentation header">
-        <div class="topnav-inner docs-topnav-inner">
-            <a class="brand" href="index.html">
-                <span class="brand-icon" aria-hidden="true"><svg class="ico"><use href="#i-sparkles"/></svg></span>
-                <span>Limen AI Docs</span>
-            </a>
-
-            <div class="docs-nav" id="docsNav">
-    <div class="docs-nav-main">
-        <a class="docs-nav-link" href="host-guide-ar.html">Host guide (AR)</a>
-        <a class="docs-nav-link docs-nav-link-primary" href="index.html#learning-paths">Learning paths</a>
-        <a class="docs-nav-link" href="index.html#snippets">Snippets</a>
-        <a class="docs-nav-link" href="index.html#advanced-tutorial">Advanced</a>
-
-        <div class="nav-drop" data-nav-drop>
-            <button class="nav-drop-trigger" type="button" aria-expanded="false" aria-haspopup="true">
-                Learn
-                <svg class="ico nav-chevron"><use href="#i-chevron"/></svg>
-            </button>
-            <div class="nav-drop-panel nav-drop-panel-sm" hidden>
-                                    <a class="nav-drop-link" href="index.html#learning-paths">Learning paths</a>
-                                    <a class="nav-drop-link" href="index.html#snippets">Copy snippets</a>
-                                    <a class="nav-drop-link" href="index.html#advanced-tutorial">Advanced tutorial</a>
-                                    <a class="nav-drop-link" href="index.html#troubleshooting">Troubleshooting</a>
-                                    <a class="nav-drop-link" href="index.html#black-box">Black-box setup</a>
-                            </div>
-        </div>
-
-        <div class="nav-drop" data-nav-drop>
-            <button class="nav-drop-trigger" type="button" aria-expanded="false" aria-haspopup="true">
-                Reference
-                <svg class="ico nav-chevron"><use href="#i-chevron"/></svg>
-            </button>
-            <div class="nav-drop-panel nav-drop-panel-wide" hidden>
-                <div class="nav-drop-grid">
-                                            <div class="nav-drop-col">
-                            <div class="nav-drop-title">Getting started</div>
-                                                            <a class="nav-drop-link" href="index.html#installation">Installation</a>
-                                                            <a class="nav-drop-link" href="index.html#quickstart">Quick start</a>
-                                                            <a class="nav-drop-link" href="index.html#architecture">Architecture</a>
-                                                    </div>
-                                            <div class="nav-drop-col">
-                            <div class="nav-drop-title">Core concepts</div>
-                                                            <a class="nav-drop-link" href="index.html#agents">Agents</a>
-                                                            <a class="nav-drop-link" href="index.html#tools">Tools</a>
-                                                            <a class="nav-drop-link" href="index.html#workflows">Workflows</a>
-                                                            <a class="nav-drop-link" href="index.html#memory-knowledge">Memory &amp; RAG</a>
-                                                            <a class="nav-drop-link" href="index.html#providers">Providers</a>
-                                                    </div>
-                                            <div class="nav-drop-col">
-                            <div class="nav-drop-title">Integration</div>
-                                                            <a class="nav-drop-link" href="index.html#programmatic">Programmatic API</a>
-                                                            <a class="nav-drop-link" href="index.html#http-api">HTTP API</a>
-                                                            <a class="nav-drop-link" href="index.html#queue-broadcasting">Queue &amp; realtime</a>
-                                                            <a class="nav-drop-link" href="index.html#chat-ui">Chat UI</a>
-                                                            <a class="nav-drop-link" href="index.html#quality">Quality layer</a>
-                                                            <a class="nav-drop-link" href="index.html#security">Security</a>
-                                                            <a class="nav-drop-link" href="index.html#observability">Observability</a>
-                                                    </div>
-                                            <div class="nav-drop-col">
-                            <div class="nav-drop-title">Guides</div>
-                                                            <a class="nav-drop-link" href="index.html#use-cases">Use cases</a>
-                                                            <a class="nav-drop-link" href="index.html#artisan">Artisan CLI</a>
-                                                            <a class="nav-drop-link" href="index.html#configuration">Configuration</a>
-                                                            <a class="nav-drop-link" href="index.html#testing">Testing</a>
-                                                            <a class="nav-drop-link" href="index.html#markdown-guides">Markdown guides</a>
-                                                    </div>
-                                    </div>
-            </div>
-        </div>
-
-        <a class="docs-nav-link docs-nav-host" href="host-guide-ar.html">
-            <svg class="ico"><use href="#i-book"/></svg>
-            Host (AR)
-        </a>
+  <header class="site-header">
+    <a href="#overview" class="site-header-brand">
+      <span class="brand-icon">LA</span>
+      <span>Limen AI</span>
+    </a>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="theme-toggle-mobile" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="menu-toggle" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
+  </header>
 
-    <button class="docs-nav-toggle" type="button" id="docsNavToggle" aria-expanded="false" aria-controls="docsNavPanel">
-        <svg class="ico"><use href="#i-menu"/></svg>
-        <span>Sections</span>
-    </button>
-</div>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-<div class="docs-nav-backdrop" id="docsNavBackdrop" hidden></div>
-
-<aside class="docs-nav-panel" id="docsNavPanel" aria-label="Documentation sections" hidden>
-    <div class="docs-nav-panel-head">
-        <strong>Jump to section</strong>
-        <button class="docs-nav-close" type="button" id="docsNavClose" aria-label="Close menu">
-            <svg class="ico"><use href="#i-x"/></svg>
-        </button>
-    </div>
-
-    <div class="docs-nav-panel-group">
-        <div class="docs-nav-panel-label">Start here</div>
-        <a href="index.html#learning-paths">Learning paths</a>
-        <a href="index.html#snippets">Copy snippets</a>
-        <a href="index.html#advanced-tutorial">Advanced tutorial</a>
-        <a href="index.html#troubleshooting">Troubleshooting</a>
-    </div>
-
-            <div class="docs-nav-panel-group">
-            <div class="docs-nav-panel-label">Getting started</div>
-                            <a href="index.html#installation">Installation</a>
-                            <a href="index.html#quickstart">Quick start</a>
-                            <a href="index.html#architecture">Architecture</a>
-                    </div>
-            <div class="docs-nav-panel-group">
-            <div class="docs-nav-panel-label">Core concepts</div>
-                            <a href="index.html#agents">Agents</a>
-                            <a href="index.html#tools">Tools</a>
-                            <a href="index.html#workflows">Workflows</a>
-                            <a href="index.html#memory-knowledge">Memory &amp; RAG</a>
-                            <a href="index.html#providers">Providers</a>
-                    </div>
-            <div class="docs-nav-panel-group">
-            <div class="docs-nav-panel-label">Integration</div>
-                            <a href="index.html#programmatic">Programmatic API</a>
-                            <a href="index.html#http-api">HTTP API</a>
-                            <a href="index.html#queue-broadcasting">Queue &amp; realtime</a>
-                            <a href="index.html#chat-ui">Chat UI</a>
-                            <a href="index.html#quality">Quality layer</a>
-                            <a href="index.html#security">Security</a>
-                            <a href="index.html#observability">Observability</a>
-                    </div>
-            <div class="docs-nav-panel-group">
-            <div class="docs-nav-panel-label">Guides</div>
-                            <a href="index.html#use-cases">Use cases</a>
-                            <a href="index.html#artisan">Artisan CLI</a>
-                            <a href="index.html#configuration">Configuration</a>
-                            <a href="index.html#testing">Testing</a>
-                            <a href="index.html#markdown-guides">Markdown guides</a>
-                    </div>
-    
-    <div class="docs-nav-panel-group">
-        <div class="docs-nav-panel-label">Host demo</div>
-        <a href="host-guide-ar.html">Arabic integration guide</a>
-        <a href="host-guide-ar.html#concepts">Concepts (AR)</a>
-    </div>
-</aside>
-
-            <div class="docs-nav-actions">
-                <div class="search-wrap">
-                    <span class="search-icon" aria-hidden="true"><svg class="ico"><use href="#i-search"/></svg></span>
-                    <input class="search-input" id="docsSearch" type="search" placeholder="Search…" aria-label="Search documentation">
-                    <span class="search-kbd" aria-hidden="true">/</span>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-        <header class="hero">
-        <div class="badge-row">
-            <span class="badge badge-ai">Official package docs · v1.2.2</span>
-            <span class="badge badge-live"><span class="live-dot" aria-hidden="true"></span> Learning paths</span>
-            <span class="badge">Advanced tutorial included</span>
-        </div>
-
-        <h1>Limen AI documentation</h1>
-        <p class="lead">
-            Pick a path (FAQ widget → tools → workflows), copy snippets, follow the advanced support-system tutorial, then dive into the full reference.
-        </p>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-num">3</div>
-                <div class="stat-label">Learning paths</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">6</div>
-                <div class="stat-label">Tutorial steps</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">19</div>
-                <div class="stat-label">Markdown guides</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">20+</div>
-                <div class="stat-label">Hub sections</div>
-            </div>
-        </div>
-
-        <div class="cta-row">
-            <a class="btn btn-primary" href="#learning-paths"><svg class="ico"><use href="#i-book-open"/></svg> Pick your path</a>
-            <a class="btn btn-ghost" href="#advanced-tutorial"><svg class="ico"><use href="#i-package"/></svg> Advanced tutorial</a>
-            <a class="btn btn-ghost" href="host-guide-ar.html#concepts"><svg class="ico"><use href="#i-book"/></svg> Concepts (Arabic)</a>
-        </div>
-    </header>
-        <section id="learning-paths">
-    <div class="section-head">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">LA</span>
         <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-book-open"/></svg></span> Pick your learning path</h2>
-            <p class="section-sub">Three curated tracks — start where you are, finish with a production-ready agent.</p>
+          <h1>Limen AI</h1>
+          <p>Laravel Agent Framework</p>
         </div>
-    </div>
-
-    <div class="grid grid-3 path-grid">
-        <article class="card path-card">
-            <span class="pill pill-live">Path A · ~30 min</span>
-            <h3>Widget only (FAQ bot)</h3>
-            <p>No tools, no auth wiring. Knowledge + widget for public support.</p>
-            <ol class="path-steps">
-                <li><a href="#snippets">Copy install + .env snippets</a></li>
-                <li><a href="index.html#black-box">Black-box checklist</a></li>
-                <li><a href="knowledge-base-setup.md">Knowledge base setup</a></li>
-                <li><a href="index.html#chat-ui">Embed the widget</a></li>
-                <li><a href="index.html#testing">Verify with CLI</a></li>
-            </ol>
-            <a class="btn btn-ghost path-go" href="#snippets">Start Path A →</a>
-        </article>
-
-        <article class="card path-card path-featured">
-            <span class="pill pill-live">Path B · ~2 hours</span>
-            <h3>Tools + authorization</h3>
-            <p>Agent calls Laravel — lookups, tickets, safe mutations with <code>authorize()</code>.</p>
-            <ol class="path-steps">
-                <li><a href="index.html#installation">Install &amp; doctor</a></li>
-                <li><a href="index.html#quickstart">Make your first tool</a></li>
-                <li><a href="index.html#agents">Register agents in config</a></li>
-                <li><a href="scaling-agents-and-tools.md">Split public vs staff agents</a></li>
-                <li><a href="index.html#security">Security checklist</a></li>
-            </ol>
-            <a class="btn btn-primary path-go" href="index.html#quickstart">Start Path B →</a>
-        </article>
-
-        <article class="card path-card">
-            <span class="pill pill-warn">Path C · ~1 day</span>
-            <h3>Workflows + staff ops</h3>
-            <p>Multi-step flows, approvals, queue, and observability for serious ops.</p>
-            <ol class="path-steps">
-                <li><a href="#advanced-tutorial">End-to-end support system</a></li>
-                <li><a href="index.html#workflows">Workflow config</a></li>
-                <li><a href="index.html#queue-broadcasting">Queue &amp; realtime</a></li>
-                <li><a href="index.html#observability">Logs &amp; metrics</a></li>
-                <li><a href="host-guide-ar.html#registered">Live 3PL demo (AR)</a></li>
-            </ol>
-            <a class="btn btn-ghost path-go" href="#advanced-tutorial">Start Path C →</a>
-        </article>
-    </div>
-
-    <div class="alert alert-info path-note">
-        <svg class="ico"><use href="#i-info"/></svg>
-        <div>
-            <strong>Arabic host guide — concepts with plain analogies</strong>
-            Agent, Tool, Skill, Workflow explained simply.
-            <a href="host-guide-ar.html#concepts">Open concepts (AR)</a>
-            · English paths above ·
-            <a href="index.html#markdown-guides">markdown guides</a>
+      </div>
+      <div class="sidebar-theme">
+        <div class="theme-toggle" role="group" aria-label="Color theme">
+          <button type="button" data-theme-set="dark" class="active">Dark</button>
+          <button type="button" data-theme-set="light">Light</button>
         </div>
-    </div>
-</section>
-    <section>
-    <div class="section-head">
-        <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-book-open"/></svg></span> How to use this hub</h2>
-            <p class="section-sub">Start with a path, copy snippets, follow the advanced tutorial, then search the full reference below.</p>
+      </div>
+      <nav aria-label="Documentation">
+        <div class="nav-group">
+          <div class="nav-group-title">Getting started</div>
+          <a class="nav-link" href="#overview">Overview</a>
+          <a class="nav-link" href="#installation">Installation</a>
+          <a class="nav-link" href="#quickstart">Quick start</a>
+          <a class="nav-link" href="#architecture">Architecture</a>
         </div>
-    </div>
-
-    <div class="grid grid-2">
-        <div class="card">
-            <h3>1 · Pick a path</h3>
-            <p>Path A (FAQ), B (tools), or C (workflows) — each links to the right sections.</p>
+        <div class="nav-group">
+          <div class="nav-group-title">Core concepts</div>
+          <a class="nav-link" href="#agents">Agents</a>
+          <a class="nav-link" href="#tools">Tools</a>
+          <a class="nav-link" href="#workflows">Workflows</a>
+          <a class="nav-link" href="#memory-knowledge">Memory &amp; RAG</a>
+          <a class="nav-link" href="#providers">LLM providers</a>
         </div>
-        <div class="card">
-            <h3>2 · Copy snippets</h3>
-            <p>Install, .env, agent, tool, widget — tabbed blocks with Copy buttons.</p>
+        <div class="nav-group">
+          <div class="nav-group-title">Integration</div>
+          <a class="nav-link" href="#programmatic">Programmatic API</a>
+          <a class="nav-link" href="#http-api">HTTP API</a>
+          <a class="nav-link" href="#queue-broadcasting">Queue &amp; realtime</a>
+          <a class="nav-link" href="#chat-ui">Chat UI &amp; theming</a>
+          <a class="nav-link" href="#security">Security</a>
+          <a class="nav-link" href="#observability">Observability</a>
         </div>
-        <div class="card">
-            <h3>3 · Advanced tutorial</h3>
-            <p>Six-step support system: 3 agents, KB, tools, approval, workflow.</p>
+        <div class="nav-group">
+          <div class="nav-group-title">Guides</div>
+          <a class="nav-link" href="#use-cases">Use cases</a>
+          <a class="nav-link" href="#artisan">Artisan commands</a>
+          <a class="nav-link" href="#configuration">Configuration</a>
+          <a class="nav-link" href="#testing">Testing</a>
+          <a class="nav-link" href="#releases">Releases</a>
         </div>
-        <div class="card">
-            <h3>4 · Search &amp; nav</h3>
-            <p>Press <code>/</code> to filter sections. Top bar lists all hub anchors.</p>
-        </div>
-    </div>
-</section>
-    <section id="snippets">
-    <div class="section-head">
-        <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-terminal"/></svg></span> Copy-ready snippets</h2>
-            <p class="section-sub">Common setup blocks — pick a tab, click Copy, paste into your app.</p>
-        </div>
-        <a class="btn btn-ghost" href="black-box-host-guide.md">Full black-box guide →</a>
-    </div>
-
-    <div class="tabs" role="tablist">
-        <button class="tab active" type="button" data-tab="install">Install</button>
-        <button class="tab" type="button" data-tab="env">.env</button>
-        <button class="tab" type="button" data-tab="agent">Agent</button>
-        <button class="tab" type="button" data-tab="tool">Tool</button>
-        <button class="tab" type="button" data-tab="widget">Widget</button>
-        <button class="tab" type="button" data-tab="ollama">Ollama</button>
-        <button class="tab" type="button" data-tab="test">Verify</button>
-    </div>
-
-    <div class="tab-panel active" id="panel-install">
-        <p class="panel-note">Minimum path from zero to a working install.</p>
-        <pre data-lang="bash"><code>composer require limen-ai/limen-ai
-php artisan limen-ai:install --migrate
-php artisan config:clear
-php artisan limen-ai:doctor
-php artisan limen-ai:validate</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-env">
-        <p class="panel-note">Black-box defaults — no Laravel Gates required.</p>
-        <pre data-lang="env"><code>LIMEN_AI_DEFAULT_AGENT=app_assistant
-LIMEN_AI_PROVIDER=openai
-OPENAI_API_KEY=your-key
-
-LIMEN_AI_AUTHORIZATION_MODE=simple
-LIMEN_AI_REQUIRE_AUTH=false
-
-LIMEN_AI_UI_TITLE="Support"
-LIMEN_AI_UI_GUEST_ENABLED=true
-LIMEN_AI_UI_HISTORY_ENABLED=true
-LIMEN_AI_PERSISTENCE_DRIVER=database</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-agent">
-        <p class="panel-note">FAQ-only agent — knowledge injected every turn, no tools needed.</p>
-        <pre data-lang="php"><code>'knowledge' => [
-    'driver' => 'config',
-    'collections' => [
-        'product_help' => [
-            'documents' => [
-                ['content' => 'Shipping: 3–5 business days.'],
-                ['content' => 'Returns within 14 days.'],
-            ],
-        ],
-    ],
-],
-'agents' => [
-    'app_assistant' => [
-        'instructions' => 'Answer from knowledge. Be concise.',
-        'tools' => [],
-        'knowledge' => ['product_help'],
-        'authorization' => ['required' => false, 'guest_allowed' => true],
-    ],
-],</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-tool">
-        <p class="panel-note">Generate a tool, implement authorize() + handle(), register in config.</p>
-        <pre data-lang="bash"><code>php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status --test</code></pre>
-        <pre data-lang="php"><code>public function authorize(array $input, ToolExecutionContext $context): bool
-{
-    return $context->userId() !== null;
-}
-
-public function handle(array $input, ToolExecutionContext $context): array
-{
-    return ['status' => 'shipped', 'order_id' => $input['order_id']];
-}</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-widget">
-        <p class="panel-note">One Blade line — chat UI, history, guest sessions.</p>
-        <pre data-lang="blade"><code>&lt;x-limen-ai::widget /&gt;
-
-&lt;!-- Or full page chat --&gt;
-&lt;x-limen-ai::chatbot agent="app_assistant" /&gt;</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-ollama">
-        <p class="panel-note">Local model via OpenAI-compatible driver (e.g. qwen3:8b).</p>
-        <pre data-lang="env"><code>LIMEN_AI_PROVIDER=openai
-OPENAI_API_KEY=ollama
-OPENAI_BASE_URL=http://localhost:11434/v1
-OPENAI_TIMEOUT=120
-LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
-LIMEN_AI_QUEUE_AGENT_RUNS=false
-LIMEN_AI_BROADCAST_DRIVER=null</code></pre>
-    </div>
-
-    <div class="tab-panel" id="panel-test">
-        <p class="panel-note">Smoke-test without opening the browser.</p>
-        <pre data-lang="bash"><code>php artisan limen-ai:doctor
-php artisan limen-ai:validate
-php artisan limen-ai:tool:test get_order_status --input='{"order_id":"ORD-1001"}'
-php artisan limen-ai:agent:test app_assistant --message="What is your return policy?"</code></pre>
-    </div>
-</section>
-    <section id="advanced-tutorial">
-    <div class="section-head">
-        <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-package"/></svg></span> Advanced end-to-end: support system</h2>
-            <p class="section-sub">One copy-paste story — public FAQ widget, staff agent with tools, refund approval workflow.</p>
-        </div>
-        <a class="btn btn-ghost" href="scaling-agents-and-tools.md">Scaling guide →</a>
-    </div>
-
-    <div class="walk">
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">1</span>
-                <span class="walk-title">Three agents, split by audience</span>
-                <span class="walk-file">config/limen-ai.php</span>
-            </div>
-            <p class="walk-desc">Public widget stays small (FAQ only). Staff gets lookups. Admin gets mutations with confirmation.</p>
-            <pre data-lang="php"><code>'agents' => [
-    'app_assistant' => [
-        'instructions' => 'Answer from knowledge only. Never guess order status.',
-        'tools' => [],
-        'knowledge' => ['store_faq'],
-        'authorization' => ['required' => false, 'guest_allowed' => true],
-    ],
-    'support_agent' => [
-        'instructions' => 'Help staff with orders and tickets. Call tools when user gives an ID.',
-        'tools' => ['get_order_status', 'list_open_tickets'],
-        'authorization' => ['required' => true, 'guest_allowed' => false],
-    ],
-    'admin_agent' => [
-        'instructions' => 'Privileged actions only when staff confirms.',
-        'tools' => ['refund_order'],
-        'authorization' => ['required' => true, 'guest_allowed' => false],
-    ],
-],</code></pre>
-        </div>
-
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">2</span>
-                <span class="walk-title">Knowledge for the public widget</span>
-                <span class="walk-file">config/limen-ai.php</span>
-            </div>
-            <p class="walk-desc">Short FAQ chunks — shipping, returns, hours. No vector DB required to start.</p>
-            <pre data-lang="php"><code>'knowledge' => [
-    'collections' => [
-        'store_faq' => [
-            'documents' => [
-                ['content' => 'Shipping: 3–5 business days standard.'],
-                ['content' => 'Returns: 14 days, unused items only.'],
-                ['content' => 'Support: Sun–Thu 9–18 Cairo time.'],
-            ],
-        ],
-    ],
-],</code></pre>
-        </div>
-
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">3</span>
-                <span class="walk-title">Staff lookup tool</span>
-                <span class="walk-file">app/LimenAi/Tools/GetOrderStatusTool.php</span>
-            </div>
-            <pre data-lang="bash"><code>php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status --test</code></pre>
-            <pre data-lang="php"><code>public function authorize(array $input, ToolExecutionContext $context): bool
-{
-    return $context->userId() !== null;
-}
-
-public function handle(array $input, ToolExecutionContext $context): array
-{
-    $order = Order::where('number', $input['order_id'])->first();
-
-    return [
-        'found' => (bool) $order,
-        'status' => $order?->status ?? 'not_found',
-    ];
-}</code></pre>
-        </div>
-
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">4</span>
-                <span class="walk-title">Dangerous action + confirmation</span>
-                <span class="walk-file">config/limen-ai.php</span>
-            </div>
-            <p class="walk-desc">Refunds require human approval — set <code>confirmation: true</code> on the tool.</p>
-            <pre data-lang="php"><code>'tools' => [
-    'refund_order' => [
-        'class' => App\LimenAi\Tools\RefundOrderTool::class,
-        'description' => 'Issue a partial or full refund for an order ID.',
-        'input_schema' => [
-            'order_id' => ['type' => 'string', 'required' => true],
-            'amount' => ['type' => 'number', 'required' => true],
-        ],
-        'confirmation' => true,
-    ],
-],</code></pre>
-        </div>
-
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">5</span>
-                <span class="walk-title">Workflow: draft → approve → execute</span>
-                <span class="walk-file">config/limen-ai.php</span>
-            </div>
-            <pre data-lang="php"><code>'workflows' => [
-    'refund_request' => [
-        'steps' => [
-            ['type' => 'agent', 'agent' => 'support_agent', 'input' => '{{ message }}'],
-            ['type' => 'approval', 'message' => 'Confirm refund for order?'],
-            ['type' => 'tool', 'tool' => 'refund_order'],
-        ],
-    ],
-],</code></pre>
-        </div>
-
-        <div class="walk-step">
-            <div class="walk-head">
-                <span class="step-dot">6</span>
-                <span class="walk-title">Embed UI + verify</span>
-            </div>
-            <pre data-lang="blade"><code>&lt;!-- Public site --&gt;
-&lt;x-limen-ai::widget agent="app_assistant" /&gt;
-
-&lt;!-- Staff area (auth middleware on route) --&gt;
-&lt;x-limen-ai::chatbot agent="support_agent" /&gt;</code></pre>
-            <pre data-lang="bash"><code>php artisan limen-ai:doctor
-php artisan limen-ai:validate
-php artisan limen-ai:agent:test app_assistant --message="What is your return policy?"
-php artisan limen-ai:tool:test get_order_status --input='{"order_id":"ORD-1001"}'</code></pre>
-        </div>
-    </div>
-</section>
-    <section id="troubleshooting">
-    <div class="section-head">
-        <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-alert"/></svg></span> Troubleshooting</h2>
-            <p class="section-sub">Common failures when building agents — symptom, cause, fix.</p>
-        </div>
-    </div>
-
-    <div class="accordion">
-        <div class="acc-item open">
-            <button class="acc-trigger" type="button">
-                <span>Agent ignores my tools</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> Tool not on agent's <code>tools</code> array, vague <code>description</code>, or skill/agent intersection empty.</p>
-                <p><strong>Fix:</strong> Add tool key to agent config. Write description like “Call when user mentions order number.” Run <code>php artisan limen-ai:tools</code> to confirm registration.</p>
-            </div>
-        </div>
-
-        <div class="acc-item">
-            <button class="acc-trigger" type="button">
-                <span>Wrong tool picked every time</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> Too many tools on one agent (especially local 7B–8B models).</p>
-                <p><strong>Fix:</strong> Split agents per role. Keep public widget at 0–2 tools. See <a href="scaling-agents-and-tools.md">scaling guide</a>.</p>
-            </div>
-        </div>
-
-        <div class="acc-item">
-            <button class="acc-trigger" type="button">
-                <span>Guest blocked / unauthorized tool</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> <code>authorize()</code> returns false, or agent requires auth while widget is guest.</p>
-                <p><strong>Fix:</strong> Public agent: <code>guest_allowed: true</code> and no privileged tools. Staff tools: separate agent on authenticated routes only.</p>
-            </div>
-        </div>
-
-        <div class="acc-item">
-            <button class="acc-trigger" type="button">
-                <span>Ollama timeout / empty replies</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> Model cold start, low timeout, too many tools in context.</p>
-                <p><strong>Fix:</strong> <code>OPENAI_TIMEOUT=120</code>, <code>LIMEN_AI_QUEUE_AGENT_RUNS=false</code> for local dev, reduce tools, run <code>ollama serve</code>.</p>
-            </div>
-        </div>
-
-        <div class="acc-item">
-            <button class="acc-trigger" type="button">
-                <span>Knowledge not used in answers</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> Collection not attached to agent <code>knowledge</code> array, or chunks too long/vague.</p>
-                <p><strong>Fix:</strong> Attach collection key to agent. Use 2–4 sentence factual chunks. Test with <code>limen-ai:agent:test</code>.</p>
-            </div>
-        </div>
-
-        <div class="acc-item">
-            <button class="acc-trigger" type="button">
-                <span>Skill tools never run</span>
-                <span class="acc-icon"><svg class="ico"><use href="#i-chevron"/></svg></span>
-            </button>
-            <div class="acc-body">
-                <p><strong>Cause:</strong> Tool in skill but not in agent <code>tools</code> — intersection must include both.</p>
-                <p><strong>Fix:</strong> Add tool key to agent AND skill, or drop skill tools and list on agent only. See <a href="host-guide-ar.html#concepts">concepts (AR)</a>.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section id="markdown-guides">
-    <div class="section-head">
-        <div>
-            <h2><span class="h2-icon"><svg class="ico"><use href="#i-folder"/></svg></span> Markdown guides</h2>
-            <p class="section-sub">Deep dives — click any guide for the full document.</p>
-        </div>
-    </div>
-
-    <div class="grid grid-3 md-guide-grid">
-                    <a class="card md-guide-card" href="README.md">
-                <h4>Docs README index</h4>
-                <p><code>README.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="black-box-host-guide.md">
-                <h4>Black-box host guide</h4>
-                <p><code>black-box-host-guide.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="host-quickstart.md">
-                <h4>Host quickstart</h4>
-                <p><code>host-quickstart.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="installation.md">
-                <h4>Installation</h4>
-                <p><code>installation.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="providers.md">
-                <h4>Providers</h4>
-                <p><code>providers.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="agent-configuration.md">
-                <h4>Agent configuration</h4>
-                <p><code>agent-configuration.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="knowledge-base-setup.md">
-                <h4>Knowledge base setup</h4>
-                <p><code>knowledge-base-setup.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="artisan-command-map.md">
-                <h4>Artisan command map</h4>
-                <p><code>artisan-command-map.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="configuration-schema.md">
-                <h4>Configuration schema</h4>
-                <p><code>configuration-schema.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="scaling-agents-and-tools.md">
-                <h4>Scaling agents &amp; tools</h4>
-                <p><code>scaling-agents-and-tools.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="theming.md">
-                <h4>Theming</h4>
-                <p><code>theming.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="observability.md">
-                <h4>Observability</h4>
-                <p><code>observability.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="QUALITY-GATE.md">
-                <h4>Quality gate</h4>
-                <p><code>QUALITY-GATE.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="architecture%2FARCHITECTURE.md">
-                <h4>Architecture</h4>
-                <p><code>architecture/ARCHITECTURE.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="development%2FTESTING.md">
-                <h4>Testing</h4>
-                <p><code>development/TESTING.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="limen-integration.md">
-                <h4>Limen 3PL integration</h4>
-                <p><code>limen-integration.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="..%2FCHANGELOG.md">
-                <h4>CHANGELOG</h4>
-                <p><code>../CHANGELOG.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="..%2FSECURITY.md">
-                <h4>SECURITY</h4>
-                <p><code>../SECURITY.md</code></p>
-            </a>
-                    <a class="card md-guide-card" href="..%2FAGENTS.md">
-                <h4>AGENTS.md (AI contributors)</h4>
-                <p><code>../AGENTS.md</code></p>
-            </a>
-            </div>
-</section>
-
-    <div class="content-divider hub-divider"><span>Official package reference</span></div>
+      </nav>
+    </aside>
 
     <main class="main">
-    <!-- limen-docs:content-start -->
-    <div class="content" id="hubContent">
-        <div class="content" id="hubContent">
-        
+      <div class="content">
         <header class="hero" id="overview">
-          <span class="hero-badge">v1.2.2 · Laravel 11–13 · PHP 8.2+</span>
-          <h2>Drop-in AI chat for Laravel — black-box simple</h2>
+          <span class="hero-badge">v1.0.0 · Laravel 11 &amp; 12 · PHP 8.2+</span>
+          <h2>Build production-ready AI agents in Laravel</h2>
           <p class="hero-lead">
-            Install, set <code>.env</code>, add agents/tools/knowledge in config, embed the widget — chat replies automatically.
-            No Laravel Gates in default mode. Tools use <code>authorize()</code> on <code>BaseTool</code>. Knowledge (FAQ/RAG) injects into every turn.
+            Limen AI is a reusable Laravel package for config-driven agents, tools, skills, workflows,
+            memory, knowledge retrieval (RAG), approvals, and an embeddable chat UI — with authorization,
+            SSRF protection, and audit logging built in from day one.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#black-box">Black-box guide (5 min)</a>
-            <a class="btn btn-secondary" href="black-box-host-guide.md">Markdown guide</a>
-            <a class="btn btn-secondary" href="https://github.com/hatem-isnaad/limen-ai" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn btn-primary" href="#quickstart">Quick start (5 min)</a>
+            <a class="btn btn-secondary" href="https://github.com/hatem-isnaad/limen-ai" target="_blank" rel="noopener">GitHub repository</a>
           </div>
         </header>
-
-        <section id="black-box">
-          <h2 class="section-title">Black-box developer path</h2>
-          <p class="section-desc">Everything a new developer needs — no framework internals, no Gate setup.</p>
-
-          <div class="callout callout-info">
-            <strong>You change config + env. The package runs the agent loop.</strong>
-            <p>Prepare a knowledge base (FAQ chunks), optional tools for lookups/actions, one Blade line for the widget. Users can chat immediately.</p>
-          </div>
-
-          <h3>1 — Install</h3>
-          <div class="code-block" data-lang="Shell">
-            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">composer require limen-ai/limen-ai
-php artisan limen-ai:install
-php artisan migrate
-php artisan config:clear</code></pre>
-          </div>
-
-          <h3>2 — Environment</h3>
-          <div class="code-block" data-lang="env">
-            <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">LIMEN_AI_DEFAULT_AGENT=app_assistant
-LIMEN_AI_PROVIDER=openai
-OPENAI_API_KEY=your-key
-
-# Black-box auth (default) — no Gates
-LIMEN_AI_AUTHORIZATION_MODE=simple
-LIMEN_AI_REQUIRE_AUTH=false
-
-# Widget
-LIMEN_AI_UI_TITLE="Support"
-LIMEN_AI_UI_GUEST_ENABLED=true
-LIMEN_AI_UI_HISTORY_ENABLED=true
-
-# Ollama (optional — e.g. qwen3:8b)
-# OPENAI_API_KEY=ollama
-# OPENAI_BASE_URL=http://localhost:11434/v1
-# LIMEN_AI_APP_ASSISTANT_MODEL=qwen3:8b
-# LIMEN_AI_HEURISTIC_VALIDATION=true
-# LIMEN_AI_SEMANTIC_VALIDATION=true
-# LIMEN_AI_SEMANTIC_MIN_SCORE=0.6</code></pre>
-          </div>
-
-          <h3>3 — Knowledge base (so chat answers real questions)</h3>
-          <div class="code-block" data-lang="PHP">
-            <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-php">// config/limen-ai.php
-'knowledge' => [
-    'driver' => 'config',
-    'limit' => 5,
-    'collections' => [
-        'product_help' => [
-            'name' => 'Product Help',
-            'documents' => [
-                ['content' => 'Shipping: 3–5 business days. Free over 500 SAR.'],
-                ['content' => 'Returns within 14 days if unused.'],
-                ['content' => 'Support: Sun–Thu 9–18 Cairo time.'],
-            ],
-        ],
-    ],
-],
-'agents' => [
-    'app_assistant' => [
-        'instructions' => 'Answer from your knowledge. Be concise.',
-        'tools' => [],
-        'knowledge' => ['product_help'],
-        'authorization' => ['required' => false, 'guest_allowed' => true],
-    ],
-],</code></pre>
-          </div>
-          <p class="section-desc">Full KB cookbook: <a href="knowledge-base-setup.md">knowledge-base-setup.md</a></p>
-
-          <h3>4 — Widget</h3>
-          <div class="code-block" data-lang="Blade">
-            <div class="code-toolbar"><span class="code-lang">Blade</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-xml">&lt;x-limen-ai::widget /&gt;</code></pre>
-          </div>
-
-          <h3>5 — Verify</h3>
-          <div class="code-block" data-lang="Shell">
-            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">php artisan limen-ai:doctor
-php artisan limen-ai:validate
-php artisan limen-ai:agent:test app_assistant --message="What is your return policy?"</code></pre>
-          </div>
-
-          <div class="grid-3">
-            <div class="card"><h4>Tools (optional)</h4><p><code>limen-ai:make:tool</code> + <code>authorize()</code> when Laravel must execute lookups or actions.</p></div>
-            <div class="card"><h4>Multi-agent</h4><p>Split public widget, staff, and admin agents — see <a href="scaling-agents-and-tools.md">scaling guide</a>.</p></div>
-            <div class="card"><h4>No Gates</h4><p><code>LIMEN_AI_AUTHORIZATION_MODE=simple</code> — permission logic lives in tool classes.</p></div>
-          </div>
-        </section>
 
         <section>
           <h2 class="section-title">Core principle</h2>
           <p class="section-desc">Every design decision follows one rule:</p>
           <div class="callout callout-info">
             <strong>The LLM proposes actions. Laravel decides whether they are allowed and executes them safely.</strong>
-            <p>User identity, permissions, data scoping, and side effects never come from model output — they come from Laravel auth, tool <code>authorize()</code> methods (simple mode), or Gates (optional gates mode).</p>
+            <p>User identity, permissions, data scoping, and side effects never come from model output — they come from your authenticated Laravel context, Gates, and host application services.</p>
           </div>
           <div class="grid-3">
             <div class="card"><h4>Config-first</h4><p>Define agents, tools, and workflows in PHP config — no redeploy to switch models or providers.</p></div>
@@ -3116,28 +530,21 @@ php artisan limen-ai:agent:test app_assistant --message="What is your return pol
 
         <section id="installation">
           <h2 class="section-title">Installation</h2>
-          <p class="section-desc">Install into an existing Laravel 11, 12, or 13 app. <strong>Packagist is optional</strong> — see <a href="installation.md">installation.md</a> for VCS, path repo, private registry, and monorepo methods.</p>
+          <p class="section-desc">Complete setup from zero to a working agent in your Laravel application.</p>
 
           <h3>1. Require the package</h3>
           <div class="code-block" data-lang="Shell">
             <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash"># Packagist
-composer require limen-ai/limen-ai
-
-# Or VCS (add repository to composer.json first)
-composer update limen-ai/limen-ai
-
-# Or local path repo for development
-# See installation.md</code></pre>
+            <pre><code class="language-bash">composer require limen-ai/limen-ai</code></pre>
           </div>
 
           <h3>2. Publish assets</h3>
           <div class="code-block" data-lang="Shell">
             <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">php artisan limen-ai:install
-# Or publish individually:
-# php artisan vendor:publish --tag=limen-ai-config
-# php artisan vendor:publish --tag=limen-ai-env</code></pre>
+            <pre><code class="language-bash">php artisan vendor:publish --tag=limen-ai-config
+php artisan vendor:publish --tag=limen-ai-views
+php artisan vendor:publish --tag=limen-ai-assets
+php artisan vendor:publish --tag=limen-ai-migrations</code></pre>
           </div>
 
           <h3>3. Run migrations &amp; validate</h3>
@@ -3153,24 +560,14 @@ php artisan limen-ai:validate</code></pre>
             <table>
               <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
               <tbody>
-                <tr><td><code>LIMEN_AI_DEFAULT_AGENT</code></td><td>Agent key for widget/API (e.g. <code>app_assistant</code>)</td></tr>
+                <tr><td><code>LIMEN_AI_DEFAULT_AGENT</code></td><td>Agent key when none is specified (default: <code>example</code>)</td></tr>
                 <tr><td><code>LIMEN_AI_PROVIDER</code></td><td>LLM provider: <code>fake</code>, <code>openai</code>, <code>anthropic</code>, <code>gemini</code>, <code>openrouter</code></td></tr>
-                <tr><td><code>LIMEN_AI_AUTHORIZATION_MODE</code></td><td><code>simple</code> (default, no Gates) or <code>gates</code></td></tr>
-                <tr><td><code>LIMEN_AI_REQUIRE_AUTH</code></td><td>Require login for agents (default <code>false</code> for public widget)</td></tr>
-                <tr><td><code>LIMEN_AI_PERSISTENCE_DRIVER</code></td><td>Unset = auto-detect database after <code>migrate</code></td></tr>
-                <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key (use <code>ollama</code> + <code>OPENAI_BASE_URL</code> for local Ollama)</td></tr>
+                <tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI API key</td></tr>
                 <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic API key</td></tr>
                 <tr><td><code>GEMINI_API_KEY</code></td><td>Google Gemini API key</td></tr>
                 <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter API key</td></tr>
                 <tr><td><code>LIMEN_AI_QUEUE_AGENT_RUNS</code></td><td>Dispatch long runs to queue</td></tr>
                 <tr><td><code>LIMEN_AI_BROADCASTING_ENABLED</code></td><td>Enable realtime chat updates</td></tr>
-                <tr><td><code>LIMEN_AI_ATTACHMENTS_ENABLED</code></td><td>Enable file upload and attachment injection</td></tr>
-                <tr><td><code>LIMEN_AI_ATTACHMENTS_MAX_SIZE_KB</code></td><td>Max upload size per file</td></tr>
-                <tr><td><code>LIMEN_AI_HEURISTIC_VALIDATION</code></td><td>Built-in reply quality heuristics (default <code>true</code>)</td></tr>
-                <tr><td><code>LIMEN_AI_SEMANTIC_VALIDATION</code></td><td>LLM judge scoring for reply quality (Ollama/OpenAI-compatible)</td></tr>
-                <tr><td><code>LIMEN_AI_UI_GUEST_ENABLED</code></td><td>Public widget sessions; auto-enables rate limiting when <code>true</code></td></tr>
-                <tr><td><code>LIMEN_AI_UI_RATE_LIMIT_ENABLED</code></td><td>Explicit throttle for staff routes (guest widgets throttle automatically)</td></tr>
-                <tr><td><code>LIMEN_AI_STREAMING_ENABLED</code></td><td>SSE run stream + EventSource fallback in chat UI</td></tr>
               </tbody>
             </table>
           </div>
@@ -3182,49 +579,67 @@ php artisan limen-ai:validate</code></pre>
         </section>
 
         <section id="quickstart">
-          <h2 class="section-title">Quick start — add a tool</h2>
-          <p class="section-desc">KB-only chat needs no tools. Add one when Laravel must execute an action.</p>
+          <h2 class="section-title">Quick start</h2>
+          <p class="section-desc">Ship a working chat agent in four steps.</p>
 
-          <h3>Step 1 — Generate tool</h3>
-          <div class="code-block" data-lang="Shell">
-            <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">php artisan limen-ai:make:tool GetOrderStatus --key=get_order_status</code></pre>
-          </div>
-
-          <h3>Step 2 — Implement authorize + handle</h3>
+          <h3>Step 1 — Register a tool class</h3>
           <div class="code-block" data-lang="PHP">
             <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-php">// extends LimenAi\Tools\BaseTool
-public function authorize(array $input, ToolExecutionContext $context): bool
-{
-    return $context->userId() !== null; // false = blocked
-}
+            <pre><code class="language-php">// app/LimenAi/Tools/ExampleEchoTool.php
+namespace App\LimenAi\Tools;
 
-public function handle(array $input, ToolExecutionContext $context): array
+use LimenAi\Contracts\Tools\Tool;
+use LimenAi\Contracts\Tools\ToolDefinition;
+use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Tools\ConfigToolDefinition;
+
+class ExampleEchoTool implements Tool
 {
-    return ['status' => 'ok', 'order_id' => $input['order_id']];
+    public function key(): string { return 'example_echo'; }
+
+    public function definition(): ToolDefinition
+    {
+        return ConfigToolDefinition::fromConfig('example_echo', [
+            'name' => 'Example Echo',
+            'description' => 'Echoes input back for testing.',
+            'class' => self::class,
+            'input_schema' => ['message' => ['type' => 'string', 'required' => true]],
+        ]);
+    }
+
+    public function handle(array $input, ToolExecutionContext $context): array
+    {
+        return ['message' => $input['message'], 'user_id' => $context->userId()];
+    }
 }</code></pre>
           </div>
 
-          <h3>Step 3 — Register &amp; attach to agent</h3>
+          <h3>Step 2 — Point config at your tool</h3>
           <div class="code-block" data-lang="PHP">
             <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-php">'tools' => [
-    'get_order_status' => [
-        'class' => App\LimenAi\Tools\GetOrderStatusTool::class,
-        'input_schema' => ['order_id' => ['type' => 'string', 'required' => true]],
+            <pre><code class="language-php">// config/limen-ai.php
+'tools' => [
+    'example_echo' => [
+        'class' => App\LimenAi\Tools\ExampleEchoTool::class,
+        // ... other fields from published config
     ],
-],
-'agents' => [
-    'support_agent' => ['tools' => ['get_order_status']],
 ],</code></pre>
           </div>
 
-          <h3>Step 4 — Test</h3>
+          <h3>Step 3 — Embed the chat UI</h3>
+          <div class="code-block" data-lang="Blade">
+            <div class="code-toolbar"><span class="code-lang">Blade</span><button type="button" class="copy-btn">Copy</button></div>
+            <pre><code class="language-xml">&lt;x-limen-ai::chatbot agent="example" /&gt;
+
+&lt;!-- Floating widget --&gt;
+&lt;x-limen-ai::widget agent="example" /&gt;</code></pre>
+          </div>
+
+          <h3>Step 4 — Test with the fake provider</h3>
           <div class="code-block" data-lang="Shell">
             <div class="code-toolbar"><span class="code-lang">Shell</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-bash">php artisan limen-ai:doctor
-php artisan limen-ai:agent:test support_agent --user=1 --message="Status of order 123?"</code></pre>
+            <pre><code class="language-bash">php artisan limen-ai:agent:test example
+composer test</code></pre>
           </div>
         </section>
 
@@ -3292,21 +707,6 @@ LlmProvider (with tool result) → persist + broadcast</div>
               </tbody>
             </table>
           </div>
-
-          <h3>Multi-agent layout (recommended)</h3>
-          <p class="section-desc">Split public widget, staff, and admin agents — keep the public agent small (FAQ + 0–2 guest-safe tools).</p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Agent key</th><th>Where</th><th>Tools</th><th>Access</th></tr></thead>
-              <tbody>
-                <tr><td><code>app_assistant</code></td><td>Public widget</td><td>0–2 <code>guest_safe</code> tools</td><td>Guests + authenticated</td></tr>
-                <tr><td><code>support_agent</code></td><td>Staff chat</td><td>5–10 lookup tools</td><td>Authenticated staff</td></tr>
-                <tr><td><code>admin_agent</code></td><td>Admin chat</td><td>Mutations + <code>confirmation: true</code></td><td>Privileged users</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="section-desc">See <a href="scaling-agents-and-tools.md">scaling-agents-and-tools.md</a> and the <a href="limen-integration.md">Limen 3PL reference host</a>.</p>
-
         </section>
 
         <section id="tools">
@@ -3330,7 +730,7 @@ LlmProvider (with tool result) → persist + broadcast</div>
             <li>Authorization via Laravel Gates before execution</li>
             <li>Schema validation on all LLM-provided arguments</li>
             <li>Human approval pause for sensitive tools (<code>confirmation: true</code>)</li>
-            <li>Idempotency guards and SSRF validation on outbound HTTP</li>
+            <li>Idempotency guards and SSRF-safe HTTP integrations</li>
             <li>Audit logging with sensitive field redaction</li>
           </ul>
         </section>
@@ -3355,39 +755,24 @@ LlmProvider (with tool result) → persist + broadcast</div>
 
         <section id="memory-knowledge">
           <h2 class="section-title">Memory &amp; knowledge (RAG)</h2>
-          <p class="section-desc">Prepare FAQ/policy chunks in config — retrieved automatically every turn. <a href="knowledge-base-setup.md">Full KB guide →</a></p>
+          <p class="section-desc">Inject scoped memory and retrieved documents into every agent turn.</p>
           <ul>
-            <li><strong>Knowledge collections</strong> — FAQ, policies, product facts (config driver, no vector DB required)</li>
             <li><strong>Conversation memory</strong> — recent context within a thread</li>
-            <li><strong>User memory</strong> — persisted preferences for authenticated users</li>
-            <li><strong>Attach to agents</strong> — <code>'knowledge' => ['product_help']</code> on each agent</li>
+            <li><strong>User memory</strong> — persisted preferences scoped to authenticated users</li>
+            <li><strong>Strict policy</strong> — key allowlists, regex validation, value truncation</li>
           </ul>
           <div class="code-block" data-lang="PHP">
             <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
             <pre><code class="language-php">'knowledge' => [
-    'driver' => 'config',
-    'limit' => 5,
+    'driver' => env('LIMEN_AI_KNOWLEDGE_DRIVER', 'config'),
     'collections' => [
-        'product_help' => [
-            'name' => 'Product Help',
+        'getting_started' => [
             'documents' => [
-                ['content' => 'Shipping: 3–5 business days.', 'metadata' => ['topic' => 'shipping']],
-                ['content' => 'Returns within 14 days.', 'metadata' => ['topic' => 'returns']],
-                ['content' => 'Support hours: Sun–Thu 9–18.', 'metadata' => ['topic' => 'contact']],
+                ['content' => 'Limen AI tools require Laravel authorization.'],
             ],
         ],
     ],
-],
-'agents' => [
-    'app_assistant' => [
-        'tools' => [],
-        'knowledge' => ['product_help'],
-    ],
 ],</code></pre>
-          </div>
-          <div class="callout callout-warn">
-            <strong>Start with knowledge, not tools</strong>
-            <p>Public widgets answer FAQ from KB with zero tools. Add tools only when Laravel must query your database or send messages.</p>
           </div>
         </section>
 
@@ -3403,13 +788,8 @@ LlmProvider (with tool result) → persist + broadcast</div>
                 <tr><td><code>anthropic</code></td><td>AnthropicProvider</td><td>Claude models</td></tr>
                 <tr><td><code>gemini</code></td><td>GeminiProvider</td><td>Google Gemini</td></tr>
                 <tr><td><code>openrouter</code></td><td>OpenAiProvider (compatible)</td><td>Any OpenRouter-listed model</td></tr>
-                <tr><td>Ollama (local)</td><td><code>openai</code> driver</td><td><code>OPENAI_API_KEY=ollama</code> + <code>OPENAI_BASE_URL=http://localhost:11434/v1</code></td></tr>
               </tbody>
             </table>
-          </div>
-          <div class="callout callout-info">
-            <strong>Ollama + qwen3:8b</strong>
-            <p>Use the OpenAI-compatible driver with a small local model. Enable <code>LIMEN_AI_HEURISTIC_VALIDATION</code> and optional <code>LIMEN_AI_SEMANTIC_VALIDATION</code> for reply quality. See <a href="providers.md">providers.md</a>.</p>
           </div>
           <div class="code-block" data-lang="PHP">
             <div class="code-toolbar"><span class="code-lang">PHP</span><button type="button" class="copy-btn">Copy</button></div>
@@ -3447,16 +827,11 @@ $runId = app(AgentRuntime::class)->run(
             <table>
               <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
               <tbody>
-                <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation <code>{ "agent": "example" }</code></td></tr>
+                <tr><td>POST</td><td><code>/conversations</code></td><td>Start a new conversation</td></tr>
                 <tr><td>GET</td><td><code>/conversations/{id}</code></td><td>Fetch conversation with messages</td></tr>
-                <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send message <code>{ "message": "...", "attachment_ids": [] }</code></td></tr>
-                <tr><td>GET/POST</td><td><code>/conversations/{id}/attachments</code></td><td>List or upload attachments</td></tr>
-                <tr><td>DELETE</td><td><code>/attachments/{id}</code></td><td>Delete an attachment</td></tr>
+                <tr><td>POST</td><td><code>/conversations/{id}/messages</code></td><td>Send a user message</td></tr>
                 <tr><td>GET</td><td><code>/runs/{id}</code></td><td>Poll run status and output</td></tr>
-                <tr><td>GET</td><td><code>/runs/{id}/stream</code></td><td>SSE stream (status, deltas, completion)</td></tr>
-                <tr><td>GET</td><td><code>/runs/{id}/observability</code></td><td>Audit trace and token usage</td></tr>
                 <tr><td>POST</td><td><code>/approvals/{id}/approve</code></td><td>Approve a paused tool action</td></tr>
-                <tr><td>POST</td><td><code>/approvals/{id}/reject</code></td><td>Reject a paused tool action</td></tr>
               </tbody>
             </table>
           </div>
@@ -3466,25 +841,20 @@ $runId = app(AgentRuntime::class)->run(
 { "agent": "example" }
 
 POST /limen-ai/conversations/{uuid}/messages
-{ "message": "Echo hello world" }
+{ "content": "Echo hello world" }
 
-GET /limen-ai/runs/{runId}
-GET /limen-ai/runs/{runId}/stream</code></pre>
+GET /limen-ai/runs/{runId}</code></pre>
           </div>
         </section>
 
         <section id="queue-broadcasting">
-          <h2 class="section-title">Queue, streaming &amp; realtime</h2>
-          <p class="section-desc">Long runs can queue to Redis; live updates via Pusher, Laravel Reverb, or SSE fallback.</p>
+          <h2 class="section-title">Queue &amp; realtime</h2>
           <div class="code-block" data-lang="Env">
             <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
             <pre><code class="language-ini">LIMEN_AI_QUEUE_AGENT_RUNS=true
 LIMEN_AI_QUEUE_CONNECTION=redis
 LIMEN_AI_BROADCASTING_ENABLED=true
-LIMEN_AI_BROADCAST_DRIVER=pusher
-# Or: LIMEN_AI_BROADCAST_DRIVER=reverb
-LIMEN_AI_STREAMING_ENABLED=true
-LIMEN_AI_UI_STREAMING_ENABLED=true</code></pre>
+LIMEN_AI_BROADCAST_DRIVER=pusher</code></pre>
           </div>
         </section>
 
@@ -3498,42 +868,17 @@ LIMEN_AI_UI_STREAMING_ENABLED=true</code></pre>
           </div>
         </section>
 
-        <section id="quality">
-          <h2 class="section-title">Quality layer</h2>
-          <p class="section-desc">Optional reply guards run after the LLM returns — before the user sees the message. See <a href="QUALITY-GATE.md">QUALITY-GATE.md</a>.</p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Layer</th><th>Env</th><th>Purpose</th></tr></thead>
-              <tbody>
-                <tr><td>Heuristic</td><td><code>LIMEN_AI_HEURISTIC_VALIDATION</code></td><td>Length, empty reply, basic sanity checks</td></tr>
-                <tr><td>Semantic judge</td><td><code>LIMEN_AI_SEMANTIC_VALIDATION</code></td><td>Second LLM pass scores reply quality (works with Ollama)</td></tr>
-                <tr><td>Forbidden topics</td><td><code>LIMEN_AI_ENFORCE_FORBIDDEN_TOPICS</code></td><td>Block configured topic patterns</td></tr>
-                <tr><td>Custom hooks</td><td><code>LIMEN_AI_OUTPUT_VALIDATOR</code></td><td>Host-implementable <code>OutputValidator</code> class</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="code-block" data-lang="env">
-            <div class="code-toolbar"><span class="code-lang">.env</span><button type="button" class="copy-btn">Copy</button></div>
-            <pre><code class="language-ini">LIMEN_AI_HEURISTIC_VALIDATION=true
-LIMEN_AI_SEMANTIC_VALIDATION=true
-LIMEN_AI_SEMANTIC_MIN_SCORE=0.6
-LIMEN_AI_SEMANTIC_VALIDATION_STRICT=false</code></pre>
-          </div>
-        </section>
-
         <section id="security">
           <h2 class="section-title">Security</h2>
           <p class="section-desc">Defense in depth — the LLM never becomes your authorization layer.</p>
           <div class="flow">Authentication (Laravel Guards)
-    ↓ Agent authorization (abilities / simple mode)
+    ↓ Agent authorization (abilities)
     ↓ Server-derived RunContext (user ID)
     ↓ Prompt injection sanitization
     ↓ Tool authorization + validation
     ↓ Approval gate for sensitive tools
-    ↓ Guest-safe tool enforcement
-    ↓ Auto rate limiting on public widgets
     ↓ SSRF-safe HTTP + audit log</div>
-          <p>Guest widgets apply <code>ThrottleAgentRequests</code> automatically — no middleware publish required. See <a href="..%2FSECURITY.md">SECURITY.md</a> for the full threat model.</p>
+          <p>See <a href="../SECURITY.md">SECURITY.md</a> for the full threat model.</p>
         </section>
 
         <section id="observability">
@@ -3589,8 +934,6 @@ $fake->queueResponse(LlmResponseData::fromArray([
                 <tr><td><code>limen-ai:install</code></td><td>Publish config, views, assets, migrations</td></tr>
                 <tr><td><code>limen-ai:doctor</code></td><td>Health check: config, providers, queue</td></tr>
                 <tr><td><code>limen-ai:validate</code></td><td>Validate all definitions</td></tr>
-                <tr><td><code>limen-ai:checklist</code></td><td>First-run host integration checklist</td></tr>
-                <tr><td><code>limen-ai:import:knowledge</code></td><td>Import FAQ documents from JSON/CSV</td></tr>
                 <tr><td><code>limen-ai:make:tool</code></td><td>Generate tool class + test</td></tr>
                 <tr><td><code>limen-ai:agent:test {agent}</code></td><td>Run agent against fake or live provider</td></tr>
               </tbody>
@@ -3610,9 +953,8 @@ $fake->queueResponse(LlmResponseData::fromArray([
                 <tr><td><code>tools</code></td><td>Tool definitions</td></tr>
                 <tr><td><code>workflows</code></td><td>Multi-step workflow definitions</td></tr>
                 <tr><td><code>knowledge</code></td><td>RAG collections and vector store</td></tr>
-                <tr><td><code>quality</code></td><td>Heuristic + semantic validation, output hooks</td></tr>
                 <tr><td><code>security</code></td><td>SSRF, injection patterns, redaction</td></tr>
-                <tr><td><code>ui</code></td><td>Chat widget, themes, rate limits, route prefix</td></tr>
+                <tr><td><code>ui</code></td><td>Chat widget, themes, route prefix</td></tr>
               </tbody>
             </table>
           </div>
@@ -3627,24 +969,13 @@ $fake->queueResponse(LlmResponseData::fromArray([
 composer test:gates
 composer test:release</code></pre>
           </div>
-          <p>Details: <a href="development%2FTESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
+          <p>Details: <a href="../TESTING.md">TESTING.md</a> · <a href="ci.md">ci.md</a></p>
         </section>
 
         <section id="releases">
           <h2 class="section-title">Releases</h2>
-          <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>. Current: <strong>v1.2.2</strong>. Full history: <a href="..%2FCHANGELOG.md">CHANGELOG.md</a>.</p>
+          <p class="section-desc">Limen AI follows <a href="https://semver.org/">Semantic Versioning</a>.</p>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>Version</th><th>Highlights</th></tr></thead>
-              <tbody>
-                <tr><td><strong>v1.2.2</strong></td><td>Semantic LLM judge validation, automatic guest rate limiting</td></tr>
-                <tr><td><strong>v1.2.1</strong></td><td>CI matrix fix, Pint style gate</td></tr>
-                <tr><td><strong>v1.2.0</strong></td><td>Conversation summarizer, SSE streaming, Reverb driver</td></tr>
-                <tr><td><strong>v1.1.0</strong></td><td>Heuristic validators, checklist command, composite tool repo</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-wrap" style="margin-top:1rem">
             <table>
               <thead><tr><th>Change type</th><th>Version bump</th></tr></thead>
               <tbody>
@@ -3656,366 +987,105 @@ composer test:release</code></pre>
           </div>
         </section>
 
-    </div>
-    <!-- limen-docs:content-end -->
+        <footer>
+          <p><strong>Limen AI</strong> · MIT License · <a href="https://github.com/hatem-isnaad/limen-ai">github.com/hatem-isnaad/limen-ai</a></p>
+          <p><a href="../ARCHITECTURE.md">ARCHITECTURE.md</a> · <a href="../AI_SPEC.md">AI_SPEC.md</a> · <a href="providers.md">providers.md</a></p>
+        </footer>
+      </div>
     </main>
+  </div>
 
-    <footer>
-        <p>
-            <strong>Limen AI</strong> — Laravel AI agent framework · MIT License ·
-            <a href="https://github.com/hatem-isnaad/limen-ai">GitHub</a>
-        </p>
-        <p>
-            <a href="host-guide-ar.html">دليل Host بالعربية</a> ·
-            <a href="index.html">English hub</a> ·
-            <a href="../AGENTS.md">AGENTS.md</a> ·
-            <a href="installation.md">Installation</a> ·
-            <a href="limen-integration.md">Limen 3PL host</a>
-        </p>
-    </footer>
-</div>
-
-<button class="to-top" id="toTop" type="button" aria-label="Back to top"><svg class="ico"><use href="#i-arrow-up"/></svg></button>
-
-<script>
-(function () {
-    'use strict';
-
-    const icon = (id, cls) => '<svg class="ico ' + cls + '"><use href="#' + id + '"/></svg>';
-
-    const COPY_MARKUP =
-        '<span class="ico-swap" aria-hidden="true">' +
-            icon('i-copy', 'ico-idle') +
-            icon('i-check', 'ico-done') +
-            icon('i-x', 'ico-fail') +
-        '</span>' +
-        '<span class="copy-label">Copy</span>';
-
-    const initCopyButton = (btn) => {
-        btn.type = 'button';
-        btn.setAttribute('aria-label', 'Copy');
-        btn.className = 'code-copy';
-        btn.innerHTML = COPY_MARKUP;
-        return btn;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/http.min.js"></script>
+  <script>
+    const HLJS_THEMES = {
+      dark: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css',
+      light: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css',
     };
 
-    const copy = async (text, btn) => {
-        const label = btn.querySelector('.copy-label');
-        let state = 'copied';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('hljs-theme').href = HLJS_THEMES[theme];
+      localStorage.setItem('limen-docs-theme', theme);
+      document.querySelectorAll('[data-theme-set]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeSet === theme);
+      });
+      document.querySelectorAll('pre code').forEach(block => {
+        block.removeAttribute('data-highlighted');
+        hljs.highlightElement(block);
+      });
+    }
 
+    const savedTheme = localStorage.getItem('limen-docs-theme')
+      || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    applyTheme(savedTheme);
+
+    document.querySelectorAll('[data-theme-set]').forEach(btn => {
+      btn.addEventListener('click', () => applyTheme(btn.dataset.themeSet));
+    });
+    document.getElementById('theme-toggle-mobile')?.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+    function openSidebar() {
+      sidebar.classList.add('open');
+      backdrop.classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    menuToggle?.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    backdrop?.addEventListener('click', closeSidebar);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) closeSidebar();
+      });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const code = btn.closest('.code-block')?.querySelector('code');
+        if (!code) return;
         try {
-            await navigator.clipboard.writeText(text);
+          await navigator.clipboard.writeText(code.textContent.trim());
+          btn.textContent = 'Copied';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
         } catch (_) {
-            state = 'failed';
+          btn.textContent = 'Failed';
         }
+      });
+    });
 
-        btn.classList.remove('copied', 'failed');
-        btn.classList.add(state);
-        if (label) {
-            label.textContent = state === 'copied' ? 'Copied' : 'Failed';
+    hljs.highlightAll();
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = [...navLinks].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
         }
-
-        clearTimeout(btn._resetTimer);
-        btn._resetTimer = setTimeout(() => {
-            btn.classList.remove('copied', 'failed');
-            if (label) label.textContent = 'Copy';
-        }, 1700);
-    };
-
-    const PHP_KEYWORDS = 'return|function|public|private|protected|class|interface|use|new|true|false|null|require|array|const|static|namespace|extends|implements|if|else|elseif|foreach|while|as|try|catch|throw|void|bool|string|int|float|fn|match|enum|readonly|declare|abstract|final';
-    const PHP_FUNCS = 'env|config|app_path|base_path|storage_path|route|url|data_get|auth|__|trans|collect|now';
-
-    const sniffLanguage = (text) => {
-        if (/^\s*(#|[A-Z][A-Z0-9_]*=)/m.test(text) && !/[{};]/.test(text)) return 'env';
-        if (/^\s*(composer|php artisan|npm|ollama|curl|open|git)\b/m.test(text)) return 'bash';
-        if (/&lt;x-|&lt;!--/.test(text) || /^\s*</.test(text)) return 'blade';
-        if (/[$'"]|=>|::/.test(text)) return 'php';
-        return 'text';
-    };
-
-    const escapeHtml = (s) => s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    const wrap = (cls, text) => '<span class="tok-' + cls + '">' + text + '</span>';
-
-    const HIGHLIGHTERS = {
-        php: (src) => src.replace(
-            new RegExp(
-                '(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)' +
-                "|('(?:\\\\.|[^'\\\\])*'|\"(?:\\\\.|[^\"\\\\])*\")" +
-                '|(\\$[A-Za-z_]\\w*)' +
-                '|\\b(' + PHP_FUNCS + ')(?=\\s*\\()' +
-                '|\\b(' + PHP_KEYWORDS + ')\\b' +
-                '|\\b([A-Z]\\w*(?:\\\\[A-Z]\\w*)*)\\b' +
-                '|([A-Za-z_]\\w*)(?=\\s*\\()' +
-                '|(=&gt;|-&gt;|\\?-&gt;|::)' +
-                '|\\b(\\d+(?:\\.\\d+)?)\\b',
-                'g'
-            ),
-            (m, comment, str, variable, helper, keyword, cls, call, op, num) => {
-                if (comment) return wrap('comment', comment);
-                if (str) return wrap('string', str);
-                if (variable) return wrap('var', variable);
-                if (helper) return wrap('func', helper);
-                if (keyword) return wrap('keyword', keyword);
-                if (cls) return wrap('class', cls);
-                if (call) return wrap('func', call);
-                if (op) return wrap('op', op);
-                if (num) return wrap('number', num);
-                return m;
-            }
-        ),
-        bash: (src) => src.replace(
-            /(#[^\n]*)|('[^']*'|"[^"]*")|(^|\s)(--?[A-Za-z][\w-]*)|\b([\w-]+:[\w:-]+)|\b(composer|php|artisan|npm|ollama|curl|git|open|cd)\b/gm,
-            (m, comment, str, lead, flag, sub, cmd) => {
-                if (comment) return wrap('comment', comment);
-                if (str) return wrap('string', str);
-                if (flag) return lead + wrap('flag', flag);
-                if (sub) return wrap('func', sub);
-                if (cmd) return wrap('keyword', cmd);
-                return m;
-            }
-        ),
-        env: (src) => src.replace(
-            /(#[^\n]*)|^([A-Z][A-Z0-9_]*)(=)(.*)$/gm,
-            (m, comment, key, eq, value) => {
-                if (comment) return wrap('comment', comment);
-                return wrap('key', key) + wrap('op', eq) + wrap('string', value);
-            }
-        ),
-        blade: (src) => src.replace(
-            /(&lt;!--[\s\S]*?--&gt;)|(&lt;\/?[\w:.-]+)|([\w-]+)(=)("[^"]*")|(\/?&gt;)/g,
-            (m, comment, tag, attr, eq, val, close) => {
-                if (comment) return wrap('comment', comment);
-                if (tag) return wrap('tag', tag);
-                if (attr) return wrap('attr', attr) + wrap('op', eq) + wrap('string', val);
-                if (close) return wrap('tag', close);
-                return m;
-            }
-        ),
-        text: (src) => src,
-    };
-
-    const LANG_LABEL = { php: 'PHP', bash: 'Terminal', env: '.env', blade: 'Blade', text: 'Text' };
-
-    document.querySelectorAll('pre > code').forEach((code) => {
-        if (code.closest('.code-block')) return;
-
-        const pre = code.parentElement;
-        const raw = code.textContent.replace(/\s+$/, '');
-        const lang = pre.dataset.lang || sniffLanguage(escapeHtml(raw));
-        const lineCount = raw.split('\n').length;
-
-        code.innerHTML = (HIGHLIGHTERS[lang] || HIGHLIGHTERS.text)(escapeHtml(raw));
-
-        const block = document.createElement('div');
-        block.className = 'code-block';
-        pre.parentNode.insertBefore(block, pre);
-
-        block.innerHTML =
-            '<div class="code-head">' +
-                '<span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
-                '<span class="code-lang">' + (LANG_LABEL[lang] || lang) + '</span>' +
-            '</div>' +
-            '<div class="code-body">' +
-                (lineCount > 1
-                    ? '<div class="code-gutter" aria-hidden="true">' +
-                        Array.from({ length: lineCount }, (_, i) => i + 1).join('\n') +
-                      '</div>'
-                    : '') +
-            '</div>';
-
-        block.querySelector('.code-body').appendChild(pre);
-
-        const btn = initCopyButton(document.createElement('button'));
-        block.querySelector('.code-head').prepend(btn);
-        btn.addEventListener('click', () => copy(raw, btn));
-    });
-
-    const mapHubLang = (code) => {
-        const cls = [...code.classList].find((c) => c.startsWith('language-'));
-        if (!cls) return 'text';
-        const lang = cls.replace('language-', '');
-        if (lang === 'xml') return 'blade';
-        if (lang === 'ini' || lang === 'env') return 'env';
-        if (lang === 'php') return 'php';
-        if (lang === 'bash') return 'bash';
-        return 'text';
-    };
-
-    document.querySelectorAll('#hubContent .code-block pre > code').forEach((code) => {
-        const raw = code.textContent.replace(/\s+$/, '');
-        const lang = mapHubLang(code);
-        code.innerHTML = (HIGHLIGHTERS[lang] || HIGHLIGHTERS.text)(escapeHtml(raw));
-    });
-
-    document.querySelectorAll('#hubContent .copy-btn').forEach((btn) => {
-        btn.addEventListener('click', async () => {
-            const code = btn.closest('.code-block')?.querySelector('code');
-            if (!code) return;
-            try {
-                await navigator.clipboard.writeText(code.textContent.trim());
-                btn.textContent = 'Copied';
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.textContent = 'Copy';
-                    btn.classList.remove('copied');
-                }, 2000);
-            } catch (_) {
-                btn.textContent = 'Failed';
-            }
-        });
-    });
-
-    document.querySelectorAll('.tab').forEach((tab) => {
-        tab.addEventListener('click', () => {
-            const scope = tab.closest('section') || document;
-            scope.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-            scope.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById('panel-' + tab.dataset.tab)?.classList.add('active');
-        });
-    });
-
-    document.querySelectorAll('.acc-trigger').forEach((trigger) => {
-        trigger.addEventListener('click', () => {
-            trigger.closest('.acc-item')?.classList.toggle('open');
-        });
-    });
-
-    const closeAllDrops = () => {
-        document.querySelectorAll('[data-nav-drop].open').forEach((drop) => {
-            drop.classList.remove('open');
-            drop.querySelector('.nav-drop-trigger')?.setAttribute('aria-expanded', 'false');
-            drop.querySelector('.nav-drop-panel')?.setAttribute('hidden', '');
-        });
-    };
-
-    document.querySelectorAll('[data-nav-drop]').forEach((drop) => {
-        const trigger = drop.querySelector('.nav-drop-trigger');
-        const panel = drop.querySelector('.nav-drop-panel');
-        trigger?.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const isOpen = drop.classList.contains('open');
-            closeAllDrops();
-            if (!isOpen) {
-                drop.classList.add('open');
-                trigger.setAttribute('aria-expanded', 'true');
-                panel?.removeAttribute('hidden');
-            }
-        });
-    });
-
-    document.addEventListener('click', closeAllDrops);
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            closeAllDrops();
-        }
-    });
-
-    const navPanel = document.getElementById('docsNavPanel');
-    const navBackdrop = document.getElementById('docsNavBackdrop');
-    const navToggle = document.getElementById('docsNavToggle');
-    const navClose = document.getElementById('docsNavClose');
-
-    const openNavPanel = () => {
-        navPanel?.removeAttribute('hidden');
-        navBackdrop?.removeAttribute('hidden');
-        navToggle?.setAttribute('aria-expanded', 'true');
-        document.body.style.overflow = 'hidden';
-    };
-
-    const closeNavPanel = () => {
-        navPanel?.setAttribute('hidden', '');
-        navBackdrop?.setAttribute('hidden', '');
-        navToggle?.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
-    };
-
-    navToggle?.addEventListener('click', openNavPanel);
-    navClose?.addEventListener('click', closeNavPanel);
-    navBackdrop?.addEventListener('click', closeNavPanel);
-    navPanel?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', closeNavPanel);
-    });
-
-    const progress = document.getElementById('progressBar');
-    const toTop = document.getElementById('toTop');
-
-    const onScroll = () => {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        const ratio = max > 0 ? window.scrollY / max : 0;
-        if (progress) progress.style.transform = 'scaleX(' + ratio + ')';
-        if (toTop) toTop.classList.toggle('visible', window.scrollY > 600);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    toTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-    const navLinks = Array.from(document.querySelectorAll('.docs-nav-link[href*="#"]'));
-    const sections = navLinks
-        .map((link) => {
-            const href = link.getAttribute('href') || '';
-            const hash = href.includes('#') ? href.split('#')[1] : '';
-            return hash ? document.getElementById(hash) : null;
-        })
-        .filter(Boolean);
-
-    if (sections.length && 'IntersectionObserver' in window) {
-        const spy = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                navLinks.forEach((l) => l.classList.remove('active'));
-                const match = navLinks.find((l) => (l.getAttribute('href') || '').endsWith('#' + entry.target.id));
-                match?.classList.add('active');
-            });
-        }, { rootMargin: '-20% 0px -70% 0px' });
-
-        sections.forEach((s) => spy.observe(s));
-    }
-
-    const search = document.getElementById('docsSearch');
-    const hub = document.getElementById('hubContent');
-    const searchables = hub
-        ? [...document.querySelectorAll('section[id]')]
-        : [];
-
-    if (search && searchables.length) {
-        let timer;
-        const runSearch = (raw) => {
-            const q = raw.trim().toLowerCase();
-            searchables.forEach((block) => {
-                if (!q) {
-                    block.classList.remove('search-hidden');
-                    return;
-                }
-                block.classList.toggle('search-hidden', !block.textContent.toLowerCase().includes(q));
-            });
-        };
-
-        search.addEventListener('input', () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => runSearch(search.value), 140);
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== search && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
-                e.preventDefault();
-                search.focus();
-            }
-            if (e.key === 'Escape' && document.activeElement === search) {
-                search.value = '';
-                runSearch('');
-                search.blur();
-            }
-        });
-    }
-})();
-</script>
-
+      });
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+  </script>
 </body>
 </html>
