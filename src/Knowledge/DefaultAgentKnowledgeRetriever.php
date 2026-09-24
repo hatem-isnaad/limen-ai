@@ -18,6 +18,10 @@ class DefaultAgentKnowledgeRetriever implements AgentKnowledgeRetriever
 
     public function retrieve(string $agentKey, string $query): array
     {
+        if (($this->config->get('limen-ai.knowledge.driver') ?? 'null') === 'null') {
+            return [];
+        }
+
         $collections = $this->knowledge->collectionsForAgent($agentKey);
 
         if ($collections === []) {

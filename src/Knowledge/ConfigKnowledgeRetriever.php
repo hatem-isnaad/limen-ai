@@ -38,6 +38,7 @@ class ConfigKnowledgeRetriever implements KnowledgeRetriever
         return array_slice($results, 0, $limit);
     }
 
+    /** @param  array<string, mixed>  $document */
     protected function scoreDocument(string $query, array $document, string $content): float
     {
         if (($document['type'] ?? null) === 'faq') {
