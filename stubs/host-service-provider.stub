@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
+use LimenAi\Facades\LimenAi;
+
+class LimenAiHostServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        Gate::define('agents.use', fn (): bool => auth()->check());
+        Gate::define('tools.use', fn (): bool => auth()->check());
+
+        LimenAi::configure(function ($registry): void {
+            $registry->faq(
+                'support',
+                'What are your business hours?',
+                'We are available Sunday to Thursday, 9am to 5pm UTC.',
+            );
+
+            // Register runtime tools, agents, or provider overrides:
+            // $registry->tool('lookup_order', \App\LimenAi\Tools\LookupOrderTool::class);
+            // $registry->provider('openai', ['api_key' => config('services.openai.key')]);
+        });
+    }
+}
