@@ -9,8 +9,8 @@
 - [ ] Error handling reviewed
 - [ ] Security considerations documented
 - [ ] Events added (if applicable)
-- [ ] docs/project/STATUS.md updated
+- [ ] STATUS.md updated
 - [ ] CHANGELOG.md updated
-- [ ] docs/project/IMPLEMENTATION.md updated
-- [ ] docs/project/PROJECT_MANIFEST.md updated
+- [ ] IMPLEMENTATION.md updated
+- [ ] PROJECT_MANIFEST.md updated
 - [ ] Deferred work explicitly listed

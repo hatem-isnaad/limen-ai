@@ -6,4 +6,4 @@
 4. Repository abstractions for all definitions
 5. Generic package — no Limen business logic
 6. Tests required for all implemented features
-7. Document all architectural changes in docs/architecture/DECISIONS.md
+7. Document all architectural changes in DECISIONS.md

@@ -2,99 +2,17 @@
 set -euo pipefail
 
 OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
-FORCE="${FORCE_RELEASE:-false}"
-
-read_composer_version() {
-  python3 - <<'PY'
-import json
-import pathlib
-
-composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
-version = composer.get("version")
-if not isinstance(version, str) or not version:
-    raise SystemExit("composer.json is missing a string version field")
-print(version)
-PY
-}
-
-collect_commit_subjects() {
-  local range="${1:-}"
-
-  SUBJECTS=()
-
-  if [[ -n "$range" ]]; then
-    while IFS= read -r subject || [[ -n "$subject" ]]; do
-      [[ -n "$subject" ]] && SUBJECTS+=("$subject")
-    done < <(git log "${range}" --no-merges --pretty=format:%s)
-  else
-    while IFS= read -r subject || [[ -n "$subject" ]]; do
-      [[ -n "$subject" ]] && SUBJECTS+=("$subject")
-    done < <(git log --no-merges --pretty=format:%s)
-  fi
-}
 
 git fetch --tags --force || echo "Warning: unable to fetch tags; using local tag refs"
 
-VERSION="$(read_composer_version)"
-TAG="v${VERSION}"
-DATE="$(date -u +%Y-%m-%d)"
-
-echo "Target release from composer.json: ${TAG}"
-
-if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null 2>&1 || gh release view "$TAG" >/dev/null 2>&1; then
-  echo "Release tag ${TAG} already exists; skipping publish"
-  echo "published=false" >> "$OUTPUT"
-  exit 0
-fi
-
-PREV_TAG="$(python3 - <<'PY'
-import json
-import pathlib
-import re
-import subprocess
-
-composer = json.loads(pathlib.Path("composer.json").read_text(encoding="utf-8"))
-current = composer.get("version")
-if not isinstance(current, str):
-    raise SystemExit(0)
-
-def semver_key(version: str) -> tuple[int, ...]:
-    parts = []
-    for part in version.split("."):
-        match = re.match(r"(\d+)", part)
-        if not match:
-            raise ValueError(version)
-        parts.append(int(match.group(1)))
-    return tuple(parts)
-
-current_key = semver_key(current)
-tags = subprocess.check_output(["git", "tag", "-l", "v*", "--merged", "HEAD"], text=True).splitlines()
-best_tag = ""
-best_key: tuple[int, ...] | None = None
-
-for tag in tags:
-    version = tag[1:] if tag.startswith("v") else tag
-    try:
-        key = semver_key(version)
-    except ValueError:
-        continue
-
-    if key >= current_key:
-        continue
-
-    if best_key is None or key > best_key:
-        best_key = key
-        best_tag = tag
-
-print(best_tag)
-PY
-)"
-if [[ -n "$PREV_TAG" ]]; then
-  RANGE="${PREV_TAG}..HEAD"
-  collect_commit_subjects "${RANGE}"
+LAST_TAG="$(git tag -l 'v*' --sort=-v:refname | head -1 || true)"
+echo "Latest release tag: ${LAST_TAG:-<none>}"
+if [[ -n "$LAST_TAG" ]]; then
+  RANGE="${LAST_TAG}..HEAD"
+  mapfile -t SUBJECTS < <(git log "${RANGE}" --no-merges --pretty=format:%s)
 else
   RANGE=""
-  collect_commit_subjects
+  mapfile -t SUBJECTS < <(git log --no-merges --pretty=format:%s)
 fi
 
 if [[ ${#SUBJECTS[@]} -eq 0 ]]; then
@@ -107,20 +25,63 @@ RE_FEAT='^feat(\([^)]+\))?:'
 RE_PATCH='^(fix|perf|revert|refactor|build)(\([^)]+\))?:'
 RE_NOTES='^- (feat|fix|perf|revert|refactor|build)(\([^)]+\))?:'
 
-RELEASABLE=false
+BUMP="none"
 for subject in "${SUBJECTS[@]}"; do
-  if [[ "$subject" =~ $RE_FEAT ]] || [[ "$subject" =~ $RE_PATCH ]]; then
-    RELEASABLE=true
+  commit_prefix="${subject%%:*}"
+
+  if [[ "$subject" == *"BREAKING CHANGE"* ]] || [[ "$commit_prefix" == *"!" ]]; then
+    BUMP="major"
     break
+  fi
+
+  if [[ "$subject" =~ $RE_FEAT ]]; then
+    if [[ "$BUMP" != "major" ]]; then
+      BUMP="minor"
+    fi
+    continue
+  fi
+
+  if [[ "$subject" =~ $RE_PATCH ]]; then
+    if [[ "$BUMP" == "none" ]]; then
+      BUMP="patch"
+    fi
   fi
 done
 
-if [[ "$RELEASABLE" != "true" && "$FORCE" != "true" ]]; then
-  echo "No releasable conventional commits since ${PREV_TAG:-<first release>}"
+if [[ "$BUMP" == "none" ]]; then
+  echo "No releasable conventional commits since ${LAST_TAG:-<first release>}"
   echo "Analyzed ${#SUBJECTS[@]} commit subject(s)"
   echo "published=false" >> "$OUTPUT"
   exit 0
 fi
+
+echo "Release bump: ${BUMP}"
+
+if [[ -n "$LAST_TAG" ]]; then
+  CURRENT="${LAST_TAG#v}"
+else
+  CURRENT="0.0.0"
+fi
+
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+case "$BUMP" in
+  major)
+    MAJOR=$((MAJOR + 1))
+    MINOR=0
+    PATCH=0
+    ;;
+  minor)
+    MINOR=$((MINOR + 1))
+    PATCH=0
+    ;;
+  patch)
+    PATCH=$((PATCH + 1))
+    ;;
+esac
+
+VERSION="${MAJOR}.${MINOR}.${PATCH}"
+TAG="v${VERSION}"
+DATE="$(date -u +%Y-%m-%d)"
 
 NOTES_FILE="$(mktemp)"
 {
@@ -141,7 +102,7 @@ if [[ ! -s "$NOTES_FILE" ]]; then
   fi
 fi
 
-echo "Creating GitHub release ${TAG}"
+echo "Creating GitHub release ${TAG} (${BUMP} bump)"
 gh release create "$TAG" \
   --title "Limen AI ${TAG}" \
   --notes-file "$NOTES_FILE" \
@@ -171,23 +132,24 @@ section_lines.extend(f"- {line}" for line in bullet_lines)
 section_lines.append("")
 
 content = changelog_path.read_text(encoding="utf-8")
+content = re.sub(
+    r"## \[Unreleased\]\n\n### Added\n\n",
+    "## [Unreleased]\n\n### Added\n\n",
+    content,
+    count=1,
+)
 marker = "## [Unreleased]"
 if marker not in content:
     raise SystemExit("CHANGELOG.md is missing an [Unreleased] section")
 
-if f"## [{version}]" in content:
-    print(f"CHANGELOG.md already documents {version}; leaving file unchanged")
-else:
-    updated = content.replace(
-        marker,
-        "\n".join(section_lines) + marker,
-        1,
-    )
-    link = f"[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
-    if link.strip() not in updated:
-        updated += f"\n{link}"
-    changelog_path.write_text(updated, encoding="utf-8")
-    print(f"Updated CHANGELOG.md for {version}")
+updated = content.replace(
+    marker,
+    "\n".join(section_lines) + marker,
+    1,
+)
+updated += f"\n[{version}]: https://github.com/hatem-isnaad/limen-ai/releases/tag/v{version}\n"
+changelog_path.write_text(updated, encoding="utf-8")
+print(f"Updated CHANGELOG.md for {version}")
 PY
 
 rm -f "$NOTES_FILE"
