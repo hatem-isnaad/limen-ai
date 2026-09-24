@@ -50,4 +50,14 @@ class TokenUsageTest extends TestCase
             'total_tokens' => 40,
         ], $normalized);
     }
+
+    public function test_it_estimates_tokens_from_text_length(): void
+    {
+        $estimated = TokenUsage::estimate('12345678', 'abcd');
+
+        $this->assertSame(2, $estimated['input_tokens']);
+        $this->assertSame(1, $estimated['output_tokens']);
+        $this->assertSame(3, $estimated['total_tokens']);
+        $this->assertTrue($estimated['estimated']);
+    }
 }
