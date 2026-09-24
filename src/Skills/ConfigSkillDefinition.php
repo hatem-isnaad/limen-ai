@@ -17,6 +17,7 @@ final class ConfigSkillDefinition implements SkillDefinition
         private readonly array $allowedTools,
         private readonly array $knowledgeSources,
         private readonly string $version,
+        private readonly bool $enabled,
     ) {}
 
     /**
@@ -31,6 +32,7 @@ final class ConfigSkillDefinition implements SkillDefinition
             allowedTools: array_values($config['tools'] ?? $config['allowed_tools'] ?? []),
             knowledgeSources: array_values($config['knowledge'] ?? $config['knowledge_sources'] ?? []),
             version: (string) ($config['version'] ?? '1.0.0'),
+            enabled: (bool) ($config['enabled'] ?? true),
         );
     }
 
@@ -62,5 +64,10 @@ final class ConfigSkillDefinition implements SkillDefinition
     public function version(): string
     {
         return $this->version;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

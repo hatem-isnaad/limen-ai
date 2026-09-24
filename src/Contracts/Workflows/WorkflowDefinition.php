@@ -2,7 +2,9 @@
 
 namespace LimenAi\Contracts\Workflows;
 
-interface WorkflowDefinition
+use LimenAi\Contracts\Enableable;
+
+interface WorkflowDefinition extends Enableable
 {
     public function key(): string;
 

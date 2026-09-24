@@ -2,7 +2,9 @@
 
 namespace LimenAi\Contracts\Tools;
 
-interface ToolDefinition
+use LimenAi\Contracts\Enableable;
+
+interface ToolDefinition extends Enableable
 {
     public function key(): string;
 
