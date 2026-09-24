@@ -1,18 +1,6 @@
 # Limen AI — CI & Test Matrix
 
-This document describes the continuous integration setup for the package and the test suites that must pass before promoting code to **`main`**.
-
-## Branch gate
-
-CI runs on **`main` and `stg`** (push and pull requests targeting either branch). See [branching.md](branching.md).
-
-| Event | Branch | CI |
-|-------|--------|-----|
-| Push | `main`, `stg` | Yes |
-| Pull request | → `main`, → `stg` | Yes |
-| Push | `cursor/**`, feature branches | No (open a PR) |
-
-Validate on `stg` before merging to `main` for go-live.
+This document describes the recommended continuous integration setup for the package and the test suites that must pass before merge.
 
 ## Workflow
 
@@ -22,11 +10,9 @@ GitHub Actions workflow: [`.github/workflows/tests.yml`](../.github/workflows/te
 
 | Dimension | Values |
 |-----------|--------|
-| PHP | 8.2, 8.3 (Laravel 13 cells use 8.3 only — L13 requires `php ^8.3`) |
-| Laravel | 11.x, 12.x, 13.x |
-| Testbench | ^9.0 (L11), ^10.0 (L12), ^11.0 (L13) |
-
-Matrix excludes **PHP 8.2 × Laravel 13** because Illuminate 13 and Laravel 13 require PHP 8.3+.
+| PHP | 8.2, 8.3 |
+| Laravel | 11.x, 12.x |
+| Testbench | ^9.0 (L11), ^10.0 (L12) |
 
 Each matrix cell runs:
 
@@ -34,11 +20,7 @@ Each matrix cell runs:
 2. **Architecture** — module and package boundary enforcement
 3. **Security** — consolidated security-critical smoke checks
 
-After the matrix completes, a **release-gate** job runs `composer test:release` on PHP 8.3.
-
 The PHP 8.3 / Laravel 12 cell optionally emits Clover coverage for downstream reporting.
-
-Release publishing is **manual** via [`.github/workflows/release.yml`](../.github/workflows/release.yml) (`workflow_dispatch`). Bump `composer.json` + `CHANGELOG.md`, then run the workflow. It publishes the `composer.json` version — it does not auto-increment from stray tags.
 
 ## Local Commands
 
@@ -47,20 +29,20 @@ composer test                  # full suite
 composer test:architecture     # boundary gates only
 composer test:security         # security gates only
 composer test:gates            # architecture + security (merge gate)
-composer test:release          # full suite + merge gates + Pint (pre-go-live)
-composer test:style            # Pint style check only
+composer test:release          # full suite + merge gates (pre-tag)
 ```
 
-## Merge Gates (Required on `stg`)
+Release tags additionally run [`.github/workflows/release.yml`](../.github/workflows/release.yml), which verifies the tag matches `composer.json` version and executes `composer test:release`.
 
-These suites **must pass** before merging `stg` → `main`:
+## Merge Gates (Required)
+
+These suites **must pass** on every PR:
 
 | Gate | Suite | Purpose |
 |------|-------|---------|
 | Boundaries | Architecture | Prevent host-app coupling, UI/runtime leaks, SSRF bypass |
 | Security smoke | Security | SSRF, sanitization, redaction, context integrity |
 | Coverage map | Architecture (`CriticalCoverageGateTest`) | Security-critical classes have dedicated tests |
-| Release gate | `composer test:release` | Full regression + architecture + security |
 
 ## Test File Matrix (Summary)
 
@@ -80,7 +62,7 @@ These suites **must pass** before merging `stg` → `main`:
 | Observability | ✓ | ✓ | ✓ | ✓ | — |
 | Developer CLI | ✓ | — | ✓ | — | — |
 
-See [TESTING.md](development/TESTING.md) for scenario-level detail.
+See [TESTING.md](../TESTING.md) for scenario-level detail.
 
 ## Coverage Recommendations
 
