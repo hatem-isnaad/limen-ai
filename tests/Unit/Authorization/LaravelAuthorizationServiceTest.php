@@ -9,10 +9,11 @@ use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
 use LimenAi\Contracts\Authorization\AuthorizationService;
 use LimenAi\Exceptions\AgentAuthorizationException;
+use LimenAi\Exceptions\AgentDisabledException;
+use LimenAi\Exceptions\ToolDisabledException;
 use LimenAi\Exceptions\RunContextAuthorizationException;
 use LimenAi\Exceptions\UnauthenticatedException;
 use LimenAi\Runtime\RunContextData;
-use LimenAi\Tests\Stubs\EchoTool;
 use LimenAi\Tests\TestCase;
 use LimenAi\Tools\ConfigToolDefinition;
 
@@ -35,7 +36,7 @@ class LaravelAuthorizationServiceTest extends TestCase
     {
         return ConfigToolDefinition::fromConfig('test_tool', [
             'name' => 'Test Tool',
-            'class' => EchoTool::class,
+            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
             'authorization' => $authorization,
         ]);
     }
@@ -105,7 +106,7 @@ class LaravelAuthorizationServiceTest extends TestCase
     {
         $service = new LaravelAuthorizationService(
             app('auth'),
-            new NullGuestSessionValidator,
+            new NullGuestSessionValidator(),
             app('config'),
         );
 
@@ -121,8 +122,6 @@ class LaravelAuthorizationServiceTest extends TestCase
 
     public function test_it_rejects_guest_agents_without_token(): void
     {
-        auth()->logout();
-
         $service = app(AuthorizationService::class);
         $agent = $this->agent(['guest_allowed' => true]);
 
@@ -147,8 +146,6 @@ class LaravelAuthorizationServiceTest extends TestCase
 
     public function test_it_blocks_tools_when_gate_denies_ability(): void
     {
-        config()->set('limen-ai.authorization.mode', 'gates');
-
         $this->actingAs(new GenericUser(['id' => 1]));
 
         Gate::define('tools.use', fn (): bool => false);
@@ -158,14 +155,37 @@ class LaravelAuthorizationServiceTest extends TestCase
         $this->assertFalse($service->canUseTool($this->tool(['abilities' => ['tools.use']])));
     }
 
-    public function test_simple_mode_allows_tools_without_gate_abilities(): void
+    public function test_it_blocks_disabled_agents(): void
     {
-        config()->set('limen-ai.authorization.mode', 'simple');
-
         $this->actingAs(new GenericUser(['id' => 1]));
 
         $service = app(AuthorizationService::class);
+        $agent = ConfigAgentDefinition::fromConfig('test_agent', [
+            'enabled' => false,
+            'name' => 'Test Agent',
+            'instructions' => 'Test',
+        ]);
 
-        $this->assertTrue($service->canUseTool($this->tool()));
+        $this->assertFalse($service->canUseAgent($agent));
+
+        $this->expectException(AgentDisabledException::class);
+        $service->authorizeAgent($agent);
+    }
+
+    public function test_it_blocks_disabled_tools(): void
+    {
+        $this->actingAs(new GenericUser(['id' => 1]));
+
+        $service = app(AuthorizationService::class);
+        $tool = ConfigToolDefinition::fromConfig('disabled_tool', [
+            'enabled' => false,
+            'name' => 'Disabled Tool',
+            'class' => \LimenAi\Tests\Stubs\EchoTool::class,
+        ]);
+
+        $this->assertFalse($service->canUseTool($tool));
+
+        $this->expectException(ToolDisabledException::class);
+        $service->authorizeTool($tool);
     }
 }
