@@ -13,6 +13,7 @@ class ConfigAgentRepository implements AgentRepository
     public function __construct(
         private readonly ConfigRepository $config,
         private readonly DefinitionLoader $definitions,
+        private readonly ClassAgentDefinitionFactory $classAgents,
     ) {}
 
     public function find(string $key): ?AgentDefinition
@@ -23,6 +24,10 @@ class ConfigAgentRepository implements AgentRepository
             return null;
         }
 
+        if (isset($definition['class']) && is_string($definition['class'])) {
+            return $this->classAgents->make($key, $definition);
+        }
+
         return ConfigAgentDefinition::fromConfig($key, $definition);
     }
 
@@ -31,7 +36,9 @@ class ConfigAgentRepository implements AgentRepository
         $agents = $this->definitions->agents();
 
         $definitions = array_map(
-            fn (string $key, array $definition): AgentDefinition => ConfigAgentDefinition::fromConfig($key, $definition),
+            fn (string $key, array $definition): AgentDefinition => isset($definition['class'])
+                ? $this->classAgents->make($key, $definition)
+                : ConfigAgentDefinition::fromConfig($key, $definition),
             array_keys($agents),
             $agents,
         );
