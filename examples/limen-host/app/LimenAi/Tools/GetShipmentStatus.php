@@ -4,11 +4,11 @@ namespace App\LimenAi\Tools;
 
 use App\Contracts\ShipmentService;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Contracts\Tools\Tool;
 use LimenAi\Contracts\Tools\ToolDefinition;
-use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class GetShipmentStatus extends BaseTool
+class GetShipmentStatus implements Tool
 {
     public function __construct(
         private readonly ShipmentService $shipments,
@@ -22,11 +22,6 @@ class GetShipmentStatus extends BaseTool
     public function definition(): ToolDefinition
     {
         return ConfigToolDefinition::fromConfig($this->key(), config('limen-ai.tools.get_shipment_status', []));
-    }
-
-    public function authorize(array $input, ToolExecutionContext $context): bool
-    {
-        return $context->userId() !== null;
     }
 
     /**

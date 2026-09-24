@@ -4,11 +4,11 @@ namespace App\LimenAi\Tools;
 
 use App\Contracts\ShipmentService;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Contracts\Tools\Tool;
 use LimenAi\Contracts\Tools\ToolDefinition;
-use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class SendCustomerMessage extends BaseTool
+class SendCustomerMessage implements Tool
 {
     public function __construct(
         private readonly ShipmentService $shipments,
@@ -22,11 +22,6 @@ class SendCustomerMessage extends BaseTool
     public function definition(): ToolDefinition
     {
         return ConfigToolDefinition::fromConfig($this->key(), config('limen-ai.tools.send_customer_message', []));
-    }
-
-    public function authorize(array $input, ToolExecutionContext $context): bool
-    {
-        return $context->userId() !== null;
     }
 
     /**
