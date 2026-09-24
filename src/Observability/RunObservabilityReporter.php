@@ -31,6 +31,7 @@ class RunObservabilityReporter
             ],
             'audit' => $this->auditExporter->export($runId),
             'usage' => $this->usageReader->recordsForRun($runId),
+            'usage_summary' => $this->usageReader->summarizeForRun($runId),
         ];
     }
 }

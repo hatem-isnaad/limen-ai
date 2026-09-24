@@ -44,7 +44,17 @@ class ObservabilityTest extends TestCase
 
         $this->assertNotEmpty($usage);
         $this->assertSame('llm', $usage[0]['type']);
-        $this->assertSame(128, $usage[0]['usage']['total_tokens']);
+        $this->assertSame(80, $usage[0]['input_tokens']);
+        $this->assertSame(48, $usage[0]['output_tokens']);
+        $this->assertSame(128, $usage[0]['total_tokens']);
+
+        $summary = app(UsageReader::class)->summarizeForRun($runId);
+
+        $this->assertSame(1, $summary['llm_calls']);
+        $this->assertSame(80, $summary['input_tokens']);
+        $this->assertSame(48, $summary['output_tokens']);
+        $this->assertSame(80.0, $summary['avg_input_tokens']);
+        $this->assertSame(48.0, $summary['avg_output_tokens']);
     }
 
     public function test_tool_execution_records_usage_and_trace_spans_in_audit(): void
@@ -107,13 +117,15 @@ class ObservabilityTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('observability.run_id', $runId)
             ->assertJsonStructure([
-                'observability' => ['trace', 'audit', 'usage'],
-            ]);
+                'observability' => ['trace', 'audit', 'usage', 'usage_summary'],
+            ])
+            ->assertJsonPath('observability.usage_summary.llm_calls', 1);
 
         $report = app(RunObservabilityReporter::class)->forRun($runId);
 
         $this->assertNotEmpty($report['trace']['trace_id'] ?? null);
         $this->assertNotEmpty($report['audit']);
         $this->assertNotEmpty($report['usage']);
+        $this->assertSame(1, $report['usage_summary']['llm_calls']);
     }
 }

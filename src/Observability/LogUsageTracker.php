@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 use LimenAi\Contracts\Observability\UsageReader;
 use LimenAi\Contracts\Observability\UsageTracker;
 
-class LogUsageTracker implements UsageReader, UsageTracker
+class LogUsageTracker implements UsageTracker, UsageReader
 {
     public function __construct(
         private readonly ConfigRepository $config,
@@ -20,12 +20,17 @@ class LogUsageTracker implements UsageReader, UsageTracker
             return;
         }
 
+        $tokens = TokenUsage::normalize($usage);
+
         $record = [
             'type' => 'llm',
             'run_id' => $runId,
             'provider' => $provider,
             'model' => $model,
-            'usage' => $usage,
+            'input_tokens' => $tokens['input_tokens'],
+            'output_tokens' => $tokens['output_tokens'],
+            'total_tokens' => $tokens['total_tokens'],
+            'usage' => array_merge($usage, $tokens),
         ];
 
         $this->buffer->push($record);
@@ -53,6 +58,16 @@ class LogUsageTracker implements UsageReader, UsageTracker
     public function recordsForRun(string $runId): array
     {
         return $this->buffer->forRun($runId);
+    }
+
+    public function summarizeForRun(string $runId): array
+    {
+        return UsageSummary::fromRecords($this->recordsForRun($runId));
+    }
+
+    public function summarize(): array
+    {
+        return UsageSummary::fromRecords($this->buffer->all());
     }
 
     protected function enabled(): bool
