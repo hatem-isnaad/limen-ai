@@ -73,18 +73,10 @@ Never trust from LLM output:
 - Never pass credentials to LLM
 - Store secrets in env/config, resolved at runtime
 
-## Attachments
-
-- Upload size, mime type, and per-conversation count limits are enforced server-side
-- Extracted attachment text is treated as untrusted and wrapped before LLM injection
-- Optional vector RAG over attachments uses the same sanitization rules as knowledge retrieval
-- Files are stored on the configured disk (`attachments.disk`) or in-memory for development
-- Use `DatabaseAttachmentStore` in production with the `limen_ai_attachments` migration
-
 ## Prompt Injection Mitigation
 
 - Separate system/instruction from untrusted content
-- Mark retrieved knowledge, attachments, and user content as untrusted
+- Mark retrieved knowledge and user content as untrusted
 - Optional sanitization filters
 - Tool allowlists per agent (LLM cannot invoke undeclared tools)
 
@@ -112,26 +104,6 @@ Log at minimum:
 ## Failure Mode
 
 When in doubt: **deny execution**, return safe user-facing message, log internally.
-
-## Guest mode (public widgets)
-
-When `LIMEN_AI_UI_GUEST_ENABLED=true` and `LIMEN_AI_UI_REQUIRE_AUTH=false`, unauthenticated visitors can start conversations. Treat this as a **public attack surface**.
-
-**Minimum hardening:**
-
-- Keep `guest_allowed` **false** on agents that can call privileged tools unless you add separate guest-safe agents
-- Use `CacheGuestSessionValidator` (default) so guest tokens expire and cannot be reused indefinitely
-- Guest/public widgets auto-apply `ThrottleAgentRequests` when `LIMEN_AI_UI_GUEST_ENABLED=true` (optional `LIMEN_AI_UI_RATE_LIMIT_ENABLED=true` for authenticated routes)
-- Mark read-only widget tools with `guest_safe: true`; `limen-ai:validate` fails guest agents with unsafe tools
-- Disable tools that mutate data, send messages, or reach internal APIs for guest-facing agents
-- Run `php artisan limen-ai:doctor` — in-memory persistence with UI enabled is reported as a failure
-- Run `php artisan migrate` so persistence auto-detects database (or set `LIMEN_AI_PERSISTENCE_DRIVER=database`)
-
-**Do not:**
-
-- Expose admin or internal agents on public pages
-- Pass tenant or user identifiers from the browser into run context
-- Disable authorization gates globally to “make the widget work”
 
 ## Pre-release security checklist (v1.0.0+)
 
