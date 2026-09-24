@@ -2,7 +2,9 @@
 
 namespace LimenAi\Contracts\Skills;
 
-interface SkillDefinition
+use LimenAi\Contracts\Enableable;
+
+interface SkillDefinition extends Enableable
 {
     public function key(): string;
 

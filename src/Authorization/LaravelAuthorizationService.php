@@ -11,9 +11,12 @@ use LimenAi\Contracts\Authorization\GuestSessionValidator;
 use LimenAi\Contracts\Runtime\RunContext;
 use LimenAi\Contracts\Tools\ToolDefinition;
 use LimenAi\Exceptions\AgentAuthorizationException;
+use LimenAi\Exceptions\AgentDisabledException;
 use LimenAi\Exceptions\RunContextAuthorizationException;
 use LimenAi\Exceptions\ToolAuthorizationException;
+use LimenAi\Exceptions\ToolDisabledException;
 use LimenAi\Exceptions\UnauthenticatedException;
+use LimenAi\Support\Enablement;
 
 class LaravelAuthorizationService implements AuthorizationService
 {
@@ -37,6 +40,10 @@ class LaravelAuthorizationService implements AuthorizationService
 
     public function canUseAgent(AgentDefinition $agent): bool
     {
+        if (! Enablement::isEnabled($agent)) {
+            return false;
+        }
+
         $authorization = $agent->authorizationConfig();
 
         if ($this->authenticationRequired($authorization) && ! $this->isAuthenticated() && ! $this->isGuestAllowed($agent)) {
@@ -48,11 +55,19 @@ class LaravelAuthorizationService implements AuthorizationService
 
     public function canUseTool(ToolDefinition $tool): bool
     {
+        if (! Enablement::isEnabled($tool)) {
+            return false;
+        }
+
         return $this->passesAuthorization($tool->authorizationConfig(), $tool);
     }
 
     public function authorizeAgent(AgentDefinition $agent): void
     {
+        if (! Enablement::isEnabled($agent)) {
+            throw AgentDisabledException::forAgent($agent->key());
+        }
+
         $authorization = $agent->authorizationConfig();
 
         if ($this->authenticationRequired($authorization) && ! $this->isAuthenticated() && ! $this->isGuestAllowed($agent)) {
@@ -66,6 +81,10 @@ class LaravelAuthorizationService implements AuthorizationService
 
     public function authorizeTool(ToolDefinition $tool): void
     {
+        if (! Enablement::isEnabled($tool)) {
+            throw ToolDisabledException::forTool($tool->key());
+        }
+
         if (! $this->canUseTool($tool)) {
             throw ToolAuthorizationException::forTool($tool->key());
         }
@@ -122,20 +141,13 @@ class LaravelAuthorizationService implements AuthorizationService
     /** @param  array<string, mixed>  $authorization */
     protected function passesAuthorization(array $authorization, object $subject): bool
     {
-        $abilities = array_values($authorization['abilities'] ?? []);
-        $hasPolicy = isset($authorization['policy'], $authorization['policy_method']);
-
-        if ($this->authorizationMode() === 'simple' && $abilities === [] && ! $hasPolicy) {
-            return true;
-        }
-
-        foreach ($abilities as $ability) {
+        foreach ($authorization['abilities'] ?? [] as $ability) {
             if (! Gate::check((string) $ability, $subject)) {
                 return false;
             }
         }
 
-        if ($hasPolicy && $this->isAuthenticated()) {
+        if (isset($authorization['policy'], $authorization['policy_method']) && $this->isAuthenticated()) {
             $user = $this->auth->user();
 
             if ($user === null || ! Gate::forUser($user)->allows((string) $authorization['policy_method'], $subject)) {
@@ -144,12 +156,5 @@ class LaravelAuthorizationService implements AuthorizationService
         }
 
         return true;
-    }
-
-    protected function authorizationMode(): string
-    {
-        $mode = (string) $this->config->get('limen-ai.authorization.mode', 'simple');
-
-        return in_array($mode, ['simple', 'gates'], true) ? $mode : 'simple';
     }
 }

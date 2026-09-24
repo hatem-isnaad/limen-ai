@@ -6,6 +6,15 @@ use LimenAi\Contracts\Agents\AgentDefinition;
 
 final class ConfigAgentDefinition implements AgentDefinition
 {
+    /**
+     * @param  list<string>  $skills
+     * @param  list<string>  $tools
+     * @param  list<string>  $knowledge
+     * @param  array<string, mixed>  $memoryConfig
+     * @param  array<string, mixed>  $authorizationConfig
+     * @param  array<string, mixed>  $outputConfig
+     * @param  array<string, mixed>  $limits
+     */
     public function __construct(
         private readonly string $key,
         private readonly string $name,
@@ -17,13 +26,16 @@ final class ConfigAgentDefinition implements AgentDefinition
         private readonly array $tools,
         private readonly array $knowledge,
         private readonly array $memoryConfig,
-        private readonly array $personaConfig,
         private readonly array $authorizationConfig,
         private readonly array $outputConfig,
         private readonly array $limits,
         private readonly string $version,
+        private readonly bool $enabled,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     public static function fromConfig(string $key, array $config): self
     {
         return new self(
@@ -37,11 +49,11 @@ final class ConfigAgentDefinition implements AgentDefinition
             tools: array_values($config['tools'] ?? []),
             knowledge: array_values($config['knowledge'] ?? []),
             memoryConfig: $config['memory'] ?? [],
-            personaConfig: $config['persona'] ?? [],
             authorizationConfig: $config['authorization'] ?? [],
             outputConfig: $config['output'] ?? [],
             limits: $config['limits'] ?? [],
             version: (string) ($config['version'] ?? '1.0.0'),
+            enabled: (bool) ($config['enabled'] ?? true),
         );
     }
 
@@ -95,11 +107,6 @@ final class ConfigAgentDefinition implements AgentDefinition
         return $this->memoryConfig;
     }
 
-    public function personaConfig(): array
-    {
-        return $this->personaConfig;
-    }
-
     public function authorizationConfig(): array
     {
         return $this->authorizationConfig;
@@ -118,5 +125,10 @@ final class ConfigAgentDefinition implements AgentDefinition
     public function version(): string
     {
         return $this->version;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

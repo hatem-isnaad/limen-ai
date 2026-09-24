@@ -2,8 +2,12 @@
 
 namespace LimenAi\Contracts\Tools;
 
+use LimenAi\Contracts\Enableable;
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
 
+/**
+ * Tool executors may also implement {@see Enableable} for runtime enable/disable checks.
+ */
 interface Tool
 {
     public function key(): string;

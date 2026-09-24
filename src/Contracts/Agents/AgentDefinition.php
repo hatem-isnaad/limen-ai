@@ -2,7 +2,9 @@
 
 namespace LimenAi\Contracts\Agents;
 
-interface AgentDefinition
+use LimenAi\Contracts\Enableable;
+
+interface AgentDefinition extends Enableable
 {
     public function key(): string;
 
@@ -27,9 +29,6 @@ interface AgentDefinition
 
     /** @return array<string, mixed> */
     public function memoryConfig(): array;
-
-    /** @return array<string, mixed> */
-    public function personaConfig(): array;
 
     /** @return array<string, mixed> */
     public function authorizationConfig(): array;
