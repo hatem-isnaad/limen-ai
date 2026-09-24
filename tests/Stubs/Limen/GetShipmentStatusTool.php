@@ -3,11 +3,11 @@
 namespace LimenAi\Tests\Stubs\Limen;
 
 use LimenAi\Contracts\Runtime\ToolExecutionContext;
+use LimenAi\Contracts\Tools\Tool;
 use LimenAi\Contracts\Tools\ToolDefinition;
-use LimenAi\Tools\BaseTool;
 use LimenAi\Tools\ConfigToolDefinition;
 
-class GetShipmentStatusTool extends BaseTool
+class GetShipmentStatusTool implements Tool
 {
     public function __construct(
         private readonly FakeShipmentService $shipments,
@@ -28,11 +28,6 @@ class GetShipmentStatusTool extends BaseTool
                 'shipment_id' => ['type' => 'string', 'required' => true],
             ],
         ]);
-    }
-
-    public function authorize(array $input, ToolExecutionContext $context): bool
-    {
-        return $context->userId() !== null;
     }
 
     /**
