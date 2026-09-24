@@ -168,7 +168,7 @@ return [
         'example_echo' => [
             'name' => 'Example Echo',
             'description' => 'Echoes input back for testing.',
-            'class' => null,
+            'class' => LimenAi\Tools\BuiltIn\ExampleEchoTool::class,
             'input_schema' => [
                 'message' => ['type' => 'string', 'required' => true],
             ],

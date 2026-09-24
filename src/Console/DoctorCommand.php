@@ -5,20 +5,18 @@ namespace LimenAi\Console;
 use Illuminate\Console\Command;
 use LimenAi\Agents\AgentValidator;
 use LimenAi\Contracts\Agents\AgentRepository;
-use LimenAi\Contracts\Attachments\AttachmentStore;
 use LimenAi\Contracts\Broadcasting\RealtimeBroadcaster;
 use LimenAi\Contracts\Observability\AuditLogger;
 use LimenAi\Contracts\Providers\LlmProvider;
 use LimenAi\Contracts\Runtime\AgentRunDispatcher;
 use LimenAi\Contracts\Runtime\AgentRuntime;
+use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Integrations\HttpIntegrationValidator;
-use LimenAi\Support\EnvironmentDoctor;
-use LimenAi\Support\LimenAiManager;
 use LimenAi\Workflows\WorkflowValidator;
 
 class DoctorCommand extends Command
 {
-    protected $signature = 'limen-ai:doctor {--json : Output the report as JSON for CI and scripts}';
+    protected $signature = 'limen-ai:doctor';
 
     protected $description = 'Validate Limen AI environment, bindings, and configuration';
 
@@ -26,64 +24,68 @@ class DoctorCommand extends Command
         AgentValidator $agents,
         WorkflowValidator $workflows,
         HttpIntegrationValidator $integrations,
-        EnvironmentDoctor $environmentDoctor,
+        ToolRepository $tools,
+        AgentRepository $agentRepository,
     ): int {
         $failures = [];
-        $checks = [];
-        $environment = (string) app()->environment();
+
+        $this->components->info('Running Limen AI environment checks...');
 
         if (! config()->has('limen-ai')) {
             $failures[] = 'Configuration file [config/limen-ai.php] is missing.';
-            $checks['configuration'] = 'missing';
         } else {
-            $checks['configuration'] = 'ok';
+            $this->components->twoColumnDetail('Configuration', '<fg=green>OK</>');
         }
 
         $defaultAgent = (string) config('limen-ai.default_agent', '');
 
         if ($defaultAgent === '') {
             $failures[] = 'Default agent is not configured.';
-            $checks['default_agent'] = 'missing';
         } elseif ($agents->validate($defaultAgent) !== []) {
             $failures[] = "Default agent [{$defaultAgent}] failed validation.";
-            $checks['default_agent'] = 'invalid';
         } else {
-            $checks['default_agent'] = $defaultAgent;
+            $this->components->twoColumnDetail('Default agent', "<fg=green>{$defaultAgent}</>");
         }
 
-        $bindings = [];
-
         foreach ([
-            'agent_runtime' => AgentRuntime::class,
-            'agent_dispatcher' => AgentRunDispatcher::class,
-            'llm_provider' => LlmProvider::class,
-            'audit_logger' => AuditLogger::class,
-            'broadcaster' => RealtimeBroadcaster::class,
-            'agent_repository' => AgentRepository::class,
-            'attachment_store' => AttachmentStore::class,
-            'limen_ai_manager' => LimenAiManager::class,
-        ] as $key => $contract) {
+            'Agent runtime' => AgentRuntime::class,
+            'Agent dispatcher' => AgentRunDispatcher::class,
+            'LLM provider' => LlmProvider::class,
+            'Audit logger' => AuditLogger::class,
+            'Broadcaster' => RealtimeBroadcaster::class,
+            'Agent repository' => AgentRepository::class,
+        ] as $label => $contract) {
             if (! app()->bound($contract)) {
                 $failures[] = "Binding missing for {$contract}.";
-                $bindings[$key] = 'missing';
-
                 continue;
             }
 
-            $bindings[$key] = 'bound';
+            $this->components->twoColumnDetail($label, '<fg=green>bound</>');
         }
 
-        $checks['bindings'] = $bindings;
+        if ((bool) config('limen-ai.queue.agent_runs', false) && config('limen-ai.queue.connection') === null) {
+            $this->components->twoColumnDetail('Queue agent runs', '<fg=yellow>enabled (default connection)</>');
+        } else {
+            $this->components->twoColumnDetail('Queue agent runs', (bool) config('limen-ai.queue.agent_runs', false) ? 'enabled' : 'disabled');
+        }
 
-        $queueEnabled = (bool) config('limen-ai.queue.agent_runs', false);
-        $checks['queue_agent_runs'] = $queueEnabled ? 'enabled' : 'disabled';
+        $provider = (string) config('limen-ai.providers.default', 'fake');
+        $this->components->twoColumnDetail('Default provider', $provider);
 
-        if ($queueEnabled && config('limen-ai.queue.connection') === null) {
-            $checks['queue_agent_runs'] = 'enabled (default connection)';
+        foreach ($this->missingProviderEnvVars($provider) as $envVar) {
+            $failures[] = "Provider [{$provider}] requires env var [{$envVar}].";
+        }
+
+        foreach ($agentRepository->all() as $agent) {
+            foreach ($tools->forAgent($agent->key()) as $tool) {
+                if ($tool->httpIntegration() === [] && $tool->executorClass() === '') {
+                    $failures[] = "Tool [{$tool->key()}] assigned to agent [{$agent->key()}] is missing an executor class.";
+                }
+            }
         }
 
         $broadcastDriver = (string) config('limen-ai.broadcasting.driver', 'null');
-        $checks['broadcast_driver'] = $broadcastDriver;
+        $this->components->twoColumnDetail('Broadcast driver', $broadcastDriver);
 
         if ($broadcastDriver === 'pusher' && config('broadcasting.default') === null) {
             $failures[] = 'Pusher broadcast driver selected but Laravel broadcasting is not configured.';
@@ -97,69 +99,8 @@ class DoctorCommand extends Command
 
         if ($validationErrors !== []) {
             $failures = array_merge($failures, $validationErrors);
-            $checks['definitions'] = 'invalid';
         } else {
-            $checks['definitions'] = 'valid';
-        }
-
-        $environmentReport = $environmentDoctor->inspect($environment);
-        $failures = array_merge($failures, $environmentReport['failures']);
-        $warnings = $environmentReport['warnings'];
-
-        $report = [
-            'ok' => $failures === [],
-            'healthy' => $failures === [],
-            'environment' => $environment,
-            'checks' => $checks,
-            'failures' => $failures,
-            'warnings' => $warnings,
-        ];
-
-        if ($this->option('json')) {
-            $this->line(json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) ?: '{}');
-
-            return $failures === [] ? self::SUCCESS : self::FAILURE;
-        }
-
-        $this->components->info('Running Limen AI environment checks...');
-
-        if (($checks['configuration'] ?? null) === 'ok') {
-            $this->components->twoColumnDetail('Configuration', '<fg=green>OK</>');
-        }
-
-        if (isset($checks['default_agent']) && ! in_array($checks['default_agent'], ['missing', 'invalid'], true)) {
-            $this->components->twoColumnDetail('Default agent', "<fg=green>{$checks['default_agent']}</>");
-        }
-
-        foreach ([
-            'Agent runtime' => 'agent_runtime',
-            'Agent dispatcher' => 'agent_dispatcher',
-            'LLM provider' => 'llm_provider',
-            'Audit logger' => 'audit_logger',
-            'Broadcaster' => 'broadcaster',
-            'Agent repository' => 'agent_repository',
-            'Attachment store' => 'attachment_store',
-            'Limen AI manager' => 'limen_ai_manager',
-        ] as $label => $key) {
-            if (($bindings[$key] ?? null) === 'bound') {
-                $this->components->twoColumnDetail($label, '<fg=green>bound</>');
-            }
-        }
-
-        $this->components->twoColumnDetail('Queue agent runs', $checks['queue_agent_runs']);
-        $this->components->twoColumnDetail('Broadcast driver', $broadcastDriver);
-
-        if (($checks['definitions'] ?? null) === 'valid') {
             $this->components->twoColumnDetail('Definitions', '<fg=green>valid</>');
-        }
-
-        if ($warnings !== []) {
-            $this->newLine();
-            $this->components->warn('Limen AI doctor warnings:');
-
-            foreach ($warnings as $warning) {
-                $this->line("- {$warning}");
-            }
         }
 
         if ($failures !== []) {
@@ -177,5 +118,25 @@ class DoctorCommand extends Command
         $this->components->info('Limen AI environment looks healthy.');
 
         return self::SUCCESS;
+    }
+
+    protected function missingProviderEnvVars(string $provider): array
+    {
+        if ($provider === 'fake') {
+            return [];
+        }
+
+        $required = match ($provider) {
+            'openai' => ['OPENAI_API_KEY'],
+            'openrouter' => ['OPENROUTER_API_KEY'],
+            'anthropic' => ['ANTHROPIC_API_KEY'],
+            'gemini' => ['GEMINI_API_KEY'],
+            default => [],
+        };
+
+        return array_values(array_filter(
+            $required,
+            fn (string $envVar): bool => blank(env($envVar)),
+        ));
     }
 }

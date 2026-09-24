@@ -22,9 +22,9 @@ final class ConfigWorkflowDefinition implements WorkflowDefinition
      */
     public static function fromConfig(string $key, array $config): self
     {
-        $workflowDefinition = $config['definition'] ?? $config['steps'] ?? $config;
+        $workflowDefinition = $config['definition'] ?? $config;
 
-        unset($workflowDefinition['name'], $workflowDefinition['version']);
+        unset($workflowDefinition['name'], $workflowDefinition['version'], $workflowDefinition['enabled']);
 
         return new self(
             key: $key,

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Skills\SkillDefinition;
 use LimenAi\Contracts\Skills\SkillRepository;
+use LimenAi\Support\DefinitionLoader;
 use LimenAi\Support\Enablement;
 
 class ConfigSkillRepository implements SkillRepository
@@ -13,11 +14,12 @@ class ConfigSkillRepository implements SkillRepository
     public function __construct(
         private readonly ConfigRepository $config,
         private readonly AgentRepository $agents,
+        private readonly DefinitionLoader $definitions,
     ) {}
 
     public function find(string $key): ?SkillDefinition
     {
-        $definition = $this->config->get("limen-ai.skills.{$key}");
+        $definition = $this->definitions->skills()[$key] ?? null;
 
         if (! is_array($definition)) {
             return null;
@@ -28,11 +30,7 @@ class ConfigSkillRepository implements SkillRepository
 
     public function all(): array
     {
-        $skills = $this->config->get('limen-ai.skills', []);
-
-        if (! is_array($skills)) {
-            return [];
-        }
+        $skills = $this->definitions->skills();
 
         $definitions = array_map(
             fn (string $key, array $definition): SkillDefinition => ConfigSkillDefinition::fromConfig($key, $definition),
