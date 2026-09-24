@@ -9,7 +9,7 @@ class FakeEmbeddingProviderTest extends TestCase
 {
     public function test_it_returns_deterministic_embeddings(): void
     {
-        $provider = new FakeEmbeddingProvider;
+        $provider = new FakeEmbeddingProvider();
 
         $first = $provider->embed(['hello world']);
         $second = $provider->embed(['hello world']);
