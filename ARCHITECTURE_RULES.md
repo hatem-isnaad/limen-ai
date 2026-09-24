@@ -13,7 +13,7 @@ These rules are enforced by code review, documentation, and automated architectu
 
 1. Core Runtime **must not** depend on Blade.
 2. Core Runtime **must not** depend directly on Pusher or any broadcaster implementation.
-3. Core Runtime **must not** depend directly on config files — use repositories.
+3. Core Runtime **must not** depend on config files directly — use repositories.
 4. Core Runtime **must not** call HTTP APIs of the host app for internal business operations.
 
 ## Security Boundaries

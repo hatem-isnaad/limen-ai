@@ -68,7 +68,7 @@ See [docs/UPGRADE-2.0.md](docs/UPGRADE-2.0.md) for migration notes.
 
 4. Embed the chat component:
 
-```bash
+```blade
 <x-limen-ai::chatbot agent="example" />
 ```
 
