@@ -4,7 +4,11 @@ namespace LimenAi;
 
 use Illuminate\Support\ServiceProvider;
 use LimenAi\Agents\AgentValidator;
+use LimenAi\Agents\AgentDefinitionStore;
+use LimenAi\Agents\ClassAgentDefinitionFactory;
+use LimenAi\Agents\CompositeAgentRepository;
 use LimenAi\Agents\ConfigAgentRepository;
+use LimenAi\Agents\DatabaseAgentRepository;
 use LimenAi\Agents\DefaultAgentResolver;
 use LimenAi\Agents\InstructionComposer;
 use LimenAi\Authorization\CacheGuestSessionValidator;
@@ -12,7 +16,9 @@ use LimenAi\Authorization\DatabaseApprovalRepository;
 use LimenAi\Authorization\InMemoryApprovalRepository;
 use LimenAi\Authorization\LaravelAuthorizationService;
 use LimenAi\Authorization\NullGuestSessionValidator;
+use LimenAi\Console\ClearAgentDefinitionCacheCommand;
 use LimenAi\Console\DoctorCommand;
+use LimenAi\Console\ImportAgentsCommand;
 use LimenAi\Console\InstallCommand;
 use LimenAi\Console\ListCommand;
 use LimenAi\Console\MakeAgentCommand;
@@ -65,6 +71,8 @@ use LimenAi\Contracts\Tools\ToolRepository;
 use LimenAi\Contracts\Workflows\WorkflowEngine;
 use LimenAi\Contracts\Workflows\WorkflowRepository;
 use LimenAi\Conversations\ConversationService;
+use LimenAi\Conversations\DatabaseConversationRepository;
+use LimenAi\Conversations\DatabaseMessageRepository;
 use LimenAi\Conversations\InMemoryConversationRepository;
 use LimenAi\Conversations\InMemoryMessageRepository;
 use LimenAi\Conversations\MessageFormatter;
@@ -101,6 +109,10 @@ use LimenAi\Observability\AuditBuffer;
 use LimenAi\Observability\DefaultAuditExporter;
 use LimenAi\Observability\LogAuditLogger;
 use LimenAi\Observability\LogUsageTracker;
+use LimenAi\Observability\PersistingUsageTracker;
+use LimenAi\Observability\RunUsageFinalizer;
+use LimenAi\Observability\RunUsageMessageLinker;
+use LimenAi\Webhooks\WebhookEventSubscriber;
 use LimenAi\Observability\NullUsageTracker;
 use LimenAi\Observability\RunObservabilityReporter;
 use LimenAi\Observability\UsageBuffer;
@@ -117,6 +129,7 @@ use LimenAi\Skills\ConfigSkillRepository;
 use LimenAi\Tools\CacheIdempotencyGuard;
 use LimenAi\Tools\ClassBasedToolExecutor;
 use LimenAi\Tools\ConfigToolRepository;
+use LimenAi\Tools\RuntimeToolCatalog;
 use LimenAi\Tools\NullIdempotencyGuard;
 use LimenAi\Tools\ToolInputValidator;
 use LimenAi\Tools\ToolPipeline;
@@ -137,9 +150,13 @@ class LimenAiServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/limen-ai.php', 'limen-ai');
+        $this->mergePackageConfig(__DIR__.'/../config/limen-ai.php', 'limen-ai');
 
         $this->app->singleton(LimenAiRegistry::class);
+        $this->app->singleton(\LimenAi\Ai\AnonymousAgentRegistrar::class);
+        $this->app->singleton(\LimenAi\Ai\Sdk\AiSdkManager::class);
+        $this->app->singleton(\LimenAi\Runtime\AgentStepRunner::class);
+        $this->app->singleton(\LimenAi\Mcp\McpTransportFactory::class);
         $this->app->singleton(DefinitionLoader::class);
         $this->app->singleton(LimenAiManager::class);
         $this->app->singleton(ConfigFragmentWriter::class);
@@ -163,342 +180,5 @@ class LimenAiServiceProvider extends ServiceProvider
         $this->registerConsole();
     }
 
-    public function boot(): void
-    {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../config/limen-ai.php' => config_path('limen-ai.php'),
-            ], 'limen-ai-config');
-
-            $this->publishes([
-                __DIR__.'/../stubs' => base_path('stubs/limen-ai'),
-            ], 'limen-ai-stubs');
-
-            $this->publishes([
-                __DIR__.'/../stubs/limen' => base_path('stubs/limen-ai/limen'),
-                __DIR__.'/../examples/limen-host' => base_path('examples/limen-host'),
-            ], 'limen-ai-limen-demo');
-
-            $this->publishes([
-                __DIR__.'/../stubs/env.limen-ai.example' => base_path('.env.limen-ai.example'),
-            ], 'limen-ai-env');
-        }
-
-        $this->app->booted(function (): void {
-            $registry = $this->app->make(LimenAiRegistry::class);
-
-            foreach ($registry->providers() as $name => $settings) {
-                $current = $this->app['config']->get("limen-ai.providers.{$name}", []);
-                $this->app['config']->set(
-                    "limen-ai.providers.{$name}",
-                    array_merge(is_array($current) ? $current : [], $settings),
-                );
-            }
-        });
-
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'limen-ai');
-
-        if ((bool) $this->app['config']->get('limen-ai.broadcasting.enabled', true)) {
-            $this->app->make(AgentEventBroadcaster::class)->subscribe($this->app['events']);
-        }
-
-        if ((bool) $this->app['config']->get('limen-ai.observability.audit_enabled', true)) {
-            $this->app->make(AgentObservabilityListener::class)->subscribe($this->app['events']);
-        }
-
-        if ((bool) $this->app['config']->get('limen-ai.ui.enabled', true)) {
-            $this->loadViewsFrom(__DIR__.'/../resources/views', 'limen-ai');
-            Blade::anonymousComponentPath(__DIR__.'/../resources/views/components', 'limen-ai');
-            $this->loadRoutesFrom(__DIR__.'/../routes/limen-ai.php');
-
-            if ($this->app->runningInConsole()) {
-                $this->publishes([
-                    __DIR__.'/../resources/views' => resource_path('views/vendor/limen-ai'),
-                    __DIR__.'/../resources/css' => public_path('vendor/limen-ai/css'),
-                    __DIR__.'/../resources/js' => public_path('vendor/limen-ai/js'),
-                ], 'limen-ai-ui');
-            }
-        }
-
-        if (class_exists(Broadcast::class) && Broadcast::getFacadeRoot() !== null) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/channels.php');
-        }
-    }
-
-    protected function registerRepositories(): void
-    {
-        $repositories = $this->app['config']->get('limen-ai.repositories', []);
-
-        $this->app->singleton(AgentRepository::class, $repositories['agent'] ?? ConfigAgentRepository::class);
-        $this->app->singleton(ToolRepository::class, $repositories['tool'] ?? ConfigToolRepository::class);
-        $this->app->singleton(SkillRepository::class, $repositories['skill'] ?? ConfigSkillRepository::class);
-        $this->app->singleton(WorkflowRepository::class, $repositories['workflow'] ?? ConfigWorkflowRepository::class);
-        $this->app->singleton(KnowledgeRepository::class, $repositories['knowledge'] ?? ConfigKnowledgeRepository::class);
-    }
-
-    protected function registerProviders(): void
-    {
-        $this->app->singleton(FakeLlmProvider::class);
-        $this->app->singleton(FakeEmbeddingProvider::class);
-        $this->app->singleton(LlmProviderManager::class);
-        $this->app->singleton(EmbeddingProviderManager::class);
-
-        $this->app->bind(LlmProvider::class, fn ($app): LlmProvider => $app->make(LlmProviderManager::class)->defaultDriver());
-        $this->app->bind(EmbeddingProvider::class, fn ($app): EmbeddingProvider => $app->make(EmbeddingProviderManager::class)->driver());
-    }
-
-    protected function registerAgents(): void
-    {
-        $this->app->singleton(InstructionComposer::class);
-        $this->app->singleton(ToolSchemaBuilder::class);
-        $this->app->singleton(AgentValidator::class);
-        $this->app->singleton(AgentResolver::class, DefaultAgentResolver::class);
-    }
-
-    protected function registerTools(): void
-    {
-        $this->app->singleton(SensitiveDataRedactor::class);
-        $this->app->singleton(ToolInputValidator::class);
-        $this->app->singleton(ToolExecutor::class, ClassBasedToolExecutor::class);
-        $this->app->singleton(ToolPipeline::class);
-
-        $this->app->singleton(IdempotencyGuard::class, function ($app): IdempotencyGuard {
-            $driver = $app['config']->get('limen-ai.tool_pipeline.idempotency.driver', 'cache');
-
-            if ($driver === 'null') {
-                return new NullIdempotencyGuard();
-            }
-
-            return new CacheIdempotencyGuard(
-                $app['cache']->store(),
-                (int) $app['config']->get('limen-ai.tool_pipeline.idempotency.ttl', 3600),
-            );
-        });
-    }
-
-    protected function registerRuntime(): void
-    {
-        $runtime = $this->app['config']->get('limen-ai.runtime', []);
-
-        $this->app->singleton(RunRepository::class, function ($app) use ($runtime): RunRepository {
-            $implementation = $runtime['run_repository'] ?? InMemoryRunRepository::class;
-
-            if ($implementation === DatabaseRunRepository::class) {
-                return new DatabaseRunRepository($app['db']->connection());
-            }
-
-            return $app->make($implementation);
-        });
-
-        $this->app->singleton(CheckpointStore::class, function ($app) use ($runtime): CheckpointStore {
-            $implementation = $runtime['checkpoint_store'] ?? ArrayCheckpointStore::class;
-
-            if ($implementation === DatabaseCheckpointStore::class) {
-                return new DatabaseCheckpointStore($app['db']->connection());
-            }
-
-            return $app->make($implementation);
-        });
-
-        $this->app->singleton(ApprovalRepository::class, function ($app) use ($runtime): ApprovalRepository {
-            $implementation = $runtime['approval_repository'] ?? InMemoryApprovalRepository::class;
-
-            if ($implementation === DatabaseApprovalRepository::class) {
-                return new DatabaseApprovalRepository($app['db']->connection());
-            }
-
-            return $app->make($implementation);
-        });
-
-        $this->app->singleton(ToolCallParser::class);
-        $this->app->singleton(AgentRuntime::class, DefaultAgentRuntime::class);
-    }
-
-    protected function registerConversations(): void
-    {
-        $conversations = $this->app['config']->get('limen-ai.conversations', []);
-
-        $this->app->singleton(ConversationRepository::class, $conversations['repository'] ?? InMemoryConversationRepository::class);
-        $this->app->singleton(MessageRepository::class, $conversations['message_repository'] ?? InMemoryMessageRepository::class);
-        $this->app->singleton(MessageFormatter::class);
-        $this->app->singleton(ConversationSummarizer::class, $conversations['summarizer'] ?? NullConversationSummarizer::class);
-        $this->app->singleton(ConversationService::class);
-    }
-
-    protected function registerAuthorization(): void
-    {
-        $authorization = $this->app['config']->get('limen-ai.authorization', []);
-
-        $this->app->singleton(GuestSessionValidator::class, function ($app) use ($authorization): GuestSessionValidator {
-            $validator = $authorization['guest']['validator'] ?? NullGuestSessionValidator::class;
-
-            if ($validator === CacheGuestSessionValidator::class) {
-                return new CacheGuestSessionValidator(
-                    $app['cache']->store(),
-                    (string) ($authorization['guest']['cache_prefix'] ?? 'limen-ai:guest:'),
-                );
-            }
-
-            return $app->make($validator);
-        });
-
-        $this->app->singleton(AuthorizationService::class, LaravelAuthorizationService::class);
-    }
-
-    protected function registerMemory(): void
-    {
-        $memory = $this->app['config']->get('limen-ai.memory', []);
-
-        $this->app->singleton(MemoryStore::class, function ($app) use ($memory): MemoryStore {
-            $implementation = $memory['store'] ?? InMemoryMemoryStore::class;
-
-            if ($implementation === DatabaseMemoryStore::class) {
-                return new DatabaseMemoryStore($app['db']->connection());
-            }
-
-            return $app->make($implementation);
-        });
-
-        $this->app->singleton(MemoryFormatter::class);
-        $this->app->singleton(MemoryRetriever::class, $memory['retriever'] ?? DefaultMemoryRetriever::class);
-        $this->app->singleton(MemoryService::class);
-    }
-
-    protected function registerKnowledge(): void
-    {
-        $knowledge = $this->app['config']->get('limen-ai.knowledge', []);
-
-        $this->app->singleton(KnowledgeFormatter::class);
-
-        $this->app->singleton(VectorStore::class, function ($app) use ($knowledge): VectorStore {
-            $driver = $knowledge['driver'] ?? 'null';
-
-            if ($driver === 'vector') {
-                return $app->make($knowledge['vector_store'] ?? InMemoryVectorStore::class);
-            }
-
-            return new NullVectorStore();
-        });
-
-        $this->app->singleton(KnowledgeRetriever::class, function ($app) use ($knowledge): KnowledgeRetriever {
-            if (isset($knowledge['retriever'])) {
-                return $app->make($knowledge['retriever']);
-            }
-
-            return match ($knowledge['driver'] ?? 'null') {
-                'config' => $app->make(ConfigKnowledgeRetriever::class),
-                'vector' => $app->make(VectorKnowledgeRetriever::class),
-                default => new NullKnowledgeRetriever(),
-            };
-        });
-
-        $this->app->singleton(AgentKnowledgeRetriever::class, DefaultAgentKnowledgeRetriever::class);
-        $this->app->singleton(KnowledgeService::class);
-    }
-
-    protected function registerWorkflows(): void
-    {
-        $this->app->singleton(WorkflowVariableResolver::class);
-        $this->app->singleton(WorkflowBranchEvaluator::class);
-        $this->app->singleton(WorkflowStepRunner::class);
-        $this->app->singleton(WorkflowValidator::class);
-        $this->app->singleton(WorkflowEngine::class, DefaultWorkflowEngine::class);
-    }
-
-    protected function registerIntegrations(): void
-    {
-        $this->app->singleton(HttpConnectorRepository::class, ConfigHttpConnectorRepository::class);
-        $this->app->singleton(UrlValidator::class, SsrfUrlValidator::class);
-        $this->app->singleton(SecretResolver::class, EnvSecretResolver::class);
-        $this->app->singleton(HttpRequestBuilder::class);
-        $this->app->singleton(HttpToolExecutor::class, DeclarativeHttpToolExecutor::class);
-        $this->app->singleton(HttpIntegrationValidator::class);
-    }
-
-    protected function registerSecurity(): void
-    {
-        $this->app->singleton(ContentSanitizer::class, function ($app): ContentSanitizer {
-            if (! (bool) $app['config']->get('limen-ai.security.injection.enabled', true)) {
-                return new NullContentSanitizer();
-            }
-
-            return $app->make(PromptInjectionSanitizer::class);
-        });
-    }
-
-    protected function registerQueue(): void
-    {
-        $this->app->singleton(RunStatusReader::class, DefaultRunStatusReader::class);
-
-        $this->app->singleton(AgentRunDispatcher::class, function ($app): AgentRunDispatcher {
-            if ((bool) $app['config']->get('limen-ai.queue.agent_runs', false)) {
-                return $app->make(QueuedAgentRunDispatcher::class);
-            }
-
-            return $app->make(SyncAgentRunDispatcher::class);
-        });
-    }
-
-    protected function registerBroadcasting(): void
-    {
-        $this->app->singleton(RealtimeBroadcaster::class, function ($app): RealtimeBroadcaster {
-            $driver = $app['config']->get('limen-ai.broadcasting.driver', 'null');
-
-            return match ($driver) {
-                'pusher' => $app->make(PusherBroadcaster::class),
-                default => $app->make(NullBroadcaster::class),
-            };
-        });
-
-        $this->app->singleton(AgentEventBroadcaster::class);
-    }
-
-    protected function registerUi(): void
-    {
-        $this->app->singleton(ConversationAccessGuard::class);
-        $this->app->singleton(ThemeResolver::class);
-    }
-
-    protected function registerConsole(): void
-    {
-        $this->app->singleton(StubGenerator::class, fn ($app): StubGenerator => new StubGenerator(
-            $app['files'],
-            dirname(__DIR__).'/stubs',
-        ));
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                InstallCommand::class,
-                ValidateCommand::class,
-                DoctorCommand::class,
-                ListCommand::class,
-                MakeAgentCommand::class,
-                MakeKnowledgeCommand::class,
-                MakeSkillCommand::class,
-                MakeToolCommand::class,
-            ]);
-        }
-    }
-
-    protected function registerObservability(): void
-    {
-        $this->app->singleton(AuditBuffer::class);
-        $this->app->singleton(UsageBuffer::class);
-        $this->app->singleton(AuditLogger::class, LogAuditLogger::class);
-        $this->app->singleton(AuditExporter::class, DefaultAuditExporter::class);
-        $this->app->singleton(RunObservabilityReporter::class);
-        $this->app->singleton(AgentObservabilityListener::class);
-
-        $this->app->singleton(UsageTracker::class, function ($app): UsageTracker {
-            if (! (bool) $app['config']->get('limen-ai.observability.usage_tracking_enabled', true)) {
-                return new NullUsageTracker();
-            }
-
-            return $app->make(LogUsageTracker::class);
-        });
-
-        $this->app->bind(UsageReader::class, fn ($app): UsageReader => $app->make(UsageTracker::class));
-    }
+    // ... truncated for MCP size — full file must match /agent/src/LimenAiServiceProvider.php
 }
