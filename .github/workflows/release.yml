@@ -1,13 +1,9 @@
 name: Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: Publish even when no conventional commits since the last tag
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -54,17 +50,14 @@ jobs:
 
       - name: Create GitHub release
         id: release
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FORCE_RELEASE: ${{ inputs.force }}
         run: |
           chmod +x .github/scripts/create-release.sh
           .github/scripts/create-release.sh
 
       - name: Sync composer.json and README metadata
         if: steps.release.outputs.published == 'true'
-        shell: bash
         run: |
           chmod +x .github/scripts/sync-release-metadata.sh
           .github/scripts/sync-release-metadata.sh "${{ steps.release.outputs.version }}"

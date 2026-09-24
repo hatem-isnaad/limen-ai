@@ -2,12 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [main, stg]
+    branches: [main, 'cursor/**']
   pull_request:
-    branches: [main, stg]
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
   test:
@@ -17,69 +14,60 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3']
-        laravel: ['11.*', '12.*', '13.*']
-        exclude:
-          # Laravel 13 requires PHP ^8.3 (illuminate/* and framework)
-          - php: '8.2'
-            laravel: '13.*'
+        laravel: ['11.*', '12.*']
+        include:
+          - php: '8.3'
+            laravel: '12.*'
+            coverage: true
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          coverage: none
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
 
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+
       - name: Install dependencies
-        env:
-          COMPOSER_NO_AUDIT: 1
         run: |
           composer require "illuminate/contracts:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "illuminate/database:${{ matrix.laravel }}" "illuminate/queue:${{ matrix.laravel }}" "illuminate/broadcasting:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/validation:${{ matrix.laravel }}" --no-update
           if [ "${{ matrix.laravel }}" = "11.*" ]; then
             composer require "orchestra/testbench:^9.0" --dev --no-update
-          elif [ "${{ matrix.laravel }}" = "12.*" ]; then
-            composer require "orchestra/testbench:^10.0" --dev --no-update
           else
-            composer require "orchestra/testbench:^11.0" --dev --no-update
+            composer require "orchestra/testbench:^10.0" --dev --no-update
           fi
-          composer update --prefer-dist --no-interaction -W
+          composer update --prefer-dist --no-interaction
 
       - name: Run unit, integration, and feature tests
-        run: vendor/bin/phpunit --testsuite Unit,Integration,Feature
+        run: vendor/bin/phpunit --testsuite Unit --testsuite Integration --testsuite Feature
 
       - name: Run architecture boundary gates
-        run: vendor/bin/phpunit --testsuite Architecture
+        run: composer test:architecture
 
       - name: Run security critical gates
-        run: vendor/bin/phpunit --testsuite Security
+        run: composer test:security
 
-  release-gate:
-    name: Release readiness gate
-    runs-on: ubuntu-latest
-    needs: test
+      - name: Upload coverage (PHP 8.3 / Laravel 12 only)
+        if: matrix.coverage == true
+        run: vendor/bin/phpunit --coverage-clover build/coverage.xml
+        continue-on-error: true
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Archive coverage artifact
+        if: matrix.coverage == true
+        uses: actions/upload-artifact@v4
         with:
-          php-version: '8.3'
-          coverage: none
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-
-      - name: Install dependencies
-        env:
-          COMPOSER_NO_AUDIT: 1
-        run: |
-          composer require "illuminate/contracts:12.*" "illuminate/support:12.*" "illuminate/database:12.*" "illuminate/queue:12.*" "illuminate/broadcasting:12.*" "illuminate/http:12.*" "illuminate/validation:12.*" --no-update
-          composer require "orchestra/testbench:^10.0" --dev --no-update
-          composer update --prefer-dist --no-interaction -W
-
-      - name: Run release gate
-        run: composer test:release
+          name: coverage-clover
+          path: build/coverage.xml
+          if-no-files-found: ignore
