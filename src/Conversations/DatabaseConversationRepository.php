@@ -36,19 +36,13 @@ class DatabaseConversationRepository implements ConversationRepository
 
     public function find(string $conversationId): ?array
     {
-        $row = $this->db->table('limen_ai_conversations')
-            ->where('id', $conversationId)
-            ->first();
+        $row = $this->db->table('limen_ai_conversations')->where('id', $conversationId)->first();
 
         return $row === null ? null : $this->mapRow((array) $row);
     }
 
     public function update(string $conversationId, array $attributes): void
     {
-        if ($this->find($conversationId) === null) {
-            return;
-        }
-
         $updates = ['updated_at' => now()];
 
         foreach (['agent_key', 'user_id', 'guest_token', 'title', 'state'] as $field) {
@@ -58,46 +52,10 @@ class DatabaseConversationRepository implements ConversationRepository
         }
 
         if (array_key_exists('metadata', $attributes)) {
-            $updates['metadata'] = json_encode($attributes['metadata'], JSON_THROW_ON_ERROR);
+            $updates['metadata'] = json.encode($attributes['metadata'], JSON_THROW_ON_ERROR);
         }
 
-        $this->db->table('limen_ai_conversations')
-            ->where('id', $conversationId)
-            ->update($updates);
-    }
-
-    public function listForUser(int $userId, ?string $agentKey = null, int $limit = 50): array
-    {
-        $query = $this->db->table('limen_ai_conversations')
-            ->where('user_id', $userId)
-            ->orderByDesc('updated_at')
-            ->limit($limit);
-
-        if ($agentKey !== null) {
-            $query->where('agent_key', $agentKey);
-        }
-
-        return array_map(
-            fn (object $row): array => $this->mapRow((array) $row),
-            $query->get()->all(),
-        );
-    }
-
-    public function listForGuest(string $guestToken, ?string $agentKey = null, int $limit = 50): array
-    {
-        $query = $this->db->table('limen_ai_conversations')
-            ->where('guest_token', $guestToken)
-            ->orderByDesc('updated_at')
-            ->limit($limit);
-
-        if ($agentKey !== null) {
-            $query->where('agent_key', $agentKey);
-        }
-
-        return array_map(
-            fn (object $row): array => $this->mapRow((array) $row),
-            $query->get()->all(),
-        );
+        $this->db->table('limen_ai_conversations')->where('id', $conversationId)->update($updates);
     }
 
     /** @param  array<string, mixed>  $row */

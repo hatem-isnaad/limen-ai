@@ -15,7 +15,6 @@ class DatabaseMessageRepository implements MessageRepository
     public function create(string $conversationId, array $attributes): string
     {
         $messageId = (string) ($attributes['id'] ?? Str::uuid());
-        $now = now();
 
         $this->db->table('limen_ai_messages')->insert([
             'id' => $messageId,
@@ -25,10 +24,10 @@ class DatabaseMessageRepository implements MessageRepository
             'structured_content' => isset($attributes['structured_content'])
                 ? json_encode($attributes['structured_content'], JSON_THROW_ON_ERROR)
                 : null,
-            'metadata' => isset($attributes['metadata'])
+            'metadata' => isset($attributes['metadata']) && $attributes['metadata'] !== []
                 ? json_encode($attributes['metadata'], JSON_THROW_ON_ERROR)
                 : null,
-            'created_at' => $now,
+            'created_at' => $attributes['created_at'] ?? now(),
         ]);
 
         return $messageId;
@@ -37,22 +36,17 @@ class DatabaseMessageRepository implements MessageRepository
     public function forConversation(string $conversationId, ?int $limit = null): array
     {
         $query = $this->db->table('limen_ai_messages')
-            ->where('conversation_id', $conversationId)
-            ->orderBy('created_at');
+            ->where('conversation_id', $conversationId);
 
         if ($limit !== null) {
-            $total = (clone $query)->count();
-
-            if ($total > $limit) {
-                $query->offset($total - $limit);
-            }
-
-            $query->limit($limit);
+            $rows = $query->orderByDesc('created_at')->limit($limit)->get()->reverse()->values()->all();
+        } else {
+            $rows = $query->orderBy('created_at')->get()->all();
         }
 
         return array_map(
             fn (object $row): array => $this->mapRow((array) $row),
-            $query->get()->all(),
+            $rows,
         );
     }
 
@@ -63,7 +57,7 @@ class DatabaseMessageRepository implements MessageRepository
             'id' => (string) $row['id'],
             'conversation_id' => (string) $row['conversation_id'],
             'role' => (string) $row['role'],
-            'content' => $row['content'] ?? '',
+            'content' => (string) ($row['content'] ?? ''),
             'structured_content' => isset($row['structured_content'])
                 ? json_decode((string) $row['structured_content'], true, 512, JSON_THROW_ON_ERROR)
                 : null,

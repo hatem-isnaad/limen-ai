@@ -23,9 +23,13 @@ class MakeToolCommand extends Command
         $studly = $this->studlyName($this->argument('name'));
         $class = str_ends_with($studly, 'Tool') ? $studly : $studly.'Tool';
         $key = $this->option('key') ?: $this->snakeKey($class);
-        $namespace = 'App\\LimenAi\\Tools';
+        $namespace = (string) config('limen-ai.paths.tool_namespace');
+
+        if ($namespace === '') {
+            $namespace = 'App'.'\\Ai\\Tools';
+        }
         $fqn = $namespace.'\\'.$class;
-        $targetPath = config('limen-ai.paths.tools', app_path('LimenAi/Tools')).'/'.$class.'.php';
+        $targetPath = config('limen-ai.paths.tools', app_path('Ai/Tools')).'/'.$class.'.php';
 
         try {
             $generator->generate('tool.stub', [
@@ -68,6 +72,7 @@ class MakeToolCommand extends Command
         return self::SUCCESS;
     }
 
+    /** @return array<string, mixed> */
     protected function toolConfigArray(string $key, string $class): array
     {
         return [

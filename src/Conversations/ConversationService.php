@@ -4,6 +4,10 @@ namespace LimenAi\Conversations;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Container\Container;
+use LimenAi\Agents\ClassAgentDefinition;
+use LimenAi\Ai\Contracts\Conversational;
+use LimenAi\Ai\Messages\Message;
 use LimenAi\Contracts\Agents\AgentRepository;
 use LimenAi\Contracts\Conversations\ConversationRepository;
 use LimenAi\Contracts\Conversations\ConversationSummarizer;
@@ -19,9 +23,10 @@ class ConversationService
         private readonly MessageRepository $messages,
         private readonly MessageFormatter $formatter,
         private readonly ConversationSummarizer $summarizer,
-        private readonly AgentRepository $agents,
         private readonly ConfigRepository $config,
         private readonly Dispatcher $events,
+        private readonly AgentRepository $agents,
+        private readonly Container $container,
     ) {}
 
     public function ensure(string $conversationId, string $agentKey, RunContext $context): void
@@ -45,21 +50,59 @@ class ConversationService
     /** @return list<array<string, mixed>> */
     public function historyForAgent(string $conversationId, ?string $agentKey = null): array
     {
-        $limit = $this->resolveHistoryLimit($agentKey);
+        $limit = (int) $this->config->get('limen-ai.conversations.history_limit', 50);
         $stored = $this->messages->forConversation($conversationId, $limit);
+
+        $agentMessages = $this->formatter->toAgentMessages($stored);
+        $agentMessages = $this->mergeConversationalHistory($agentKey, $agentMessages);
 
         $summary = $this->summarizer->summarize($conversationId, $stored);
 
         if ($summary !== null && $summary !== '') {
-            $messagesForAgent = $this->messagesWithSummaryApplied($stored);
-
             return array_merge(
                 [['role' => 'system', 'content' => "Conversation summary:\n".$summary]],
-                $this->formatter->toAgentMessages($messagesForAgent),
+                $agentMessages,
             );
         }
 
-        return $this->formatter->toAgentMessages($stored);
+        return $agentMessages;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $storedMessages
+     * @return list<array<string, mixed>>
+     */
+    protected function mergeConversationalHistory(?string $agentKey, array $storedMessages): array
+    {
+        if ($agentKey === null) {
+            return $storedMessages;
+        }
+
+        $definition = $this->agents->find($agentKey);
+
+        if (! $definition instanceof ClassAgentDefinition) {
+            return $storedMessages;
+        }
+
+        $instance = $this->container->make($definition->className());
+
+        if (! $instance instanceof Conversational) {
+            return $storedMessages;
+        }
+
+        $custom = [];
+
+        foreach ($instance->messages() as $message) {
+            if ($message instanceof Message) {
+                $custom[] = $message->toArray();
+
+                continue;
+            }
+
+            $custom[] = (array) $message;
+        }
+
+        return array_merge($custom, $storedMessages);
     }
 
     public function appendUserMessage(string $conversationId, string $content): string
@@ -89,12 +132,17 @@ class ConversationService
 
     /**
      * @param  list<array<string, mixed>>  $newMessages
+     * @return list<string> Created message IDs in the same order
      */
-    public function appendAgentMessages(string $conversationId, array $newMessages): void
+    public function appendAgentMessages(string $conversationId, array $newMessages): array
     {
+        $ids = [];
+
         foreach ($newMessages as $message) {
-            $this->appendAgentMessage($conversationId, $message);
+            $ids[] = $this->appendAgentMessage($conversationId, $message);
         }
+
+        return $ids;
     }
 
     public function markWaitingApproval(string $conversationId): void
@@ -119,33 +167,5 @@ class ConversationService
     public function storedMessages(string $conversationId): array
     {
         return $this->messages->forConversation($conversationId);
-    }
-
-    protected function resolveHistoryLimit(?string $agentKey): int
-    {
-        if ($agentKey !== null) {
-            $agent = $this->agents->find($agentKey);
-
-            if ($agent !== null && isset($agent->limits()['max_history_messages'])) {
-                return max(1, (int) $agent->limits()['max_history_messages']);
-            }
-        }
-
-        return max(1, (int) $this->config->get('limen-ai.conversations.history_limit', 50));
-    }
-
-    /**
-     * @param  list<array<string, mixed>>  $stored
-     * @return list<array<string, mixed>>
-     */
-    protected function messagesWithSummaryApplied(array $stored): array
-    {
-        $keepRecent = max(1, (int) $this->config->get('limen-ai.conversations.summary_keep_recent', 12));
-
-        if (count($stored) <= $keepRecent) {
-            return $stored;
-        }
-
-        return array_slice($stored, -$keepRecent);
     }
 }
