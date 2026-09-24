@@ -52,7 +52,7 @@ class DatabaseConversationRepository implements ConversationRepository
         }
 
         if (array_key_exists('metadata', $attributes)) {
-            $updates['metadata'] = json.encode($attributes['metadata'], JSON_THROW_ON_ERROR);
+            $updates['metadata'] = json_encode($attributes['metadata'], JSON_THROW_ON_ERROR);
         }
 
         $this->db->table('limen_ai_conversations')->where('id', $conversationId)->update($updates);
